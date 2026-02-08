@@ -1,3 +1,4 @@
+from time import sleep
 import flwr as fl
 from web3 import Web3
 import json
@@ -65,20 +66,43 @@ class MiBesuServer(fl.server.strategy.FedAvg):
             return None
     
     def aggregate_fit(self, server_round, results, failures):
-        agg_params, agg_metrics = super().aggregate_fit(server_round, results, failures)
+        sleep(2)
+        if not results:
+            return None, {}
+
+        valid_results = []
+        
+        for client_proxy, fit_res in results:
+            client_cid = fit_res.metrics.get("cid")
+            client_address = fit_res.metrics.get("address")
+            
+            if not client_cid or not client_address:
+                print(f"Rechazando cliente {client_proxy.cid}")
+                continue
+
+            try:
+                blockchain_cid = self.contract.functions.getClientModel(
+                    server_round, 
+                    Web3.to_checksum_address(client_address)
+                ).call()
+
+                if blockchain_cid == client_cid:
+                    print(f"Verificación exitosa para {client_address}")
+                    valid_results.append((client_proxy, fit_res))
+                else:
+                    print(f"CUIDADO: CID de {client_address} no coincide con Blockchain.")
+            except Exception as e:
+                print(f"Error validando cliente en blockchain: {e}")
+
+        agg_params, agg_metrics = super().aggregate_fit(server_round, valid_results, failures)
         
         if agg_params is not None:
-            print(f"Finalizando ronda: {server_round}")
-            
-            pesos = pickle.dumps(agg_params)
+            pesos = pickle.dumps(fl.common.parameters_to_ndarrays(agg_params))
             model_cid = self.upload_to_ipfs(pesos)
-            if model_cid is None:
-                print("No se pudo subir el modelo a IPFS")
-                return agg_params, agg_metrics
-            
-            print(f"Modelo guardado en IPFS con CID: {model_cid}")
-            self.send_transaction(server_round, model_cid)
-        
+            if model_cid:
+                print(f"Modelo global ronda {server_round} registrado: {model_cid}")
+                self.send_transaction(server_round, model_cid)
+                
         return agg_params, agg_metrics
     
     def send_transaction(self, round_id, model_cid):
@@ -101,8 +125,11 @@ class MiBesuServer(fl.server.strategy.FedAvg):
         except Exception as e:
             print(f"Error al guardar el modelo en el contrato: {e}")  
        
+def fit_config(server_round: int):
+    return {"server_round": server_round}
+       
 if __name__ == "__main__":
-    server_strat = MiBesuServer(min_fit_clients=2, min_available_clients=2)
+    server_strat = MiBesuServer(min_fit_clients=2, min_available_clients=2, on_fit_config_fn=fit_config,)
     print("Servidor en marcha")
     fl.server.start_server(
         server_address="0.0.0.0:8081",
