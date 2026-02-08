@@ -5,11 +5,15 @@ import pickle
 import requests
 import os
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-import torch
 import torch.nn as nn
 
 ETH_ENDPOINT = 'http://localhost:18545'
-CONTRACT_ADDRESS = Web3.to_checksum_address("0x42699A7612A82f1d9C36148af9C77354759b210b")
+
+with open("../Smart_Contracts/Contract_Data/FLRegistry_info.json", "r") as f:
+    contract_data = json.load(f)
+FLaddress = contract_data.get('address')
+CONTRACT_ADDRESS = Web3.to_checksum_address(FLaddress)
+
 MEMBER1_ADDRESS = Web3.to_checksum_address("0xfe3b557e8fb62b89f4916b721be55ceb828dbd73")
 PRIV_KEY1 = "0x8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63"
 IPFS_API_URL = "http://127.0.0.1:5001/api/v0/add"

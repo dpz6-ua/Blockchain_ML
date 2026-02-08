@@ -48,9 +48,18 @@ Con el servidor IPFS instalado, procedemos a inicializarlo, que se hace únicame
  - ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["*"]'
  - ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "GET", "POST"]'
 
-Teniendo la red instalada, ya podemos pasar a ejecutar los scripts que se encuentran en la carpeta "Scripts" para poner en marcha el sistema de entrenamiento distribuido con registro en Blockchain. El proceso es el siguiente:
 
-1. Ejecutar "contract_address.py" para obtener la dirección del contrato inteligente desplegado en la red de Blockchain. Esta dirección es necesaria para que los miembros de la red puedan interactuar con el contrato inteligente y registrar los datos de entrenamiento. La información del contrato inteligente se guarda en un archivo "FLRegistry_info.json" que se genera al ejecutar el script en "Smart_Contracts/Contract_Data".
+Con esto tendremos el servidor de IPFS instalado y configurado para su uso en el sistema de entrenamiento distribuido con registro en Blockchain. Con todos los elementos necesarios instalados, ya podemos pasar a ejecutar los scripts para poner en marcha el sistema de entrenamiento distribuido con registro en Blockchain.
+
+Primero ponemos en marcha la red de Blockchain. Para ello nos vamos al directorio donde se ha instalado la red Quickstart y ejecutamos el siguiente comando:
+
+./run.sh
+
+(Para parar la ejecución de la red, se puede ejecutar el comando "./stop.sh" en el mismo directorio o el "./restart.sh" para reiniciarla).
+
+Ahora con la red en marcha, ya podemos pasar a ejecutar los scripts que se encuentran en la carpeta "Scripts" para poner en marcha el sistema de entrenamiento distribuido con registro en Blockchain. El proceso es el siguiente:
+
+1. Ejecutamos "contract_address.py" para obtener la dirección del contrato inteligente desplegado en la red de Blockchain. Esta dirección es necesaria para que los miembros de la red puedan interactuar con el contrato inteligente y registrar los datos de entrenamiento. La información del contrato inteligente se guarda en un archivo "FLRegistry_info.json" que se genera al ejecutar el script en "Smart_Contracts/Contract_Data".
 
 2. Ejecutamos "ipfs daemon" para iniciar el servidor de IPFS, que se encargará del almacenamiento distribuido de los modelos entrenados.
 

@@ -17,7 +17,12 @@ args = parser.parse_args()
 
 RPC_PORTS = {2: "20002", 3: "20004"}
 ETH_ENDPOINT = f'http://localhost:{RPC_PORTS[args.member]}'
-CONTRACT_ADDRESS = Web3.to_checksum_address("0x42699A7612A82f1d9C36148af9C77354759b210b")
+
+with open("../Smart_Contracts/Contract_Data/FLRegistry_info.json", "r") as f:
+    contract_data = json.load(f)
+FLaddress = contract_data.get('address')
+print(f"Dirección del contrato obtenida: {FLaddress}")
+CONTRACT_ADDRESS = Web3.to_checksum_address(FLaddress)
 
 with open("../Smart_Contracts/FLRegistry.json", "r") as f:
     ABI = json.load(f)

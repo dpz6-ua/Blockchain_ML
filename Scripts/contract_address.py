@@ -49,7 +49,7 @@ def deploy_contract():
     
     with open("../Smart_Contracts/Contract_Data/FLRegistry_info.json", "w") as f:
         json.dump({"address": tx_receipt.contractAddress, "abi": abi}, f)
-    print("\nInformación guardada en 'Contract_Data/FLRegistry_info.json'")
+    print("\nInformación guardada en '../Smart_Contracts/Contract_Data/FLRegistry_info.json'")
 
 if __name__ == "__main__":
     if w3.is_connected():
