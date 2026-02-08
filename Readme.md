@@ -4,26 +4,25 @@ Para poner en funcionamiento la red de entrenamiento distribuido con registro de
 
 Primero necesitamos instalar los prerequisitos del entorno, que son Docker y Node.js:
 - Actualización del sistema operativo:
-    sudo apt update
-    sudo apt upgrade -y
+    - sudo apt update
+    - sudo apt upgrade -y
 
 - Instalación de dependencias de Docker:
-    sudo apt install -y curl apt-transport-https ca-certificates software-properties-common
+    - sudo apt install -y curl apt-transport-https ca-certificates software-properties-common
 
 - Clave GPG y adición del repositorio de Docker:
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+    - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+    - echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
 - Instalación de Docker Engine y Docker Compose:
-    sudo apt update
-    sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    - sudo apt update
+    - sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 - Permitir al usuario usar Docker (cerrar y volver a abrir la terminal para guardar los cambios después de ejecutar el siguiente comando):
-    sudo usermod -aG docker $USER
+    - sudo usermod -aG docker $USER
 
 - Instalación de node.js:
-    sudo apt install -y nodejs npm
+    - sudo apt install -y nodejs npm
 
 Una vez teniendo todos los elementos instalados, podemos pasar a instalar la red Quickstart. En el mismo directiorio donde tengamos las demás carpetas (Scripts, Smart_Contracts...), ejecutamos el siguiente comando:
 
@@ -53,7 +52,7 @@ Con esto tendremos el servidor de IPFS instalado y configurado para su uso en el
 
 Primero ponemos en marcha la red de Blockchain. Para ello nos vamos al directorio donde se ha instalado la red Quickstart y ejecutamos el siguiente comando:
 
-./run.sh
+- ./run.sh
 
 (Para parar la ejecución de la red, se puede ejecutar el comando "./stop.sh" en el mismo directorio o el "./restart.sh" para reiniciarla).
 
