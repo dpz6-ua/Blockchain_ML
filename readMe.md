@@ -36,6 +36,26 @@ Con esto tendremos la red de Blockchain instalada y lista para usar.
 Ahora necesitamos instalar las dependencias de los scripts de Python (3.12). Necesitamos instalar las librerías web3 para la interacción con Blockchain y Flower para el entrenamiento distribuido. Para ello ejecutamos el siguiente comando:
 - pip install web3 flwr
 
-Ahora sólamente nos falta instalar un servidor de IPFS para el almacenamiento distribuido de los modelos. Para ello, en la terminal ejecutamos el siguiente comando:
+Ahora sólamente nos falta instalar el servidor de IPFS para el almacenamiento distribuido de los modelos. Para ello, en la terminal ejecutamos la siguiente serie de comandos:
+ - wget https://dist.ipfs.tech/kubo/v0.32.1/kubo_v0.32.1_linux-amd64.tar.gz
+ - tar -xvzf kubo_v0.32.1_linux-amd64.tar.gz
+ - cd kubo
+ - sudo ./install.sh
+ - ipfs --version  (para comprobar que se ha instalado correctamente)
+
+Con el servidor IPFS instalado, procedemos a inicializarlo, que se hace únicamente la primera vez que se instala, para configurar el repositorio de IPFS. Para ello ejecutamos los siguientes comandos:
+ - ipfs init
+ - ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["*"]'
+ - ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "GET", "POST"]'
 
 Teniendo la red instalada, ya podemos pasar a ejecutar los scripts que se encuentran en la carpeta "Scripts" para poner en marcha el sistema de entrenamiento distribuido con registro en Blockchain. El proceso es el siguiente:
+
+1. Ejecutar "contract_address.py" para obtener la dirección del contrato inteligente desplegado en la red de Blockchain. Esta dirección es necesaria para que los miembros de la red puedan interactuar con el contrato inteligente y registrar los datos de entrenamiento. La información del contrato inteligente se guarda en un archivo "FLRegistry_info.json" que se genera al ejecutar el script en "Smart_Contracts/Contract_Data".
+
+2. Ejecutamos "ipfs daemon" para iniciar el servidor de IPFS, que se encargará del almacenamiento distribuido de los modelos entrenados.
+
+3. Ejecutamos "server.py" para iniciar el servidor de entrenamiento distribuido, que se encargará de coordinar el proceso de entrenamiento entre los diferentes clientes y registrar los datos en la Blockchain.
+
+4. Ejecutamos "client.py" en cada uno de los clientes que participarán en el proceso de entrenamiento distribuido, para que puedan conectarse al servidor y participar en el proceso de entrenamiento. Para ello, es necesario ejecutar el siguiente comando:
+    - python client.py --member <ID_DEL_CLIENTE>
+Donde <ID_DEL_CLIENTE> es un identificador único para cada cliente, que se utiliza para registrar los datos de entrenamiento en la Blockchain. En mi red los únicos clientes que participarán en el entrenamiento serán los clientes con ID 2 y 3.
