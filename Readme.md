@@ -1,4 +1,4 @@
-Trabajo de fin de grado desarrollado por David Znojek, estudiante de Ingeniería Informática en la Universidad de Alicante, con ayuda del tutor Francisco Pujol.
+Trabajo de fin de grado desarrollado por David Znojek, estudiante de Ingeniería Informática en la Universidad de Alicante, con ayuda del profesor y tutor Francisco Pujol.
 
 Para poner en funcionamiento la red de entrenamiento distribuido con registro de datos en la Blockchain, es necesario instalar la red de Blockchain Hyperldger Besu con Tessera que viene ya configurada y lista para usar, que es el GoQuorum Quickstart, desarrollada por el grupo GoQuorum. Cabe destacar que el trabajo se ha desarrollado en un entorno WSL de Ubuntu-22.04, por lo que todo está configurado para correr en un entorno de Linux.
 
