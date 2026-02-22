@@ -12,6 +12,7 @@ def etiquetar_dataset(root_dir):
             for file_name in os.listdir(folder_path):
                 file_path = os.path.join(folder_path, file_name)
                 if os.path.isfile(file_path):
+                    file_path = "../" + file_path
                     data.append([file_path, label])
 
     df = DataFrame(data, columns=['file_path', 'label'])

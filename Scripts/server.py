@@ -5,29 +5,21 @@ import json
 import pickle
 import requests
 import os
+from model import NetCliente
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-import torch.nn as nn
-
-ETH_ENDPOINT = 'http://localhost:18545'
 
 with open("../Smart_Contracts/Contract_Data/FLRegistry_info.json", "r") as f:
     contract_data = json.load(f)
 FLaddress = contract_data.get('address')
 CONTRACT_ADDRESS = Web3.to_checksum_address(FLaddress)
 
+ETH_ENDPOINT = 'http://localhost:18545'
 MEMBER1_ADDRESS = Web3.to_checksum_address("0xfe3b557e8fb62b89f4916b721be55ceb828dbd73")
 PRIV_KEY1 = "0x8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63"
 IPFS_API_URL = "http://127.0.0.1:5001/api/v0/add"
 
 with open("../Smart_Contracts/FLRegistry.json", "r") as f:
     ABI = json.load(f)
-
-class NetCliente(nn.Module):
-    def __init__(self):
-        super(NetCliente, self).__init__()
-        self.fc = nn.Linear(10, 2)
-    def forward(self, x):
-        return self.fc(x)
 
 class MiBesuServer(fl.server.strategy.FedAvg):
     def __init__(self, **kwargs):

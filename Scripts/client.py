@@ -6,10 +6,11 @@ import requests
 import torch
 from web3 import Web3
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-import torch.nn as nn
 from collections import OrderedDict
+from torch import nn
 import argparse
 import numpy as np
+from model import NetCliente, load_data
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--member", type=int, choices=[2, 3], required=True, help="ID del miembro")
@@ -18,6 +19,7 @@ args = parser.parse_args()
 RPC_PORTS = {2: "20002", 3: "20004"}
 ETH_ENDPOINT = f'http://localhost:{RPC_PORTS[args.member]}'
 
+# carga de datos del contrato y ABI
 with open("../Smart_Contracts/Contract_Data/FLRegistry_info.json", "r") as f:
     contract_data = json.load(f)
 FLaddress = contract_data.get('address')
@@ -39,19 +41,14 @@ CLIENT_ACCOUNTS = {
     }
 }
 
-class NetCliente(nn.Module):
-    def __init__(self):
-        super(NetCliente, self).__init__()
-        self.fc = nn.Linear(10, 2)
-    def forward(self, x):
-        return self.fc(x)
-
 class MiFlowerClient(fl.client.NumPyClient):
-    def __init__(self):
+    def __init__(self, train_data, test_data):
         self.model = NetCliente()
         self.w3 = Web3(Web3.HTTPProvider(ETH_ENDPOINT))
         self.contract = self.w3.eth.contract(address=CONTRACT_ADDRESS, abi=ABI)
-    
+        self.train_data = train_data
+        self.test_data = test_data
+        
     def upload_to_ipfs(self, data):
         try:
             files = {'file': data}
@@ -130,9 +127,21 @@ class MiFlowerClient(fl.client.NumPyClient):
 
         print(f"[{args.member}] Modelo del servidor correcto")
         print(f"[{args.member}] Iniciando entrenamiento local")
-        self.set_parameters(parameters)
         
         # ... código de entrenamiento ...
+        self.set_parameters(parameters)
+        optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)
+        criterion = nn.CrossEntropyLoss()
+        
+        self.model.train()
+        for epoch in range(3):
+            print(epoch)
+            for images, labels in self.train_data:
+                optimizer.zero_grad()
+                outputs = self.model(images)
+                loss = criterion(outputs, labels)
+                loss.backward()
+                optimizer.step()
         
         new_params = self.get_parameters(config={})
         params_bytes = pickle.dumps(new_params)
@@ -152,15 +161,25 @@ class MiFlowerClient(fl.client.NumPyClient):
     def evaluate(self, parameters, config):
         print(f"[{args.member}] Evaluando modelo")
         self.set_parameters(parameters)
+        criterion = nn.CrossEntropyLoss()
+        correct, loss = 0, 0.0
         
-        # Aquí iría el código de la evaluación local
+        self.model.eval()
+        with torch.no_grad():
+            for images, labels in self.test_data:
+                outputs = self.model(images)
+                loss += criterion(outputs, labels).item()
+                correct += (torch.max(outputs, 1)[1] == labels).sum().item()
         
-        return 0.0, 1, {"accuracy": 1.0}
+        accuracy = correct / len(self.test_data.dataset)
+        print(f"[{args.member}] Accuracy: {accuracy:.4f}")
+        return float(loss) / len(self.test_data), len(self.test_data.dataset), {"accuracy": accuracy}
 
 if __name__ == "__main__":
     print(f"Conectando Cliente Member {args.member} al servidor Flower (0.0.0.0:8081)")
+    train_data, test_data = load_data("../Dataset/traffic-images/dataset_etiquetado.csv")
     
     fl.client.start_client(
         server_address="127.0.0.1:8081", 
-        client=MiFlowerClient().to_client()
+        client=MiFlowerClient(train_data, test_data).to_client()
     )
