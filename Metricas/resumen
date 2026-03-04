@@ -1,0 +1,33 @@
+INFO :      [SUMMARY]
+INFO :      Run finished 30 round(s) in 2970.89s
+INFO :          History (loss, distributed):
+INFO :                  round 1: 0.5468227565288544
+INFO :                  round 2: 0.34468504786491394
+INFO :                  round 3: 0.30258767306804657
+INFO :                  round 4: 0.23553810268640518
+INFO :                  round 5: 0.25183652341365814
+INFO :                  round 6: 0.268254354596138
+INFO :                  round 7: 0.26293957233428955
+INFO :                  round 8: 0.31874799728393555
+INFO :                  round 9: 0.33681394159793854
+INFO :                  round 10: 0.34266725182533264
+INFO :                  round 11: 0.3936223089694977
+INFO :                  round 12: 0.41971199214458466
+INFO :                  round 13: 0.3909009248018265
+INFO :                  round 14: 0.4150651693344116
+INFO :                  round 15: 0.4143909364938736
+INFO :                  round 16: 0.4496876299381256
+INFO :                  round 17: 0.5121644139289856
+INFO :                  round 18: 0.6016879677772522
+INFO :                  round 19: 0.5766646862030029
+INFO :                  round 20: 0.6593608856201172
+INFO :                  round 21: 0.6702925562858582
+INFO :                  round 22: 0.7755693197250366
+INFO :                  round 23: 0.7643876075744629
+INFO :                  round 24: 0.7763324081897736
+INFO :                  round 25: 0.8882031142711639
+INFO :                  round 26: 0.8275171220302582
+INFO :                  round 27: 0.8307413756847382
+INFO :                  round 28: 0.8367917537689209
+INFO :                  round 29: 0.9435680210590363
+INFO :                  round 30: 0.8900133967399597

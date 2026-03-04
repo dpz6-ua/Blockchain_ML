@@ -1,4 +1,5 @@
-from time import sleep
+import time
+import csv
 import flwr as fl
 from web3 import Web3
 import json
@@ -6,6 +7,7 @@ import pickle
 import requests
 import os
 from model import NetCliente
+from pathlib import Path
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 with open("../Smart_Contracts/Contract_Data/FLRegistry_info.json", "r") as f:
@@ -26,6 +28,7 @@ class MiBesuServer(fl.server.strategy.FedAvg):
         
         modelo_init = NetCliente()
         pesos_iniciales = [val.cpu().numpy() for _, val in modelo_init.state_dict().items()]
+        self.tiempo_init_ronda = 0
         
         self.w3 = Web3(Web3.HTTPProvider(ETH_ENDPOINT))
         self.contract = self.w3.eth.contract(address=CONTRACT_ADDRESS, abi=ABI)
@@ -38,11 +41,39 @@ class MiBesuServer(fl.server.strategy.FedAvg):
         else:
             print(f"Modelo inicial guardado en IPFS con CID: {model_cid}") 
             self.send_transaction(0, model_cid)
+            
+        self.path_metricas = Path("../Metricas/Server/")
+        self.path_metricas.mkdir(parents=True, exist_ok=True)
+        self.archivo_csv = self.path_metricas / "metricas_server.csv"
+        self.init_metricas_csv()
         
         super().__init__(
             initial_parameters=fl.common.ndarrays_to_parameters(pesos_iniciales), 
             **kwargs
         )        
+
+    def init_metricas_csv(self):
+        if not self.archivo_csv.exists():
+            with open(self.archivo_csv, mode='w', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow([
+                    "ronda", 
+                    "gas_consumido", 
+                    "tiempo_confirmacion_seg", 
+                    "tiempo_total_ronda_seg",
+                    "timestamp"
+                ])
+
+    def guardar_metricas(self, num_ronda, gas, tiempo_confirmacion, tiempo_ronda_total):
+        with open(self.archivo_csv, mode='a', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow([
+                num_ronda, 
+                gas, 
+                tiempo_confirmacion, 
+                tiempo_ronda_total,
+                time.time()
+            ])
 
     def upload_to_ipfs(self, data_bytes):
         try:
@@ -58,7 +89,6 @@ class MiBesuServer(fl.server.strategy.FedAvg):
             return None
     
     def aggregate_fit(self, server_round, results, failures):
-        sleep(2)
         if not results:
             return None, {}
 
@@ -86,14 +116,18 @@ class MiBesuServer(fl.server.strategy.FedAvg):
             except Exception as e:
                 print(f"Error validando cliente en blockchain: {e}")
 
+        self.tiempo_init_ronda = time.time()  # tiempo de inicio de ronda
         agg_params, agg_metrics = super().aggregate_fit(server_round, valid_results, failures)
         
         if agg_params is not None:
             pesos = pickle.dumps(fl.common.parameters_to_ndarrays(agg_params))
             model_cid = self.upload_to_ipfs(pesos)
+            
             if model_cid:
+                tiempo_fin_ronda = time.time() - self.tiempo_init_ronda  # tiempo de fin de ronda
                 print(f"Modelo global ronda {server_round} registrado: {model_cid}")
-                self.send_transaction(server_round, model_cid)
+                gas_consumido, tiempo_transaccion = self.send_transaction(server_round, model_cid)
+                self.guardar_metricas(server_round, gas_consumido, tiempo_transaccion, tiempo_fin_ronda)
                 
         return agg_params, agg_metrics
     
@@ -109,13 +143,22 @@ class MiBesuServer(fl.server.strategy.FedAvg):
             })
             
             signed_tx = self.w3.eth.account.sign_transaction(tx, private_key=PRIV_KEY1)
+            
+            tiempo_start_transaccion = time.time()
             tx_hash = self.w3.eth.send_raw_transaction(signed_tx.raw_transaction)
             print(f"Transacción enviada: {tx_hash.hex()}")
-            self.w3.eth.wait_for_transaction_receipt(tx_hash)
+            receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
+            
+            tiempo_end_transaccion = time.time() - tiempo_start_transaccion
+            gas_real_consumido = receipt.gasUsed
+            
             print("Transacción confirmada en la blockchain")
+            
+            return gas_real_consumido, tiempo_end_transaccion
             
         except Exception as e:
             print(f"Error al guardar el modelo en el contrato: {e}")  
+            return 0, 0
        
 def fit_config(server_round: int):
     return {"server_round": server_round}
@@ -125,6 +168,6 @@ if __name__ == "__main__":
     print("Servidor en marcha")
     fl.server.start_server(
         server_address="0.0.0.0:8081",
-        config=fl.server.ServerConfig(num_rounds=3),
+        config=fl.server.ServerConfig(num_rounds=30),
         strategy=server_strat
     )
