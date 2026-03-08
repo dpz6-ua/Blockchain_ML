@@ -11,6 +11,9 @@ from torch import nn
 import argparse
 import numpy as np
 from model import NetCliente, load_data
+import csv
+import time
+from pathlib import Path
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--member", type=int, choices=[2, 3], required=True, help="ID del miembro")
@@ -49,6 +52,26 @@ class MiFlowerClient(fl.client.NumPyClient):
         self.train_data = train_data
         self.test_data = test_data
         
+        self.metricas_path = Path("../Metricas/Client/")
+        self.metricas_path.mkdir(parents=True, exist_ok=True)
+        self.csv_file = self.metricas_path / f"metricas_client_{args.member}_bchain.csv"
+        self.init_metricas_csv()
+      
+    def init_metricas_csv(self):
+        if not self.csv_file.exists():
+            with open(self.csv_file, mode='w', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow([
+                    "ronda", "gas_real", "tiempo_confirmacion", "tiempo_total_con_commit", "timestamp"
+                ])
+
+    def guardar_metricas(self, num_ronda, gas_real, tiempo_confirmacion, tiempo_total):
+        with open(self.csv_file, mode='a', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow([
+                num_ronda, gas_real, tiempo_confirmacion, tiempo_total, time.time()
+            ])         
+      
     def upload_to_ipfs(self, data):
         try:
             files = {'file': data}
@@ -71,9 +94,15 @@ class MiFlowerClient(fl.client.NumPyClient):
         })
         
         signed_tx = self.w3.eth.account.sign_transaction(tx, private_key=account["key"])
+        start_time = time.time()
         tx_hash = self.w3.eth.send_raw_transaction(signed_tx.raw_transaction)
-        self.w3.eth.wait_for_transaction_receipt(tx_hash)
+        receipt = self.w3.eth.wait_for_transaction_receipt(tx_hash)
+        end_time = time.time()
+        
+        tiempo_confirmacion = end_time - start_time
+        gas_real = receipt.gasUsed
         print(f"[{args.member}] Hash registrado en Blockchain: {cid}")
+        return gas_real, tiempo_confirmacion
 
     def get_last_model_hash_from_blockchain(self):
         try:
@@ -116,6 +145,7 @@ class MiFlowerClient(fl.client.NumPyClient):
             return False
 
     def fit(self, parameters, config):
+        start_fit = time.time()
         if not isinstance(parameters, list):
             parameters = fl.common.parameters_to_ndarrays(parameters)
             
@@ -128,7 +158,6 @@ class MiFlowerClient(fl.client.NumPyClient):
         print(f"[{args.member}] Modelo del servidor correcto")
         print(f"[{args.member}] Iniciando entrenamiento local")
         
-        # ... código de entrenamiento ...
         self.set_parameters(parameters)
         optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)
         criterion = nn.CrossEntropyLoss()
@@ -147,9 +176,13 @@ class MiFlowerClient(fl.client.NumPyClient):
         params_bytes = pickle.dumps(new_params)
         my_cid = self.upload_to_ipfs(params_bytes)
         
+        gas_used, t_confirm = 0, 0
         if my_cid:
             server_round = config.get("server_round", 1)
-            self.register_on_blockchain(server_round, my_cid)
+            gas_real, t_confirm = self.register_on_blockchain(server_round, my_cid)
+            
+            total_time = time.time() - start_fit
+            self.guardar_metricas(server_round, gas_real, t_confirm, total_time)
             
             return new_params, 1, {
                 "cid": my_cid, 

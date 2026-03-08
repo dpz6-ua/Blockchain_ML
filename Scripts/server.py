@@ -44,7 +44,7 @@ class MiBesuServer(fl.server.strategy.FedAvg):
             
         self.path_metricas = Path("../Metricas/Server/")
         self.path_metricas.mkdir(parents=True, exist_ok=True)
-        self.archivo_csv = self.path_metricas / "metricas_server.csv"
+        self.archivo_csv = self.path_metricas / "metricas_server_bchain.csv"
         self.init_metricas_csv()
         
         super().__init__(
@@ -93,6 +93,7 @@ class MiBesuServer(fl.server.strategy.FedAvg):
             return None, {}
 
         valid_results = []
+        self.tiempo_init_ronda = time.time()
         
         for client_proxy, fit_res in results:
             client_cid = fit_res.metrics.get("cid")
@@ -116,7 +117,6 @@ class MiBesuServer(fl.server.strategy.FedAvg):
             except Exception as e:
                 print(f"Error validando cliente en blockchain: {e}")
 
-        self.tiempo_init_ronda = time.time()  # tiempo de inicio de ronda
         agg_params, agg_metrics = super().aggregate_fit(server_round, valid_results, failures)
         
         if agg_params is not None:
