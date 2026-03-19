@@ -20,7 +20,8 @@ parser.add_argument("--member", type=int, choices=[2, 3], required=True, help="I
 args = parser.parse_args()
 
 RPC_PORTS = {2: "20002", 3: "20004"}
-ETH_ENDPOINT = f'http://localhost:{RPC_PORTS[args.member]}'
+SERVER_ADDRESS = "localhost"  #192.168.1.53 en el otro ordenador
+ETH_ENDPOINT = f'http://{SERVER_ADDRESS}:{RPC_PORTS[args.member]}'
 
 # carga de datos del contrato y ABI
 with open("../Smart_Contracts/Contract_Data/FLRegistry_info.json", "r") as f:
@@ -75,7 +76,7 @@ class MiFlowerClient(fl.client.NumPyClient):
     def upload_to_ipfs(self, data):
         try:
             files = {'file': data}
-            response = requests.post("http://127.0.0.1:5001/api/v0/add", files=files)
+            response = requests.post(f"http://{SERVER_ADDRESS}:5001/api/v0/add", files=files)
             return response.json()['Hash']
         except Exception as e:
             print(f"Error subiendo a IPFS: {e}")
@@ -122,7 +123,7 @@ class MiFlowerClient(fl.client.NumPyClient):
         
     def check_model_CID(self, blockchain_cid, parameters):
         try:
-            response = requests.get(f"http://127.0.0.1:8080/ipfs/{blockchain_cid}", timeout=10)
+            response = requests.get(f"http://{SERVER_ADDRESS}:8080/ipfs/{blockchain_cid}", timeout=10)
             if response.status_code == 200:
                 model_from_ipfs = pickle.loads(response.content)
                 try:
@@ -209,10 +210,10 @@ class MiFlowerClient(fl.client.NumPyClient):
         return float(loss) / len(self.test_data), len(self.test_data.dataset), {"accuracy": accuracy}
 
 if __name__ == "__main__":
-    print(f"Conectando Cliente Member {args.member} al servidor Flower (0.0.0.0:8081)")
+    print(f"Conectando Cliente Member {args.member} al servidor Flower ({SERVER_ADDRESS}:8081)")
     train_data, test_data = load_data("../Dataset/traffic-images/dataset_etiquetado.csv")
     
     fl.client.start_client(
-        server_address="127.0.0.1:8081", 
+        server_address=f"{SERVER_ADDRESS}:8081", 
         client=MiFlowerClient(train_data, test_data).to_client()
     )

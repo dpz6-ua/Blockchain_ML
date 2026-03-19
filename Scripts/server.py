@@ -15,7 +15,7 @@ with open("../Smart_Contracts/Contract_Data/FLRegistry_info.json", "r") as f:
 FLaddress = contract_data.get('address')
 CONTRACT_ADDRESS = Web3.to_checksum_address(FLaddress)
 
-ETH_ENDPOINT = 'http://localhost:18545'
+ETH_ENDPOINT = 'http://127.0.0.1:18545'
 MEMBER1_ADDRESS = Web3.to_checksum_address("0xfe3b557e8fb62b89f4916b721be55ceb828dbd73")
 PRIV_KEY1 = "0x8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63"
 IPFS_API_URL = "http://127.0.0.1:5001/api/v0/add"
@@ -44,7 +44,7 @@ class MiBesuServer(fl.server.strategy.FedAvg):
             
         self.path_metricas = Path("../Metricas/Server/")
         self.path_metricas.mkdir(parents=True, exist_ok=True)
-        self.archivo_csv = self.path_metricas / "metricas_server_bchain_7vals.csv"
+        self.archivo_csv = self.path_metricas / "metricas_server_bchain_7vals_2maquinas.csv"
         self.init_metricas_csv()
         
         super().__init__(
