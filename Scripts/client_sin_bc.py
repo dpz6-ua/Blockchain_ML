@@ -55,7 +55,7 @@ class MiFlowerClient(fl.client.NumPyClient):
         if not isinstance(parameters, list):
             parameters = fl.common.parameters_to_ndarrays(parameters)
             
-        print(f"[{args.member}] Iniciando entrenamiento local (Sin Bchain)")
+        print(f"[{args.member}] Iniciando entrenamiento local sin Blockchain")
         
         self.set_parameters(parameters)
         optimizer = torch.optim.Adam(self.model.parameters(), lr=0.001)
@@ -73,7 +73,6 @@ class MiFlowerClient(fl.client.NumPyClient):
         new_params = self.get_parameters(config={})
         server_round = config.get("server_round", 1)
         
-        # Guardamos métricas solo del tiempo de cómputo local
         total_time = time.time() - start_fit
         self.guardar_metricas(server_round, total_time)
             

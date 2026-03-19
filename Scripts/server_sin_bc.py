@@ -39,14 +39,12 @@ class MiServerNormal(fl.server.strategy.FedAvg):
 
         start_time = time.time()
         
-        # En la versión normal, no validamos contra Blockchain
-        # Agregamos directamente todos los resultados recibidos
         agg_params, agg_metrics = super().aggregate_fit(server_round, results, failures)
         
         tiempo_total = time.time() - start_time
         self.guardar_metricas(server_round, tiempo_total)
         
-        print(f"Ronda {server_round} finalizada (Sin Blockchain)")
+        print(f"Ronda {server_round} finalizada sin Blockchain")
         return agg_params, agg_metrics
        
 def fit_config(server_round: int):
@@ -58,7 +56,7 @@ if __name__ == "__main__":
         min_available_clients=2, 
         on_fit_config_fn=fit_config,
     )
-    print("Servidor estándar (Sin Blockchain) iniciado")
+    print("Servidor sin Blockchain iniciado")
     fl.server.start_server(
         server_address="0.0.0.0:8081",
         config=fl.server.ServerConfig(num_rounds=30),

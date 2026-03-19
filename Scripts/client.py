@@ -54,7 +54,7 @@ class MiFlowerClient(fl.client.NumPyClient):
         
         self.metricas_path = Path("../Metricas/Client/")
         self.metricas_path.mkdir(parents=True, exist_ok=True)
-        self.csv_file = self.metricas_path / f"metricas_client_{args.member}_bchain.csv"
+        self.csv_file = self.metricas_path / f"metricas_client_{args.member}_bchain_7vals.csv"
         self.init_metricas_csv()
       
     def init_metricas_csv(self):
