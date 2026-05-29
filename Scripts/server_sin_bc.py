@@ -14,7 +14,7 @@ class MiServerNormal(fl.server.strategy.FedAvg):
         
         self.path_metricas = Path("../Metricas/Server/")
         self.path_metricas.mkdir(parents=True, exist_ok=True)
-        self.archivo_csv = self.path_metricas / "metricas_server_NO_bchain.csv"
+        self.archivo_csv = self.path_metricas / "metricas_server_NO_bchain_2maquinas.csv"
         self.init_metricas_csv()
         
         super().__init__(
