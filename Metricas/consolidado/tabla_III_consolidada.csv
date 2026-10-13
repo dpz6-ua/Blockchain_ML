@@ -1,0 +1,6 @@
+Exp,Maq,Config,Runs,Rondas_Total,Mediana_s,Media_s,Desv_s,SE_s
+E1,1,4 val · con BC,1,29,89.37,91.84,6.34,1.18
+E2,1,Baseline sin BC,1,30,84.15,82.18,6.95,1.27
+E3,2,Baseline sin BC,1,30,64.26,64.27,0.74,0.13
+E4,2,4 val · con BC,1,30,71.29,77.05,12.63,2.31
+E5,2,7 val · con BC,1,30,70.88,73.4,4.71,0.86
