@@ -1,0 +1,393 @@
+/usr/lib/python3/dist-packages/pytz/__init__.py:31: SyntaxWarning: invalid escape sequence '\s'
+  match = re.match("^#\s*version\s*([0-9a-z]*)\s*$", line)
+[93mWARNING [0m:   DEPRECATED FEATURE: flwr.server.start_server() is deprecated.
+	Instead, use the `flower-superlink` CLI command to start a SuperLink as shown below:
+
+		$ flower-superlink --insecure
+
+	To view usage and all available options, run:
+
+		$ flower-superlink --help
+
+	Using `start_server()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+[92mINFO [0m:      Starting Flower server, config: num_rounds=30, no round_timeout
+[92mINFO [0m:      Flower ECE: gRPC server running (30 rounds), SSL is disabled
+[92mINFO [0m:      [INIT]
+[92mINFO [0m:      Using initial global parameters provided by strategy
+[92mINFO [0m:      Starting evaluation of initial global parameters
+[92mINFO [0m:      Evaluation returned no results (`None`)
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 1]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+[93mWARNING [0m:   No fit_metrics_aggregation_fn provided
+[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[93mWARNING [0m:   No evaluate_metrics_aggregation_fn provided
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 2]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 3]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 4]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 5]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 6]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 7]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 8]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 9]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 10]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 11]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 12]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 13]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 14]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 15]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 16]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+Iniciando Servidor FL con Besu - Exp: E1, Run: 1, Rondas: 30
+Modelo inicial guardado en IPFS con CID: QmPnA2A3yMMyX5urUdFyytXGR8abV4YqR3JZzdPEbiX7ML
+Transacción updateModel ronda 0 enviada: 621210a43459927c2d234fe815ceb56c69bb6e39b23223697176e9c22ce8e281
+Transacción confirmada en bloque 128 (Gas: 164648, Tiempo: 3.450s)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmTAr49twgNqKHJYq7fhJSxgTe1YPMYD8RXf7DwEWxguzi)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: QmejqxTrVVXjxKq5kRbEhJhNDw6hohGDw566oAbaTaYDtG)
+Modelo global ronda 1 subido a IPFS: QmeAXkTqZvGdnXSxLLiRDUu7T8y5YV9CLtTsMYj8SDTEnT
+Transacción updateModel ronda 1 enviada: 67dce8b86bb65fcdc58613591a2f6d705c2d40f27ee97c7721ae2ae54e2e5b1e
+Transacción confirmada en bloque 163 (Gas: 184560, Tiempo: 4.323s)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: QmNn4KJwm9TnHwJH3aVEKQFAwjTUoa92bL5iHrbk7edYBi)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmcrsjiG8HtM9dUT9RZjD2QrRArWyjDpi7BpjTB9LYV8cf)
+Modelo global ronda 2 subido a IPFS: QmPwVdUiDB8aRgYDxJgkLt1RAytcx89qoR96mTdBR3ZUet
+Transacción updateModel ronda 2 enviada: 6459bf9685c98db66b01aaa4863c7be4e32adfd9c9b47d94d7b09d85d6d199c6
+Transacción confirmada en bloque 193 (Gas: 167460, Tiempo: 6.425s)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmWfAd7pNyZM1fesbeoCcHv4vKiN8MzVBvyXsQ4eYt33Wa)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: QmTWEhJ5zLNohPtsjqSrXeAMDBxf28gXwKG5wYrVHuDwh2)
+Modelo global ronda 3 subido a IPFS: QmQvMvEJZ9N6F2MjfmsdUNhYv2RhQLZQMnyhc8pK8ZxEb9
+Transacción updateModel ronda 3 enviada: a625a7c65c8921be73ccf0d8ff5364704fe3864e22268e6df9e81de9a16c6442
+Transacción confirmada en bloque 233 (Gas: 167460, Tiempo: 4.779s)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: QmQbCCRh1TMbar2qo5rifQQG4buCQd1WFnUPRz3PgeywuJ)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmNZYwSo8tNzx28EfnUqosLEEZGDaT6RXXSEv7Q6PsfCDV)
+Modelo global ronda 4 subido a IPFS: QmbzxaPajxGQ2e6wbyshHqsCVUxTfi8XXCXFzEruXx6PaB
+Transacción updateModel ronda 4 enviada: 1c38a4ad1225c57599700c11b8067cfd8aff87b4bd596b171204ca3666d4314b
+Transacción confirmada en bloque 259 (Gas: 167460, Tiempo: 4.709s)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: QmX35jQ3EDBDpG4uQWH8pWLzLwsEc4FvCrw2aZQDx8oMsp)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmXMCX9CUSG1qm1DqNTaBKcopUw3j8Uro46K7cg648VrEY)
+Modelo global ronda 5 subido a IPFS: QmTvqLfkmQrHEdv87ShLDeW88RATqxKbu9apzRBhvWqF87
+Transacción updateModel ronda 5 enviada: 16b581e008d6b21801321bd2355f1435f2352fe17617210d1ef5e6315b01ac09
+Transacción confirmada en bloque 282 (Gas: 167460, Tiempo: 4.799s)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmYQDmGHgso3jc4b6r6EGKEY1pVNwdQSrmT3C9AGLSEDaw)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: QmPTAfsgPuvMBJjMg1LPyoQhdvPY2fDWfbDBiAbXsoRKWs)
+Modelo global ronda 6 subido a IPFS: QmdFu8KqyCbBp5HVLmVokJ3m3gzGaaoJFJxHNWEfXqLfKW
+Transacción updateModel ronda 6 enviada: ba7df73c081bf8f09204503bb9608d059e94011626282ec380dd2394aeac219a
+Transacción confirmada en bloque 312 (Gas: 167460, Tiempo: 4.668s)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: QmSGPaojuzF4EYFDcM1b8UCnNeWP27BfyPuFozqviMwZVY)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmVVkAMsBWAKXZVLpNyhroxSnvZDm3XvZpRur13feTffkc)
+Modelo global ronda 7 subido a IPFS: QmTD2xPxJv9NrYAgsiFFRQcsMpTniKzJB5p3DT7LKZ7zwK
+Transacción updateModel ronda 7 enviada: e5cdaaf2363b764edc4a4345bb01a6d90a0b170a1ca1eef2665e7e1f53280d85
+Transacción confirmada en bloque 356 (Gas: 167460, Tiempo: 4.789s)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: QmWYqCVXNQSmH9cwrDrhUnYGFJT5s6nEXkHxCCBS6149Vm)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmQnVNWeGEop1my4cNk2TofdhYAZKAc8mvEJ2KUhHkm4Vp)
+Modelo global ronda 8 subido a IPFS: Qmbh8evbunrsRvpndnpGncUuTiW9QUpU2CKWRUkhhoQ1uA
+Transacción updateModel ronda 8 enviada: c1e657cc87ad28bb352d40ecc58dc4dabe85929ed7c18d13fd358e8faa5bea02
+Transacción confirmada en bloque 384 (Gas: 167460, Tiempo: 4.723s)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmPxaCf3eMjWAmJFYuFehiTMz65fVrPhVtV16QGAitwJd5)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: QmUUiqJ39BFgaAyKcyLBMuJUswifzMvSyiwQUSmF9c7NBp)
+Modelo global ronda 9 subido a IPFS: QmZQzdKTiLV8LUzr3FdG9h2CvvUmY4mS1K7TzUCJVNAWwb
+Transacción updateModel ronda 9 enviada: 25a29fb9b6a11114e23b4edef8b303a57689bbc4775796ea62f083ffe838cde4
+Transacción confirmada en bloque 429 (Gas: 167460, Tiempo: 4.933s)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: QmbHbXvfGzTggTUfEroMDCYpGCevRYhBJMqs1qzHcupWYc)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmRoY8kufwwkKPS96mRAcenf64P4TXfubQ2omvT9itSJWM)
+Modelo global ronda 10 subido a IPFS: QmYKJsnNcqasDFfANfd1suzBeUci6kKnMKh8rQrLCkc9to
+Transacción updateModel ronda 10 enviada: bcf89a422e006012ad87f5bf8355e7d849e68dda5835b2a3c664767e395cc09f
+Transacción confirmada en bloque 454 (Gas: 167460, Tiempo: 4.881s)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmcdhzciZgGrDe2BWkyJbmZQDZ2qzzkSWKeRt5JKcHgq1p)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: QmPuU4Sxvj3CZZNdw4voZRaa2NwKUmTuQiz149Ra7XtkHn)
+Modelo global ronda 11 subido a IPFS: Qmf1EkXz7WHMhou9aCHMkCdRdfGDpJ4peGAEEmpeEkR4t9
+Transacción updateModel ronda 11 enviada: d23bc2ebba99d3a568c1273ae2d9c87351318ecc84f00621d3cd18c0394f6fc2
+Transacción confirmada en bloque 479 (Gas: 167460, Tiempo: 4.520s)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmYZecyEV9MkCs51QJZdVwg9K5FkpQL6UktWnZAJSm97Cd)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: QmWaj1tjYe8eVuZ4Pwsqwv7nGXwGtJw3GFBQ85uQjkb3qd)
+Modelo global ronda 12 subido a IPFS: QmPKqQejZq1CEkwRkyiTS7PtQqMRToRXnJcxU44HmMETwW
+Transacción updateModel ronda 12 enviada: 2235cce274ddca7cc538072628e4277ed30f88c67d54e608c29c8ee7800a8c03
+Transacción confirmada en bloque 510 (Gas: 167460, Tiempo: 4.768s)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmYVhmHuNygSxQtpe4FtiZYmzAqSbxuBLdgopt3ZTML6rd)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: QmXBne3Zq8JhWcCzzT7y33sWA8Sa7pzySAomdHPkrqYozF)
+Modelo global ronda 13 subido a IPFS: QmbECvPpdzAxNgR7bCsvZqfnLJkYPLVhttqbsFvngZHwi7
+Transacción updateModel ronda 13 enviada: e1eebc417ad87a885a381ae06255256683c5463b6ef0773168cdd4d040a0066e
+Transacción confirmada en bloque 532 (Gas: 167460, Tiempo: 4.891s)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: QmWeRTTrRDRRMWCG3m79pCD9ELwCmxu8sjf3dwWRucMWXi)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmeaoHxeJUtjRtskPYPNK5Da994wdDuyrMUGUsd7PBENZS)
+Modelo global ronda 14 subido a IPFS: QmQ1mCcFn1UYXStW5MnrjtSJmqEdEay6p6zeQXQNZW2GyW
+Transacción updateModel ronda 14 enviada: dc53ed80cd4071ff5e7748d2cf4bac392b10b5b4e134032415db11e9b57ac88f
+Transacción confirmada en bloque 556 (Gas: 167460, Tiempo: 5.128s)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmaBmAZ4FoLThsY8WVu71GeK5UwHX98AtJiunkugGSEPLF)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: QmRn8YQwWpDGbRCEVLSDC1QueGNVyqd9iUSYrcViRFxcRy)
+Modelo global ronda 15 subido a IPFS: QmVbLhi4NEF7KtWg6CiZ2VRCf7cUZe2GsEHHsonhCk2MV9
+Transacción updateModel ronda 15 enviada: b537f73929de14f0ef649d09d4977a4ac4826a4471ab22299fe80a43c9fa72df
+Transacción confirmada en bloque 580 (Gas: 167460, Tiempo: 4.772s)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: QmbR42JYo8KMa88eZE2z1BszvQqJcb3P7kUXq39r8FZjL4)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmUBGXRSbd28s7UqDwUJsdqtTC5cA5Btojqejr1X48rxfY)
+Modelo global ronda 16 subido a IPFS: QmSED33mMZar1NAKxX23rjjKmAJKeBakdncTc4ZAU9hgiW[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 17]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 18]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 19]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 20]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 21]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 22]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 23]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 24]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 25]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 26]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 27]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 28]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 29]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [ROUND 30]
+[92mINFO [0m:      configure_fit: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_fit: received 2 results and 0 failures
+[92mINFO [0m:      configure_evaluate: strategy sampled 2 clients (out of 2)
+[92mINFO [0m:      aggregate_evaluate: received 2 results and 0 failures
+[92mINFO [0m:      
+[92mINFO [0m:      [SUMMARY]
+[92mINFO [0m:      Run finished 30 round(s) in 3838.70s
+[92mINFO [0m:      	History (loss, distributed):
+[92mINFO [0m:      		round 1: 0.5716646313667297
+[92mINFO [0m:      		round 2: 0.3113083392381668
+[92mINFO [0m:      		round 3: 0.177708700299263
+[92mINFO [0m:      		round 4: 0.10320257395505905
+[92mINFO [0m:      		round 5: 0.06841006502509117
+[92mINFO [0m:      		round 6: 0.06031628139317036
+[92mINFO [0m:      		round 7: 0.06394348107278347
+[92mINFO [0m:      		round 8: 0.07023181766271591
+[92mINFO [0m:      		round 9: 0.08070485293865204
+[92mINFO [0m:      		round 10: 0.06732850521802902
+[92mINFO [0m:      		round 11: 0.07335779070854187
+[92mINFO [0m:      		round 12: 0.08951820060610771
+[92mINFO [0m:      		round 13: 0.0812150239944458
+[92mINFO [0m:      		round 14: 0.07685480639338493
+[92mINFO [0m:      		round 15: 0.10042072832584381
+[92mINFO [0m:      		round 16: 0.20196043699979782
+[92mINFO [0m:      		round 17: 0.15196680277585983
+[92mINFO [0m:      		round 18: 0.13026081770658493
+[92mINFO [0m:      		round 19: 0.18860454857349396
+[92mINFO [0m:      		round 20: 0.19318635761737823
+[92mINFO [0m:      		round 21: 0.25386856496334076
+[92mINFO [0m:      		round 22: 0.2180115431547165
+[92mINFO [0m:      		round 23: 0.22436019778251648
+[92mINFO [0m:      		round 24: 0.16714221984148026
+[92mINFO [0m:      		round 25: 0.23078680038452148
+[92mINFO [0m:      		round 26: 0.24112238734960556
+[92mINFO [0m:      		round 27: 0.24555698782205582
+[92mINFO [0m:      		round 28: 0.21501759439706802
+[92mINFO [0m:      		round 29: 0.2773309424519539
+[92mINFO [0m:      		round 30: 0.24312932789325714
+[92mINFO [0m:      
+
+Transacción updateModel ronda 16 enviada: ec78d167e19b28c942e3860c76b420d6f8d7a3de6f0e289003d35d0729b18af8
+Transacción confirmada en bloque 608 (Gas: 167460, Tiempo: 4.311s)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: QmQi2huZsqonGzpF23zWcUWHcJR72XwPiammJYcpzZWtYa)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmauegcenqrtDAPetS7wdx4UAkykuC4D4nAf497sutvS1u)
+Modelo global ronda 17 subido a IPFS: QmerhLKRJvDhKk8oEkBGfouVxLS4i5Jj4CYUbBDArCBoU2
+Transacción updateModel ronda 17 enviada: 6f24be573387daf61563edb66d95bcbbb60b0726e77860b2c2b0961d3973e59d
+Transacción confirmada en bloque 636 (Gas: 167460, Tiempo: 4.663s)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmX8SzhJ5ySQgcgVCzFCfpcUL8a5xqmBuK8hhfPNAraUwV)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: QmfCfoQditGGu6QAbUzeHhHt3Lw9CBG7ogGGF9hkM9mwQN)
+Modelo global ronda 18 subido a IPFS: QmedDF1Zd73VCQPJSCAqmhF2bUY1AnK9pF5QvTEoJbTkyV
+Transacción updateModel ronda 18 enviada: acc407bab618baff538013179650320efee771e64553a46d6db1a83a4a1afc1e
+Transacción confirmada en bloque 664 (Gas: 167460, Tiempo: 4.722s)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: QmVveFzWisunXJYe2xYwztXJe4cpASJLsvgMYhDdgDjcGm)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmehqoUHUdGcKozKvx2iYcNuTR5JmzNzJnThQGBoaWhzBY)
+Modelo global ronda 19 subido a IPFS: QmWD8snBtPFvxNeqqfbaZJHrcZ8BXpJy53tqdX2AcdU6iG
+Transacción updateModel ronda 19 enviada: a1b37889e0f4ddc6d1947fd561fbfe901d504c25352b50106eeab7d237b197a6
+Transacción confirmada en bloque 686 (Gas: 167460, Tiempo: 4.727s)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: QmRXYR5vw5mvruLthsX75S3C1vCoBk6uPrF9jFZm2avNgF)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmNcQstnnu1daCYaLFJZa7YfeLbmTNZXTDcfAkMcjMtwmS)
+Modelo global ronda 20 subido a IPFS: QmZzcJqbRUJczjsnJFiVAMgFEB4gY1qNNNiyXxT7yxGr7T
+Transacción updateModel ronda 20 enviada: 514c9b0b8f20a1f238a00abea3a41df0594f18d513937f50aaebd2dfd00d2263
+Transacción confirmada en bloque 707 (Gas: 167460, Tiempo: 4.833s)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmZAdkJaMFAgeCbpUyEVDLvjE1bv71v7ZkzB3fUHowVToz)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: QmXZNLaf8Noxhv3hQBcKT7BgG1ZwyrcdhDbecqgQZyj5tP)
+Modelo global ronda 21 subido a IPFS: QmdYGSBZRJfvAFFYF5nWZVWkfCirVP9GbA98dC3BSCd4nm
+Transacción updateModel ronda 21 enviada: 279dc0d81302e2e1adcf1db65d6a8480a2ebbe0ba68472504bc3bb908c99597c
+Transacción confirmada en bloque 729 (Gas: 167460, Tiempo: 6.712s)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmY24g97rZfndB7aDB5VcE6SyzkkdQjqUQ17DcwiSHKqoK)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: QmStTL8WGnQALA1MY5pT34aRruNm413WAeBMmT1oSTqBsk)
+Modelo global ronda 22 subido a IPFS: QmVnXc5vSEEXbbJZyCjdknaHKnKnNbFs9uVVJLtxPRipfT
+Transacción updateModel ronda 22 enviada: 9662fde8227067ed183a8b0effd1b216b9a8748369a9eabfc20d00fed7ffe90b
+Transacción confirmada en bloque 747 (Gas: 167460, Tiempo: 4.930s)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmVZEe7uYnnztNJ4G9PpKVxNu623zPM25YqSLmkkQwXLgn)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: QmQ1MXvoy23RstdVUUDyANv3EkAdMYSxFYZ9xTUiKVit7P)
+Modelo global ronda 23 subido a IPFS: QmcZcNm8udW5z4Sctbyr32pHmh6YamKFYN4j2zfZCUoNFk
+Transacción updateModel ronda 23 enviada: 4ceabb7aa74d843474479a295829b8becb95dcbe7bf0618e01ab43e0ff89cb22
+Transacción confirmada en bloque 765 (Gas: 167460, Tiempo: 4.837s)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmdemSieTcVtSYbmT2Kbj2f4z9urSgLhwvn1LjGkV5n2Yt)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: Qmb1G2bGgDMQuD3hTdfUEpemueMwuTpmyFSs6dmheufZdg)
+Modelo global ronda 24 subido a IPFS: QmVj3QxUkEhRaEirB8Y1G9YbmvG5cB3nZi75yXLkLecF2K
+Transacción updateModel ronda 24 enviada: b9cb75f5faaac37b9c97da71ed2f52a1c7a0afd03a298769459aef180a6a0dcb
+Transacción confirmada en bloque 783 (Gas: 167460, Tiempo: 4.881s)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: QmPjf5jV9bQTuYTPHW9wHXZXa6ja34zpLY7iucmksUVc1f)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmQ2H3FR1K5PaurDTdSoHimC5fQLNjycXccKmYZGH3rvFK)
+Modelo global ronda 25 subido a IPFS: QmZJ6TftFgCvna882RA8rV2YQ2q8aMQVxUneEm5oRgLpg6
+Transacción updateModel ronda 25 enviada: df69295ff8c30dfd2af0eea42168e38c5bb7f9e5d629a2fff1833562fa643903
+Transacción confirmada en bloque 801 (Gas: 167460, Tiempo: 4.792s)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: QmaP7JumKxxvQMDuZRCp3b5bTibNGqNNgbB53y6aFRH7QZ)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmRuyCbHX1gVizGdDZNTedVXWNtA6HmEUVLsbJUNqgbA2L)
+Modelo global ronda 26 subido a IPFS: QmetJQw8NBuaDPWf97N4e6JPWK9cxMUxwVXYiNWXYUmsyt
+Transacción updateModel ronda 26 enviada: 1a233398396de732e23d2d399dac1128aacc46289146f407fb326eb8863e93c5
+Transacción confirmada en bloque 819 (Gas: 167460, Tiempo: 6.889s)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmSbrLTUKSzDZ8AuH4F2HXpCqijhbL5gtcXUUtf3NGEcpQ)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: QmZLBY82npFnkuVSizoxc5TnUHdgwb8aYJhmmJa7M79vhd)
+Modelo global ronda 27 subido a IPFS: QmVF5YH9NKnPAdVmycFduJvGGqTt87UEDPPoQsGKKHYRcu
+Transacción updateModel ronda 27 enviada: c47a6d98a58e3d99756426617bb1e24f603264158925f8db997797d4a8473988
+Transacción confirmada en bloque 837 (Gas: 167460, Tiempo: 4.808s)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: QmfFfYT1wiYCwsqFQThpuhDtzayn8ChUz1aK9CAcB2Jcje)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmYicSB83C7TTHRWBN54FJEy7sdDC1bp7YfamxsvebSX5i)
+Modelo global ronda 28 subido a IPFS: Qmec72DVJ218Um2aZsb9MHav2LgTYBKffLwQ1VGcUG29G8
+Transacción updateModel ronda 28 enviada: 95c48194832987380a4d5345aa8945c74b929777340ec901ee0be209fbde68e4
+Transacción confirmada en bloque 855 (Gas: 167460, Tiempo: 4.904s)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: QmXsgaGcJjMxcxv53ojLA2rhKdNEkKshzrweuAWupzL2FG)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmRNTuosVxUPj6QN6fXSviFFhEid5qHmb854F1bbMEkwrB)
+Modelo global ronda 29 subido a IPFS: QmZTYHsMVSA2cJtmFKjhCtsqjLKUPZZYWMHhq8L2Bg79hq
+Transacción updateModel ronda 29 enviada: 14dff4a66af14329b29aef0348babd103a7757b070baa26d3473d8ffd014c930
+Transacción confirmada en bloque 873 (Gas: 167460, Tiempo: 4.900s)
+Verificación exitosa para 0x627306090abaB3A6e1400e9345bC60c78a8BEf57 (CID: QmPj8qBdNUPvxgGxLCR4cNuxmfBXqtiC1XgY6CUBrtQmJk)
+Verificación exitosa para 0xf17f52151EbEF6C7334FAD080c5704D77216b732 (CID: QmPuyHoHY3Way7thTGn43ehn9MFhpZqLxHCmWiWDqwXXD2)
+Modelo global ronda 30 subido a IPFS: QmQ8NEQ1XQ1qHKacJy37xqkoAvbLUZN15UWRJsxEQZCvS8
+Transacción updateModel ronda 30 enviada: 32d0bb287c73a38e6d8af1a3e0f7ede8cc7bbdc474681a404c924787c674ef12
+Transacción confirmada en bloque 891 (Gas: 167460, Tiempo: 5.203s)

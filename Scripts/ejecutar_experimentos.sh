@@ -11,7 +11,7 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 EXP="${1:-E1}"
 RUNS="${2:-3}"
 ROUNDS="${3:-30}"
-SERVER_IP="${4:-localhost}"
+SERVER_IP="${4:-127.0.0.1}"
 
 if command -v python3.12 >/dev/null 2>&1; then
     PY="python3.12"
@@ -101,5 +101,5 @@ echo "==========================================================================
 echo "Todas las ejecuciones de $EXP han finalizado."
 echo "Ejecutando consolidación estadística..."
 echo "=============================================================================="
-$PY "$DIR/analizar_metricas.py"
+python3 "$DIR/analizar_metricas.py" || $PY "$DIR/analizar_metricas.py"
 

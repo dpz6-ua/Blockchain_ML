@@ -166,8 +166,21 @@ class MiFlowerClient(fl.client.NumPyClient):
     def check_model_CID(self, blockchain_cid, parameters):
         if not blockchain_cid:
             return False
+        
+        # Si server_ip es localhost, usar 127.0.0.1 para evitar que el gateway de IPFS
+        # intente redirigir por HTTP 301 a subdominios del tipo <CID>.ipfs.localhost
+        ip_addr = "127.0.0.1" if self.server_ip in ["localhost", "127.0.0.1"] else self.server_ip
+
         try:
-            response = requests.get(f"http://{self.server_ip}:8080/ipfs/{blockchain_cid}", timeout=15)
+            # 1. Intentar descargar por la pasarela HTTP (puerto 8080)
+            url = f"http://{ip_addr}:8080/ipfs/{blockchain_cid}"
+            response = requests.get(url, timeout=15)
+
+            # 2. Si la pasarela falla o redirige, usar directamente la API cat (puerto 5001)
+            if response.status_code != 200:
+                cat_url = f"http://{ip_addr}:5001/api/v0/cat?arg={blockchain_cid}"
+                response = requests.post(cat_url, timeout=15)
+
             if response.status_code == 200:
                 model_from_ipfs = pickle.loads(response.content)
                 if not isinstance(model_from_ipfs, list):
