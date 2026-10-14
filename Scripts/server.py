@@ -36,7 +36,7 @@ else:
 ETH_ENDPOINT = 'http://127.0.0.1:18545'
 MEMBER1_ADDRESS = Web3.to_checksum_address("0xfe3b557e8fb62b89f4916b721be55ceb828dbd73")
 PRIV_KEY1 = "0x8f2a55949038a9610f50fb23b5883af3b4ecb3c3bb792cbcefbd1542c692be63"
-IPFS_API_URL = "http://127.0.0.1:5001/api/v0/add"
+IPFS_API_URL = "http://127.0.0.1:5001/api/v0/add?pin=false"
 
 
 class MiBesuServer(fl.server.strategy.FedAvg):
@@ -239,7 +239,7 @@ class MiBesuServer(fl.server.strategy.FedAvg):
 
     def send_transaction(self, round_id, model_cid):
         try:
-            nonce = self.w3.eth.get_transaction_count(MEMBER1_ADDRESS)
+            nonce = self.w3.eth.get_transaction_count(MEMBER1_ADDRESS, 'pending')
             tx = self.contract.functions.updateModel(round_id, model_cid).build_transaction({
                 'from': MEMBER1_ADDRESS,
                 'nonce': nonce,

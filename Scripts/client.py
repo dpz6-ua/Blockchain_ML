@@ -115,7 +115,7 @@ class MiFlowerClient(fl.client.NumPyClient):
     def upload_to_ipfs(self, data):
         try:
             files = {'file': data}
-            response = requests.post(f"http://{self.server_ip}:5001/api/v0/add", files=files, timeout=15)
+            response = requests.post(f"http://{self.server_ip}:5001/api/v0/add?pin=false", files=files, timeout=15)
             if response.status_code == 200:
                 return response.json()['Hash']
             else:
@@ -127,7 +127,7 @@ class MiFlowerClient(fl.client.NumPyClient):
 
     def register_on_blockchain(self, round_num, cid):
         account = CLIENT_ACCOUNTS[self.member_id]
-        nonce = self.w3.eth.get_transaction_count(account["address"])
+        nonce = self.w3.eth.get_transaction_count(account["address"], 'pending')
 
         tx = self.contract.functions.registerClientModel(round_num, cid).build_transaction({
             'from': account["address"],

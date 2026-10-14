@@ -30,7 +30,7 @@ CLIENT_ACCOUNTS = {
 }
 
 
-def test_verificacion_descendente(w3, contract, ipfs_url="http://127.0.0.1:5001/api/v0/add", ipfs_get="http://127.0.0.1:8080/ipfs/"):
+def test_verificacion_descendente(w3, contract, ipfs_url="http://127.0.0.1:5001/api/v0/add?pin=false", ipfs_get="http://127.0.0.1:8080/ipfs/"):
     """
     Prueba 1: Servidor Adulterado / Verificación Descendente.
     Demuestra experimentalmente que si el servidor envía un modelo distinto del registrado
@@ -155,7 +155,7 @@ def test_verificacion_ascendente(w3, contract):
         return False
 
 
-def test_verificacion_benigna(w3, contract, ipfs_url="http://127.0.0.1:5001/api/v0/add", ipfs_get="http://127.0.0.1:8080/ipfs/"):
+def test_verificacion_benigna(w3, contract, ipfs_url="http://127.0.0.1:5001/api/v0/add?pin=false", ipfs_get="http://127.0.0.1:8080/ipfs/"):
     """
     Prueba de Control: Caso Benigno (Sin manipulación).
     Verifica que en condiciones legítimas tanto la verificación descendente como ascendente son 100% exitosas.
@@ -211,7 +211,7 @@ def test_verificacion_benigna(w3, contract, ipfs_url="http://127.0.0.1:5001/api/
 def main():
     parser = argparse.ArgumentParser(description="Banco de Pruebas de Verificación y Seguridad Criptográfica")
     parser.add_argument("--endpoint", type=str, default=ETH_ENDPOINT, help="RPC endpoint de Hyperledger Besu")
-    parser.add_argument("--ipfs-api", type=str, default="http://127.0.0.1:5001/api/v0/add", help="API add de IPFS")
+    parser.add_argument("--ipfs-api", type=str, default="http://127.0.0.1:5001/api/v0/add?pin=false", help="API add de IPFS")
     parser.add_argument("--ipfs-get", type=str, default="http://127.0.0.1:8080/ipfs/", help="Gateway get de IPFS")
     args = parser.parse_args()
 
