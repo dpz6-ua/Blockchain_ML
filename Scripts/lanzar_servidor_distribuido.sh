@@ -29,6 +29,16 @@ echo "Rondas por run:  $ROUNDS"
 echo "Capa Blockchain: $USA_BC"
 echo "=============================================================================="
 
+if [ "$USA_BC" = true ]; then
+    echo "1. Desplegando instancia de FLRegistry en Besu para todo el experimento $EXP..."
+    $PY "$DIR/contract_address.py" || { echo "Error desplegando contrato"; exit 1; }
+    echo ""
+    echo ">> RECUERDA: Si no lo has hecho ya, asegúrate de que 'Smart_Contracts/Contract_Data/FLRegistry_info.json'"
+    echo "   esté copiado en el otro ordenador (PC 2) antes de lanzar los clientes."
+    echo "=============================================================================="
+    sleep 3
+fi
+
 for (( run=1; run<=RUNS; run++ ))
 do
     echo ""
@@ -41,14 +51,11 @@ do
     sleep 2
 
     if [ "$USA_BC" = true ]; then
-        echo "1. Desplegando instancia limpia del contrato FLRegistry en Besu..."
-        $PY "$DIR/contract_address.py" || { echo "Error desplegando contrato"; exit 1; }
-
-        echo "2. Servidor con Blockchain listo y escuchando en 0.0.0.0:8081..."
+        echo "Arrancando Servidor con Blockchain (Run $run)..."
         echo "   (Esperando a que los clientes del PC 2 se conecten y completen las $ROUNDS rondas)"
         $PY "$DIR/server.py" --exp "$EXP" --run "$run" --rounds "$ROUNDS" --server-address "0.0.0.0:8081"
     else
-        echo "1. Servidor SIN Blockchain listo y escuchando en 0.0.0.0:8081..."
+        echo "Arrancando Servidor SIN Blockchain (Run $run)..."
         echo "   (Esperando a que los clientes del PC 2 se conecten y completen las $ROUNDS rondas)"
         $PY "$DIR/server_sin_bc.py" --exp "$EXP" --run "$run" --rounds "$ROUNDS" --server-address "0.0.0.0:8081"
     fi
