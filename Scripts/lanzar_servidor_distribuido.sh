@@ -9,6 +9,7 @@ DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 EXP="${1:-E3}"
 RUNS="${2:-3}"
 ROUNDS="${3:-30}"
+START_RUN="${4:-1}"
 
 if command -v python3.12 >/dev/null 2>&1; then
     PY="python3.12"
@@ -24,13 +25,13 @@ fi
 echo "=============================================================================="
 echo "SERVIDOR DISTRIBUIDO AUTOMATIZADO (PC 1 - Estación Servidor)"
 echo "Experimento:     $EXP"
-echo "Runs a realizar: $RUNS"
+echo "Ejecutando runs: del $START_RUN al $RUNS"
 echo "Rondas por run:  $ROUNDS"
 echo "Capa Blockchain: $USA_BC"
 echo "=============================================================================="
 
-if [ "$USA_BC" = true ]; then
-    echo "1. Desplegando instancia de FLRegistry en Besu para todo el experimento $EXP..."
+if [ "$USA_BC" = true ] && [ "$START_RUN" -le 1 ]; then
+    echo "1. Desplegando instancia de FLRegistry en Besu para el experimento $EXP..."
     $PY "$DIR/contract_address.py" || { echo "Error desplegando contrato"; exit 1; }
     echo ""
     echo ">> RECUERDA: Si no lo has hecho ya, asegúrate de que 'Smart_Contracts/Contract_Data/FLRegistry_info.json'"
@@ -39,7 +40,7 @@ if [ "$USA_BC" = true ]; then
     sleep 3
 fi
 
-for (( run=1; run<=RUNS; run++ ))
+for (( run=START_RUN; run<=RUNS; run++ ))
 do
     echo ""
     echo "------------------------------------------------------------------------------"

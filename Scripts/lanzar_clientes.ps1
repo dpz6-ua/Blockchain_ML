@@ -5,13 +5,14 @@
 param(
     [string]$Exp = "E3",
     [int]$Runs = 3,
-    [string]$ServerIp = "192.168.1.53"
+    [string]$ServerIp = "192.168.1.53",
+    [int]$StartRun = 1
 )
 
 Write-Host "==============================================================================" -ForegroundColor Cyan
 Write-Host "ORQUESTADOR DE CLIENTES FEDERADOS (PC 2 - Windows 11)" -ForegroundColor Cyan
 Write-Host "Experimento:      $Exp"
-Write-Host "Total de runs:    $Runs"
+Write-Host "Runs a ejecutar:  del $StartRun al $Runs"
 Write-Host "IP del Servidor:  $ServerIp"
 Write-Host "==============================================================================" -ForegroundColor Cyan
 
@@ -20,7 +21,7 @@ if ($Exp -match "^E[23]" -or $Exp -match "NO") {
     $usa_bc = $false
 }
 
-for ($run = 1; $run -le $Runs; $run++) {
+for ($run = $StartRun; $run -le $Runs; $run++) {
     Write-Host ""
     Write-Host "------------------------------------------------------------------------------" -ForegroundColor Yellow
     Write-Host ">> [CLIENTES] Iniciando Ejecución $run de $Runs para $Exp" -ForegroundColor Yellow
