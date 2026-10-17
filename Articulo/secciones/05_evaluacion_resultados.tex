@@ -243,7 +243,7 @@ La Figura~\ref{fig:log_ataque_ascendente} documenta la salida en terminal del se
     \label{fig:log_ataque_ascendente}
 \end{figure}
 
-La Figura~\ref{fig:bloque_16_audit} muestra el recibo del \textbf{Bloque~16} en el explorador Besu, donde consta la transacción \texttt{registerClientModel} emitida por la cuenta del cliente (\texttt{0xf17f5215...}) con hash \texttt{0x3e15209c...} y un consumo de gas de 160.200 (límite 200.000). Dado que el atacante remitió un CID ajeno al sellado en dicho bloque, la verificación cruzada interceptó el fraude con una fiabilidad matemática absoluta.
+La Figura~\ref{fig:bloque_16_audit} muestra el recibo del \textbf{Bloque~16} en el explorador Besu, donde consta la transacción \texttt{registerClientModel} emitida por la cuenta del cliente (\texttt{0xf17f5215...}) con hash \texttt{0x3e15209c...} y un consumo de gas de 160.200 (límite 200.000). Dado que el atacante remitió un CID ajeno al sellado en dicho bloque, la verificación cruzada interceptó la inyección adversarial gracias a la resistencia a colisiones de la función de resumen SHA-256.
 
 \begin{figure}[H]
     \centering
@@ -256,7 +256,7 @@ La Tabla~\ref{tab:resumen_ataques} sintetiza las métricas cuantitativas obtenid
 
 \begin{table}[H]
 \centering
-\caption{Evaluación empírica del protocolo de doble verificación frente a vectores de ataque adversarial.}
+\caption{Evaluación empírica del protocolo de doble verificación frente a los vectores de ataque adversarial evaluados.}
 \label{tab:resumen_ataques}
 \resizebox{\columnwidth}{!}{%
 \begin{tabular}{@{}lcccc@{}}
@@ -270,7 +270,10 @@ Cliente Malicioso & Servidor Agregador & \textbf{100,0\%} & 0,044 s & Descarte i
 }
 \end{table}
 
-Estos resultados demuestran que la sobrecarga de 6 segundos introducida por el marco confiere inmunidad determinista frente a manipulaciones de pesos, neutralizando ataques con tiempos de respuesta inferiores a la décima de segundo.
+Estos resultados demuestran que la sobrecarga temporal introducida por el marco confiere una garantía determinista de integridad frente a manipulaciones de pesos y modelos disidentes en tránsito, neutralizando dichos vectores con tiempos de respuesta inferiores a la décima de segundo.
+\\
+
+Conviene delimitar con rigor el alcance de este mecanismo defensivo: la doble verificación criptográfica en cadena protege de forma exhaustiva contra la adulteración directa de parámetros (\textit{tampering}), la suplantación de identidad y la inyección de modelos no autorizados on-chain. No obstante, si un cliente malicioso genera una actualización perjudicial mediante manipulación local de sus datos de entrenamiento (\textit{data poisoning} o \textit{label flipping}) y la firma legítimamente con su clave privada en la Blockchain, el compromiso criptográfico coincidirá formalmente pero el contenido neuronal estará contaminado. La mitigación de esta tipología de ataques semánticos requiere complementar la trazabilidad con filtros de agregación estadística bizantina (como Krum, Median o Trimmed-Mean) coordinados desde el contrato, aspecto que se analiza formalmente en las líneas futuras.
 
 \subsection{Consumo y Previsibilidad del Gas en la EVM}
 La Figura~\ref{fig:consumo_gas} ilustra el consumo de gas computacional de las operaciones registradas a lo largo de las rondas.

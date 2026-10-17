@@ -169,6 +169,8 @@ El script simula de manera controlada dos vectores críticos de ataque:
 * **Prueba 1 (Descendente - Servidor Malicioso)**: El servidor inyecta un modelo adulterado. El cliente coteja el CID recibido con el emitido en la Blockchain y aborta la ronda de forma preventiva en $\approx 0{,}074$~segundos.
 * **Prueba 2 (Ascendente - Cliente Envenenador)**: Un cliente intenta colar gradientes manipulados con un hash no respaldado en la EVM. El agregador detecta la discrepancia on-chain y descarta la contribución en $\approx 0{,}044$~segundos.
 
+> **Nota metodológica de seguridad:** La doble verificación criptográfica garantiza la detección determinista de ataques de adulteración física en tránsito (*tampering*) e inyección de modelos disidentes no respaldados on-chain. La mitigación de ataques semánticos donde los pesos han sido generados mediante manipulación de datos locales (*data poisoning*) y firmados legítimamente en la red requiere defensas complementarias de agregación bizantina (Krum, Median), contempladas en el trabajo futuro.
+
 ---
 
 ## 📊 Reproducción de Métricas y Gráficas del Artículo
