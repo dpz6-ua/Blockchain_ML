@@ -1,0 +1,26 @@
+% !TeX root = ../main.tex
+\section{Conclusiones y Trabajo Futuro}
+\label{sec:conclusiones}
+
+En este artículo se ha presentado, implementado y validado experimentalmente un marco integral para garantizar la trazabilidad, integridad y auditoría criptográfica en sistemas de Aprendizaje Federado, combinando una red Blockchain permisionada (Hyperledger Besu) con almacenamiento direccionable fuera de cadena (IPFS) y el framework Flower.
+
+\subsection{Conclusiones Principales}
+Los resultados obtenidos permiten extraer las siguientes conclusiones clave:
+\begin{itemize}
+    \item \textbf{Viabilidad técnica y sobrecoste temporal asumible}: La integración de la capa de trazabilidad introduce una penalización de ciclo de únicamente entre el \textbf{6,2\%} (en entorno local) y el \textbf{10,9\%} (en entorno distribuido en red), equivalente a entre 5 y 7 segundos por ronda federada. Este sobrecoste responde afirmativamente al dilema de rendimiento vs. seguridad, demostrando que la auditabilidad de extremo a extremo es plenamente asumible en sistemas de IA distribuida.
+    \item \textbf{Eficacia de la doble verificación cruzada}: El diseño propuesto erradica la dependencia de un servidor central como punto único de confianza. Mediante el cotejo automático de CIDs de IPFS frente a los registros inmutables on-chain, los clientes quedan protegidos frente a modelos globales corruptos, mientras que el agregador descarta de inmediato contribuciones disidentes no firmadas.
+    \item \textbf{Eficiencia y predictibilidad on-chain}: El desacoplamiento arquitectónico mediante IPFS asegura un consumo de gas estrictamente determinista y de complejidad $\mathcal{O}(1)$ ($\sim$160.200 gas para clientes y $\sim$167.460 gas para el servidor), evitando cualquier saturación del estado de la EVM con independencia del tamaño de los modelos.
+    \item \textbf{Escalabilidad del consenso BFT}: Incrementar los nodos validadores de 4 a 7 (duplicando la tolerancia a fallos bizantinos de $f=1$ a $f=2$) apenas eleva la latencia de confirmación en $\sim$0,9 segundos, quedando este incremento absorbido de forma imperceptible dentro del tiempo global de entrenamiento local.
+\end{itemize}
+
+\subsection{Limitaciones y Trabajo Futuro}
+Como líneas de desarrollo futuro que amplían el alcance de este trabajo, se plantean:
+\begin{enumerate}
+    \item \textbf{Optimización y regularización del modelo de IA}: Dado que la meta primordial de este artículo consistió en evaluar la infraestructura y extraer métricas cuantitativas del sistema FL-Blockchain, la optimización fina de la red neuronal quedó fuera del alcance primario. Como línea futura se contempla incorporar criterios de parada temprana (\textit{early stopping}), técnicas de regularización (Dropout, normalización de batches) y arquitecturas convolucionales avanzadas para maximizar la generalización.
+    \item \textbf{Mecanismos de reputación y penalización on-chain}: Explotar el historial inmutable de contribuciones para articular algoritmos de puntuación de clientes o penalización (\textit{slashing}) económica/lógica de nodos maliciosos recurrentes.
+    \item \textbf{Agregación bizantina avanzada}: Complementar el esquema con estrategias de agregación robustas frente a envenenamiento no evidente (como Krum o Trimmed Mean) coordinadas desde el propio contrato.
+    \item \textbf{Entornos no-IID y despliegue vehicular V2X}: Evaluar la robustez del framework bajo distribuciones de datos altamente heterogéneas y desplegar nodos en hardware embarcado (\textit{edge computing}, como NVIDIA Jetson) con conectividad celular 5G/V2X.
+    \item \textbf{Gestión criptográfica de claves}: Sustituir el esquema de cuentas actual por módulos de seguridad de hardware (HSM) o almacenes seguros de secretos tipo Key Vault para un despliegue conforme a estándares industriales.
+\end{enumerate}
+En síntesis, la arquitectura validada demuestra que la convergencia entre Blockchain y Aprendizaje Federado no solo es factible, sino que constituye una solución sólida y escalable para el despliegue confiable de inteligencia artificial en entornos críticos y cooperativos.
+

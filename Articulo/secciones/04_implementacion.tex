@@ -1,0 +1,81 @@
+% !TeX root = ../main.tex
+\section{Implementación y Entorno Experimental}
+\label{sec:implementacion}
+
+Con el fin de aislar y evaluar cuantitativamente el sobrecoste introducido por la capa de trazabilidad y auditoría, se desplegó un banco de pruebas experimental representativo de un entorno de computación distribuida vehicular.
+
+\subsection{Infraestructura de Hardware y Software}
+La evaluación empírica se llevó a cabo utilizando dos estaciones físicas interconectadas en la misma red de área local (LAN), cuyas especificaciones técnicas se detallan en la Tabla~\ref{tab:testbed_hardware}:
+\begin{itemize}
+    \item \textbf{Estación 1 (Nodo Central)}: Aloja el servidor agregador Flower, el nodo RPC principal de la red Besu y el nodo de almacenamiento IPFS.
+    \item \textbf{Estación 2 (Nodos de Borde / Clientes)}: Aloja y ejecuta los clientes de entrenamiento federado (\textit{members} 2 y 3).
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Especificaciones del banco de pruebas experimental.}
+\label{tab:testbed_hardware}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lll}
+\toprule
+\textbf{Parámetro} & \textbf{Estación 1 (Servidor/RPC)} & \textbf{Estación 2 (Clientes)} \\
+\midrule
+Procesador & Intel Core i5-1135G7 & Intel Core i7-9700 \\
+Frecuencia base & 2,40 GHz & 3,00 GHz \\
+Núcleos / Hilos & 4 núcleos / 8 hilos & 8 núcleos / 8 hilos \\
+Memoria RAM & 7,6 GB (asignada en WSL2) & 8,0 GB \\
+Sistema Operativo & Ubuntu 22.04 LTS (WSL2) & Windows 11 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+El stack de software está compuesto por Hyperledger Besu con soporte de transacciones privadas mediante Tessera, orquestado mediante Docker Compose; el daemon IPFS Kubo (\texttt{v0.32.1}); Python \texttt{3.12} con PyTorch para la inferencia y optimización neuronal; Flower (\texttt{flwr}) para la coordinación gRPC de la federación; y la biblioteca \texttt{web3.py} para la conectividad JSON-RPC con la EVM.
+
+\subsection{Modelo Neuronal y Conjunto de Datos Vehicular}
+Como caso de uso para simular un sistema de asistencia a la conducción en vehículos conectados y autónomos (CAV), se adoptó el dataset de clasificación de eventos de tráfico del grupo CloudLab-AIA~\cite{cloudlabaia_flblockchain}. 
+\\
+
+El problema consiste en una tarea de clasificación multiclase orientada a la detección en carretera con cuatro categorías:
+\begin{enumerate}
+    \item Accidente vial (\texttt{accident}).
+    \item Congestión o tráfico denso (\texttt{dense\_traffic}).
+    \item Condiciones meteorológicas adversas (\texttt{meteorology}).
+    \item Flujo de tráfico fluido (\texttt{sparse\_traffic}).
+\end{enumerate}
+
+Las imágenes se preprocesan mediante reescalado a una resolución de $32 \times 32$ píxeles en tres canales cromáticos (RGB) y normalización estándar. Para preservar la comparabilidad estadística y eliminar sesgos de distribución, el conjunto de datos se reparte entre los clientes según un esquema independiente e idénticamente distribuido (IID).
+
+El modelo implementado (\texttt{NetCliente}) es una red neuronal convolucional (CNN) estructurada en dos bloques convolucionales consecutivos (con kernels de $3 \times 3$, función de activación ReLU y submuestreo por \textit{Max Pooling}), seguidos de dos capas densas completamente conectadas (\textit{fully connected}) que proyectan el vector de características hacia las 4 neuronas de salida. El entrenamiento se realiza mediante la función de pérdida de entropía cruzada (\textit{Cross-Entropy Loss}) y el algoritmo de optimización Adam con una tasa de aprendizaje $\eta = 10^{-3}$, configurando 3 épocas locales de entrenamiento por ronda y un horizonte total de 30 rondas federadas.
+
+Es importante remarcar que el propósito primordial de este estudio no radica en diseñar el modelo más óptimo ni en maximizar su precisión de clasificación, sino en utilizar la arquitectura de aprendizaje federado como un banco de pruebas realista para generar y analizar métricas cuantitativas del sistema (sobrecoste temporal, escalabilidad y consumo de gas). La optimización del modelo (ajuste de hiperparámetros, mitigación del sobreajuste o empleo de arquitecturas más profundas) se plantea deliberadamente como trabajo futuro, actuando aquí la red neuronal como una carga de trabajo experimental de referencia.
+
+\subsection{Matriz de Configuraciones Experimentales}
+Para desglosar y desacoplar de forma analítica el impacto individual de cada componente, se diseñaron cinco configuraciones experimentales (E1 a E5), resumidas en la Tabla~\ref{tab:configuraciones}.
+
+\begin{table}[H]
+\centering
+\caption{Matriz de configuraciones experimentales evaluadas.}
+\label{tab:configuraciones}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{ccccc}
+\toprule
+\textbf{ID Exp.} & \textbf{Estaciones} & \textbf{Capa Blockchain} & \textbf{Validadores} & \textbf{Objetivo} \\
+\midrule
+E1 & 1 & Sí & 4 & Sobrecarga BC local \\
+E2 & 1 & No & --- & Baseline local \\
+E3 & 2 & No & --- & Baseline distribuido \\
+E4 & 2 & Sí & 4 & Sobrecarga BC distribuida \\
+E5 & 2 & Sí & 7 & Escalabilidad IBFT 2.0 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+Este diseño metodológico permite efectuar comparaciones controladas de una sola variable:
+\begin{itemize}
+    \item \textbf{Coste directo de Blockchain}: Comparación de E1 vs. E2 en entorno monomáquina, y de E4 vs. E3 en entorno distribuido en red.
+    \item \textbf{Efecto de la distribución física}: Comparación de E2 vs. E3 (sin Blockchain) y de E1 vs. E4 (con Blockchain de 4 validadores).
+    \item \textbf{Escalado del consenso BFT}: Comparación de E4 (4 validadores) vs. E5 (7 validadores), evaluando la penalización de latencia al elevar la tolerancia a fallos de $f=1$ a $f=2$.
+\end{itemize}
+
