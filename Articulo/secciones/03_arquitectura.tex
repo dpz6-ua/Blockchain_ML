@@ -39,8 +39,7 @@ Adicionalmente, se mantienen los punteros de estado \texttt{latestRound} y el in
 \subsubsection{Primitivas de escritura y autenticación}
 El contrato expone dos métodos transaccionales que alteran el estado y emiten el evento desacoplado \texttt{ModelUpdated}:
 \begin{itemize}
-    \item \texttt{registerClientModel(uint256 round, string memory hash)}: Invocado por los nodos cliente al concluir el entrenamiento local. La asignación implícita de \texttt{msg.sender} garantiza el no repudio, impidiendo que un participante registre compromisos en nombre de un tercero.
-    \item \texttt{updateModel(uint256 round, string memory hash)}: Invocado exclusivamente por el servidor tras converger el algoritmo de agregación. Actualiza el puntero \texttt{latestRound} y sella el modelo global oficial de la iteración.
+    \item \texttt{updateModel(uint256 round, string memory hash)}: Invocado operacionalmente por el servidor tras converger el algoritmo de agregación. A nivel de diseño del banco de pruebas, la función se implementa con visibilidad pública para desacoplar el contrato de dependencias estáticas de despliegue; no obstante, la EVM registra de forma inmutable la dirección emisora en el campo \texttt{author} (\texttt{msg.sender}). Esto permite a los clientes verificar criptográficamente frente a la clave pública autorizada del servidor que el modelo global sellado proviene legítimamente del agregador del consorcio.
 \end{itemize}
 
 \subsubsection{Primitivas de lectura y verificación}

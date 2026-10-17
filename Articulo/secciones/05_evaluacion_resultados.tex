@@ -306,8 +306,8 @@ Para verificar empíricamente la correspondencia unívoca entre los eventos del 
 \textbf{Bloque} & \textbf{Entidad} & \textbf{Evento / Método} & \textbf{Dirección Emisora} & \textbf{Prefijo Tx Hash} & \textbf{Gas EVM} \\
 \midrule
 8 & Servidor & Despliegue \texttt{FLRegistry} & \texttt{0xfe3b557e...} & \texttt{0x939eb46c...} & 1.999.000 \\
-15 & Servidor & \texttt{updateModel} (Oficial) & \texttt{0xfe3b557e...} & \texttt{0x0af3ebfb...} & 167.460 \\
-16 & Cliente 2 & \texttt{registerClientModel} & \texttt{0xf17f5215...} & \texttt{0x3e15209c...} & 160.200 \\
+13 & Servidor & \texttt{updateModel} & \texttt{0xfe3b557e...} & \texttt{0xa18e3bb4...} & 167.460 \\
+14 & Cliente 2 & \texttt{registerClientModel} & \texttt{0x62730609...} & \texttt{0xc1c7402f...} & 160.200 \\
 \midrule
 765 & Servidor & \texttt{updateModel} (Ronda 23) & \texttt{0xfe3b557e...} & \texttt{0x4ceabb7a...} & 167.460 \\
 783 & Servidor & \texttt{updateModel} (Ronda 24) & \texttt{0xfe3b557e...} & \texttt{0xb9cb75f5...} & 167.460 \\
@@ -319,8 +319,8 @@ Para verificar empíricamente la correspondencia unívoca entre los eventos del 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/auditoria_grafana_bloque_15_y_16.png}
-    \caption{Auditoría de inmutabilidad on-chain: visualización panorámica en el explorador de bloques de Hyperledger Besu de las transacciones correspondientes al sellado del modelo local en el bloque 16 (\textit{registerClientModel}) y del modelo global en el bloque 15 (\textit{updateModel}), reflejando la concurrencia y secuenciación exacta de estados auditados.}
+    \includegraphics[width=\columnwidth]{figuras/bloque_contrato.png}
+    \caption{Auditoría de inmutabilidad on-chain: visualización en el explorador de bloques de Hyperledger Besu del despliegue del contrato inteligente \texttt{FLRegistry} (tarjeta inferior en amarillo, Bloque~8) por la dirección del servidor (\texttt{0xfe3b55...}) junto a los bloques subsiguientes de transacciones operativas 13 y 14.}
     \label{fig:auditoria_bloque}
 \end{figure}
 

@@ -21,6 +21,7 @@ Como líneas de desarrollo futuro que amplían el alcance de este trabajo, se pl
     \item \textbf{Agregación bizantina avanzada}: Complementar el esquema con estrategias de agregación robustas frente a envenenamiento no evidente (como Krum o Trimmed Mean) coordinadas desde el propio contrato.
     \item \textbf{Entornos no-IID y despliegue vehicular V2X}: Evaluar la robustez del framework bajo distribuciones de datos altamente heterogéneas y desplegar nodos en hardware embarcado (\textit{edge computing}, como NVIDIA Jetson) con conectividad celular 5G/V2X.
     \item \textbf{Gestión criptográfica de claves}: Sustituir el esquema de cuentas actual por módulos de seguridad de hardware (HSM) o almacenes seguros de secretos tipo Key Vault para un despliegue conforme a estándares industriales.
+    \item \textbf{Control de acceso on-chain y gobernanza descentralizada}: Incorporar modificadores formales de control de acceso en el Smart Contract (\texttt{onlyServer} o esquemas de consenso multifirma y gobernanza basada en roles RBAC) para restringir directamente en el bytecode de la EVM la invocación de \texttt{updateModel}, reforzando la seguridad en despliegues con múltiples servidores agregadores o federaciones abiertas.
 \end{enumerate}
 En síntesis, la arquitectura validada demuestra que la convergencia entre Blockchain y Aprendizaje Federado no solo es factible, sino que constituye una solución sólida y escalable para el despliegue confiable de inteligencia artificial en entornos críticos y cooperativos.
 
