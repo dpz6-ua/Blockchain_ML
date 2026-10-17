@@ -6,20 +6,17 @@ La arquitectura propuesta converge tres pilares tecnológicos: registros distrib
 
 \subsection{Blockchain Permisionada y Consenso IBFT 2.0}
 Una cadena de bloques es una estructura de datos inmutable y distribuida en la que las transacciones se agrupan en bloques encadenados mediante funciones hash criptográficas resistentes a colisiones (como SHA-256)~\cite{nist2015sha, zheng2018blockchain}. Frente a las redes públicas (\textit{permissionless}) como Bitcoin o Ethereum Mainnet, penalizadas por altas latencias y costes económicos de transacción, los consorcios industriales adoptan redes permisionadas basadas en la Máquina Virtual de Ethereum (EVM)~\cite{buterin2014ethereum}, tales como Hyperledger Besu~\cite{besu_docs}.
-\\
 
 En estos entornos, los mecanismos basados en consumo de recursos (PoW) o capital (PoS) se sustituyen por algoritmos de tolerancia a fallos bizantinos. El protocolo \textbf{IBFT 2.0} (\textit{Istanbul Byzantine Fault Tolerant})~\cite{moniz2020istanbul} estructura el consenso en torno a un conjunto predefinido de validadores que alternan el rol de proponente mediante un esquema rotatorio (\textit{round-robin}). Un bloque solo se anexa a la cadena tras una votación en tres fases (pre-prepare, prepare, commit) firmada por una supermayoría de al menos dos tercios:
 \begin{equation}
 n \ge 3f + 1
 \end{equation}
 donde $n$ denota el número total de nodos validadores y $f$ el número máximo de participantes defectuosos o bizantinos tolerables. 
-\\
 
 IBFT 2.0 ofrece una propiedad determinante frente a otros consensos: la \textbf{finalidad determinista inmediata}. Al carecer de bifurcaciones probabilísticas (\textit{forks}), una vez que una ronda de entrenamiento o contribución se sella en un bloque, es irrefutable y permanente. Asimismo, aunque el precio del gas (\textit{gas price}) se configure en cero para anular tarifas monetarias, el cómputo de \textit{gas used}~\cite{ethereum_gas} se mantiene como métrica objetiva del coste de cómputo y almacenamiento impuesto a la red.
 
 \subsection{Almacenamiento Distribuido Off-Chain (IPFS)}
 El almacenamiento directo de redes neuronales profundas en una Blockchain es inviable debido al tamaño de los pesos (decenas o cientos de megabytes), lo cual provocaría una saturación crítica del estado de la EVM (\textit{state bloat}) y un consumo prohibitivo de gas.
-\\
 
 Para superar este cuello de botella, se implementa el paradigma de \textbf{almacenamiento fuera de cadena con compromiso dentro de cadena} (\textit{off-chain storage with on-chain commitment}) utilizando el Sistema de Archivos Interplanetario (IPFS)~\cite{benet2014ipfs}. IPFS opera sobre una topología P2P basada en direccionamiento por contenido (\textit{content addressing}): cada archivo se identifica de forma unívoca mediante un \textit{Content Identifier} (CID), obtenido a partir del hash criptográfico de su contenido. Al registrar únicamente el CID y el hash SHA-256 en el contrato inteligente, se asegura que cualquier descarga posterior sea verificada bit a bit contra el registro inmutable, garantizando deduplicación, disponibilidad y verificación formal de integridad con coste computacional on-chain mínimo.
 
@@ -31,21 +28,9 @@ w^{(t+1)} = \sum_{k=1}^{K} \frac{n_k}{n} \, w_k^{(t)}, \quad \text{donde } n = \
 
 El marco de referencia \textbf{Flower}~\cite{beutel2020flower} proporciona una infraestructura desacoplada y eficiente para orquestar este flujo mediante llamadas a procedimientos remotos bidireccionales sobre gRPC.
 
-\subsection{Vulnerabilidades en FL y Trabajos Relacionados}
-A pesar de sus ventajas de privacidad, los sistemas FL tradicionales sufren de severas vulnerabilidades de seguridad:
-\begin{enumerate}
-    \item \textbf{Servidor central como punto único de fallo y confianza}: No existe salvaguarda para verificar si el servidor manipuló la ponderación de FedAvg o si inyectó sesgos maliciosos en $w^{(t+1)}$.
-    \item \textbf{Ataques de envenenamiento y falta de trazabilidad}: Nodos malintencionados pueden realizar \textit{model poisoning} o inyectar puertas traseras (\textit{backdoors}). Sin un historial no repudiable de identidades y hashes, resulta imposible deslindar qué participante contaminó el modelo global.
-\end{enumerate}
-
-Diversas aproximaciones en la literatura han explorado la hibridación de Blockchain y FL. No obstante, gran parte de los trabajos teóricos sufren de problemas de escalabilidad al pretender ejecutar la agregación matemática completa dentro de la EVM o depender de redes públicas costosas. En el dominio de los sistemas de transporte inteligentes (ITS), Pujol et al.~\cite{pujol2024blockchain} demostraron que Hyperledger Besu con IBFT 2.0 ofrece latencias subsegundo viables para la cooperación vehicular, y CloudLab-AIA~\cite{cloudlabaia_flblockchain} conceptualizó el registro de hashes de modelos. 
-\\
-
-Para contextualizar el aporte de esta investigación frente a las principales propuestas de la literatura especializada, la Tabla~\ref{tab:estado_arte} sintetiza una comparativa cualitativa y arquitectural. A diferencia de esquemas basados en consenso PoW o de almacenamiento on-chain (como BlockFL), o de aquellos que delegan el consenso en tolerancias a fallos no bizantinas (como FedChain con Raft), nuestra arquitectura articula una doble verificación cruzada bidireccional sobre una red permisionada de consorcio con finalidad inmediata y coste computacional predecible $\mathcal{O}(1)$.
-
-\begin{table*}[htbp]
+\begin{table*}[t]
 \centering
-\caption{Comparativa cualitativa y arquitectural frente a los principales marcos de Blockchain-Federated Learning de la literatura. \\}
+\caption{Comparativa cualitativa y arquitectural frente a los principales marcos de Blockchain-FL de la literatura.}
 \label{tab:estado_arte}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{@{}lccccc@{}}
@@ -60,5 +45,16 @@ BFL Vehicular (Pujol et al., 2024)~\cite{pujol2024blockchain} & IBFT 2.0 (Permis
 \end{tabular}%
 }
 \end{table*}
+
+\subsection{Vulnerabilidades en FL y Trabajos Relacionados}
+A pesar de sus ventajas de privacidad, los sistemas FL tradicionales sufren de severas vulnerabilidades de seguridad:
+\begin{enumerate}
+    \item \textbf{Servidor central como punto único de fallo y confianza}: No existe salvaguarda para verificar si el servidor manipuló la ponderación de FedAvg o si inyectó sesgos maliciosos en $w^{(t+1)}$.
+    \item \textbf{Ataques de envenenamiento y falta de trazabilidad}: Nodos malintencionados pueden realizar \textit{model poisoning} o inyectar puertas traseras (\textit{backdoors}). Sin un historial no repudiable de identidades y hashes, resulta imposible deslindar qué participante contaminó el modelo global.
+\end{enumerate}
+
+Diversas aproximaciones en la literatura han explorado la hibridación de Blockchain y FL. No obstante, gran parte de los trabajos teóricos sufren de problemas de escalabilidad al pretender ejecutar la agregación matemática completa dentro de la EVM o depender de redes públicas costosas. En el dominio de los sistemas de transporte inteligentes (ITS), Pujol et al.~\cite{pujol2024blockchain} demostraron que Hyperledger Besu con IBFT 2.0 ofrece latencias subsegundo viables para la cooperación vehicular, y CloudLab-AIA~\cite{cloudlabaia_flblockchain} conceptualizó el registro de hashes de modelos. 
+
+Para contextualizar el aporte de esta investigación frente a las principales propuestas de la literatura especializada, la Tabla~\ref{tab:estado_arte} sintetiza una comparativa cualitativa y arquitectural. A diferencia de esquemas basados en consenso PoW o de almacenamiento on-chain (como BlockFL), o de aquellos que delegan el consenso en tolerancias a fallos no bizantinas (como FedChain con Raft), nuestra arquitectura articula una doble verificación cruzada bidireccional sobre una red permisionada de consorcio con finalidad inmediata y coste computacional predecible $\mathcal{O}(1)$.
 
 
