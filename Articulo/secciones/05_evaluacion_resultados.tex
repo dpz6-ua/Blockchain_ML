@@ -152,14 +152,103 @@ Este incremento simétrico de 100~ms confirma experimentalmente que ampliar la r
 
 \subsection{Robustez Adversarial y Verificación Experimental de Ataques}
 \label{subsec:ataques}
-Para validar empíricamente que la arquitectura no solo registra transacciones, sino que neutraliza efectivamente vectores de ataque reales, se sometió el marco a una batería de pruebas de inyección adversarial controlada:
+Para validar empíricamente que la arquitectura no solo registra transacciones en condiciones nominales, sino que neutraliza activamente vectores de ataque reales, se implementó una batería de ensayos adversariales controlados en el módulo \texttt{test\_verificacion.py}. El objetivo es evaluar el comportamiento del sistema ante las dos principales amenazas bizantinas en aprendizaje federado no confiable: un servidor central comprometido (ataque descendente) y un nodo participante envenenador (ataque ascendente).
 
+\subsubsection{Prueba 1: Verificación Descendente (Servidor Adulterado frente a Cliente Edge)}
+\label{subsubsec:ataque_descendente}
+En un entorno convencional, si el servidor agregador o un intermediario en red (\textit{Man-in-the-Middle}) altera los pesos del modelo global antes de distribuirlos, los clientes entrenan de forma inadvertida sobre parámetros maliciosos. Para impedirlo, el código implementa una rutina de protección en dos fases:
 \begin{enumerate}
-    \item \textbf{Ataque Descendente (Servidor Comprometido / Man-in-the-Middle):} Se simuló un servidor malicioso que modifica deliberadamente los pesos globales antes de entregarlos al cliente $k$. Al recibir la instrucción, el cliente descarga el identificador oficial $\text{CID}_{reg}^{(t)}$ registrado en el contrato \texttt{FLRegistry} y realiza una comparación bit a bit frente al hash de los pesos candidatos. Al constatar la discrepancia, el cliente \textbf{aborta inmediatamente la ronda en $0{,}074$~s} (74~ms), impidiendo la ingestión de parámetros envenenados en la memoria del vehículo.
-    \item \textbf{Ataque Ascendente (Cliente Envenenador / CID Falsificado):} Se simuló un cliente malicioso que remite al servidor pesos arbitrarios acompañados de un identificador de IPFS no registrado o falseado. Antes de proceder a la agregación de FedAvg, el servidor ejecuta \texttt{getClientModel($t$, address)} en Besu. Al detectar la incompatibilidad con la firma criptográfica del cliente, el servidor \textbf{descarta la contribución en $0{,}044$~s} (44~ms), completando la agregación global exclusivamente con los participantes honestos.
+    \item \textbf{Generación y Sellado Oficial:} El servidor legítimo instancia el modelo base \texttt{NetCliente}, serializa los tensores mediante \texttt{pickle.dumps} y los publica en el daemon IPFS local a través del endpoint \texttt{/api/v0/add?pin=false}, obteniendo el CID oficial \texttt{QmSEBaqx...}. A continuación, el servidor emite una transacción firmada en la EVM invocando \texttt{updateModel(round, cid\_oficial)} desde su cuenta (\texttt{0xfe3b55...}), quedando el compromiso criptográfico sellado en el \textbf{Bloque~15}.
+    \item \textbf{Inyección Adversarial y Detección Local:} Se emula un servidor malicioso que perturba los parámetros inyectando ruido aditivo ($\mathbf{w}_{\text{cand}} = \mathbf{w}_{\text{oficial}} + 0{,}5$) y remite este vector corrupto al cliente edge vía gRPC.
+    \item \textbf{Comprobación Cruzada y Aborto Inmediato:} Al recibir la orden de entrenamiento, el cliente edge invoca la función de solo lectura \texttt{getLastModel()} en el Smart Contract mediante una llamada JSON-RPC para recuperar el CID sellado on-chain. Con este identificador descarga de forma paralela el artefacto binario de referencia desde la pasarela IPFS (\texttt{/ipfs/<CID>}) y ejecuta una comparación bit a bit tensor por tensor (\texttt{np.allclose(p\_recibido, p\_ipfs, atol=1e-7)}).
 \end{enumerate}
 
-La Tabla~\ref{tab:resumen_ataques} resume los resultados obtenidos en las pruebas de verificación cruzada, y la Figura~\ref{fig:logs_ataque} muestra los registros reales de consola generados durante la intercepción y mitigación de ambos vectores.
+\begin{center}
+\small
+\fbox{
+\begin{minipage}{0.95\columnwidth}
+\textbf{Lógica Algorítmica 1: Verificación Descendente en el Cliente Edge}
+\begin{enumerate}
+    \item \textbf{Entrada:} Pesos candidatos $\mathbf{w}_{\text{cand}}$ remitidos vía gRPC por el servidor.
+    \item Consultar contrato en Besu: $\text{CID}_{\text{onchain}} \leftarrow \texttt{FLRegistry.getLastModel().cid}$
+    \item Descargar binario de IPFS: $\mathbf{w}_{\text{ipfs}} \leftarrow \texttt{IPFS.get}(\text{CID}_{\text{onchain}})$
+    \item \textbf{Si} $\exists l : \|\mathbf{w}_{\text{cand}, l} - \mathbf{w}_{\text{ipfs}, l}\|_{\infty} > \epsilon$ \textbf{entonces}
+    \begin{itemize}
+        \item Registrar alerta: \textit{«Discrepancia detectada en pesos recibidos»}
+        \item \textbf{ABORTAR} ronda localmente (bloquear backpropagation)
+    \end{itemize}
+    \item \textbf{Si no:} Aceptar $\mathbf{w}_{\text{cand}}$ y proseguir con el entrenamiento local.
+\end{enumerate}
+\end{minipage}
+}
+\end{center}
+
+La Figura~\ref{fig:log_ataque_descendente} ilustra la telemetría real en tiempo de ejecución capturada en la consola del cliente. El proceso íntegro de consulta RPC a Besu, descarga y cotejo tensorial insumió tan solo \textbf{0,0740~segundos} (74~ms). Al constatar la discrepancia, el cliente detuvo de forma inmediata la ejecución, impidiendo la contaminación de su modelo local y salvaguardando los datos de entrenamiento privados del vehículo.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figuras/logs_deteccion_ataque_descendent.png}
+    \caption{Prueba 1: Registro de consola del nodo cliente detectando la adulteración del modelo frente al CID oficial sellado en el bloque 15 y abortando en 0,0740~s.}
+    \label{fig:log_ataque_descendente}
+\end{figure}
+
+Por su parte, la Figura~\ref{fig:bloque_15_audit} aporta la evidencia forense inmutable en la cadena de bloques, capturada desde el explorador de la red Hyperledger Besu. En ella se observa el sellado de la transacción \texttt{updateModel} en el \textbf{Bloque~15}, emitida por la dirección del servidor (\texttt{0xfe3b557e...}) con hash criptográfico \texttt{0x0af3ebfb...} y un consumo de gas de 167.460 (límite 500.000). Esta correspondencia unívoca entre el bloque minado y la verificación del cliente valida la consistencia del protocolo.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figuras/auditoria_grafana_bloque_15.png}
+    \caption{Prueba 1: Confirmación forense en Hyperledger Besu del bloque 15, registrando la transacción oficial \texttt{updateModel} emitida por el servidor agregador.}
+    \label{fig:bloque_15_audit}
+\end{figure}
+
+\subsubsection{Prueba 2: Verificación Ascendente (Cliente Envenenador frente a Servidor Agregador)}
+\label{subsubsec:ataque_ascendente}
+La segunda vulnerabilidad crítica consiste en la inyección de gradientes o pesos corruptos por parte de un nodo cliente malicioso (\textit{model poisoning}). Para neutralizarla, el servidor exige que toda contribución reportada esté previamente autenticada y sellada en la Blockchain:
+\begin{enumerate}
+    \item \textbf{Registro Legítimo On-Chain:} El nodo cliente honesto (cuenta 3, dirección \texttt{0xf17f52...}) publica sus pesos en IPFS y emite una transacción firmada con su clave privada invocando \texttt{registerClientModel(round, cid\_legitimo)}, la cual queda consolidada por los validadores en el \textbf{Bloque~16}.
+    \item \textbf{Inyección Adversarial:} Se emula un nodo malicioso que intenta colar una actualización envenenada remitiendo al servidor un identificador arbitrario no respaldado on-chain (\texttt{QmClientFraudeQueNoEstaRegistradoEnBesu...}).
+    \item \textbf{Auditoría RPC y Descarte en FedAvg:} Antes de procesar la agregación matricial de la ronda, el servidor ejecuta una llamada de solo lectura JSON-RPC \texttt{getClientModel(round, address)} sobre el contrato \texttt{FLRegistry}. Al comparar el valor reportado con el registro inmutable firmado, se detecta la no coincidencia de hashes.
+\end{enumerate}
+
+\begin{center}
+\small
+\fbox{
+\begin{minipage}{0.95\columnwidth}
+\textbf{Lógica Algorítmica 2: Auditoría RPC Ascendente en el Servidor Agregador}
+\begin{enumerate}
+    \item \textbf{Entrada:} Identificador $\text{CID}_{\text{rep}}^{(k)}$ reportado por el cliente $k$ con dirección $\text{addr}_k$.
+    \item Consultar registro del cliente en Besu: \\
+    $\text{CID}_{\text{onchain}}^{(k)} \leftarrow \texttt{getClientModel}(t, \text{addr}_k)$
+    \item \textbf{Si} $\text{CID}_{\text{rep}}^{(k)} \neq \text{CID}_{\text{onchain}}^{(k)}$ \textbf{entonces}
+    \begin{itemize}
+        \item Registrar alerta: \textit{«Discrepancia detectada / Fraude»}
+        \item \textbf{DESCARTAR} contribución del cliente $k$ del pool de FedAvg
+    \end{itemize}
+    \item \textbf{Si no:} Incorporar pesos de $k$ en la agregación global.
+\end{enumerate}
+\end{minipage}
+}
+\end{center}
+
+La Figura~\ref{fig:log_ataque_ascendente} documenta la salida en terminal del servidor agregador. La llamada JSON-RPC a la EVM tomó únicamente \textbf{0,0439~segundos} (44~ms). Al constatar que el CID no coincidía con la transacción firmada del cliente, el servidor excluyó al participante de la agregación de forma inmediata, preservando la convergencia y la integridad del modelo global.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figuras/logs_deteccion_ataque_ascendente.png}
+    \caption{Prueba 2: Registro de consola del servidor agregador auditando vía RPC el CID del cliente y descartando la contribución fraudulenta en 0,0439~s.}
+    \label{fig:log_ataque_ascendente}
+\end{figure}
+
+La Figura~\ref{fig:bloque_16_audit} muestra el recibo del \textbf{Bloque~16} en el explorador Besu, donde consta la transacción \texttt{registerClientModel} emitida por la cuenta del cliente (\texttt{0xf17f5215...}) con hash \texttt{0x3e15209c...} y un consumo de gas de 160.200 (límite 200.000). Dado que el atacante remitió un CID ajeno al sellado en dicho bloque, la verificación cruzada interceptó el fraude con una fiabilidad matemática absoluta.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figuras/auditoria_grafana_bloque_16.png}
+    \caption{Prueba 2: Confirmación forense en Hyperledger Besu del bloque 16, registrando la transacción legítima \texttt{registerClientModel} del nodo cliente.}
+    \label{fig:bloque_16_audit}
+\end{figure}
+
+La Tabla~\ref{tab:resumen_ataques} sintetiza las métricas cuantitativas obtenidas en ambas pruebas de penetración adversarial.
 
 \begin{table}[H]
 \centering
@@ -177,14 +266,7 @@ Cliente Malicioso & Servidor Agregador & \textbf{100,0\%} & 0,044 s & Descarte i
 }
 \end{table}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\columnwidth]{figuras/logs_deteccion_ataque.png}
-    \caption{Evidencia experimental de mitigación de ataques en tiempo de ejecución: (arriba) el nodo cliente detecta la alteración del modelo global respecto al CID sellado en el bloque 15 y aborta en 0,074~s; (abajo) el servidor agregador detecta el CID fraudulento de un cliente no coincidente con el registro del bloque 16 y lo descarta de FedAvg en 0,044~s.}
-    \label{fig:logs_ataque}
-\end{figure}
-
-La subsección demuestra que la sobrecarga de 6 segundos introducida por la capa de seguridad confiere inmunidad determinista frente a manipulaciones de pesos con latencias de mitigación inferiores a los 100~ms.
+Estos resultados demuestran que la sobrecarga de 6 segundos introducida por el marco confiere inmunidad determinista frente a manipulaciones de pesos, neutralizando ataques con tiempos de respuesta inferiores a la décima de segundo.
 
 \subsection{Consumo y Previsibilidad del Gas en la EVM}
 La Figura~\ref{fig:consumo_gas} ilustra el consumo de gas computacional de las operaciones registradas a lo largo de las rondas.
@@ -232,8 +314,8 @@ Para verificar empíricamente la correspondencia unívoca entre los eventos del 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/auditoria_grafana_bloque.png}
-    \caption{Auditoría de inmutabilidad on-chain: visualización en el explorador de bloques de Hyperledger Besu de las transacciones correspondientes al sellado del modelo global en el bloque 15 (\textit{updateModel}) y del modelo local en el bloque 16 (\textit{registerClientModel}), reflejando exactamente las direcciones y hashes criptográficos auditados.}
+    \includegraphics[width=\columnwidth]{figuras/auditoria_grafana_bloque_15_y_16.png}
+    \caption{Auditoría de inmutabilidad on-chain: visualización panorámica en el explorador de bloques de Hyperledger Besu de las transacciones correspondientes al sellado del modelo local en el bloque 16 (\textit{registerClientModel}) y del modelo global en el bloque 15 (\textit{updateModel}), reflejando la concurrencia y secuenciación exacta de estados auditados.}
     \label{fig:auditoria_bloque}
 \end{figure}
 
