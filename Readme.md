@@ -7,7 +7,7 @@
 [![IPFS](https://img.shields.io/badge/IPFS-Kubo_v0.32.1-65C2CB.svg)](https://ipfs.tech/)
 [![Solidity](https://img.shields.io/badge/Solidity-0.8.20-363636.svg)](https://soliditylang.org/)
 
-Repositorio oficial del framework híbrido de **Aprendizaje Federado (Flower)**, **Blockchain de Consorcio (Hyperledger Besu, IBFT 2.0)** y **Almacenamiento Distribuido Fuera de Cadena (IPFS)** para la auditoría, trazabilidad e integridad de modelos neuronales en Vehículos Conectados y Autónomos (CAVs).
+Repositorio oficial del framework híbrido de **Aprendizaje Federado (Flower)**, **Blockchain de Consorcio (Hyperledger Besu, IBFT 2.0)** y **Almacenamiento Distribuido Fuera de Cadena (IPFS)** para la auditoría, trazabilidad e integridad de modelos neuronales.
 
 Este trabajo ha sido desarrollado en la **Escuela Politécnica Superior de la Universidad de Alicante (Departamento de Tecnología Informática y Computación)** por **David Piotr Znojek** bajo la tutoría de **Francisco A. Pujol López**.
 
