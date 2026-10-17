@@ -3,8 +3,10 @@
 \label{sec:introduccion}
 
 El auge de la Inteligencia Artificial (IA) y del Aprendizaje Automático (\textit{Machine Learning}, ML) ha transformado sectores críticos como la salud, las finanzas y la conducción autónoma. No obstante, el entrenamiento de modelos de gran capacidad requiere volúmenes masivos de datos, frecuentemente sensibles o confidenciales (geolocalización, hábitos de consumo o registros biométricos). En los paradigmas tradicionales centralizados, la recopilación de información en un único repositorio introduce graves riesgos de privacidad, problemas de cumplimiento normativo (como el RGPD) y cuellos de botella computacionales y energéticos.
+\\
 
 El Aprendizaje Federado (\textit{Federated Learning}, FL)~\cite{mcmahan2017federated} surgió como una alternativa descentralizada en la que múltiples nodos o clientes entrenan copias locales del modelo con sus propios datos privados, transmitiendo a un servidor central únicamente los parámetros o gradientes actualizados. Aunque FL solventa en gran medida la fuga de datos crudos, introduce una vulnerabilidad estructural: la falta de confianza intrínseca entre los participantes. En un entorno distribuido no supervisado, actores maliciosos o nodos comprometidos pueden ejecutar ataques de envenenamiento (\textit{data poisoning} o \textit{model poisoning}) inyectando pesos manipulados. Por ejemplo, en el contexto de los Vehículos Conectados y Autónomos (CAV), una pequeña alteración coordinada en los pesos podría inducir al modelo global a no clasificar correctamente una señal de tráfico crítica (como un STOP), con consecuencias potencialmente fatales.
+\\
 
 Para mitigar este riesgo, la tecnología \textit{Blockchain} ofrece una solución idónea como registro contable inmutable, descentralizado y verificable~\cite{nakamoto2008bitcoin, zheng2018blockchain}. Al integrar Blockchain en un flujo de entrenamiento distribuido, cada actualización de parámetros, ronda de agregación e identidad de los clientes queda registrada criptográficamente mediante contratos inteligentes (\textit{smart contracts}), habilitando la trazabilidad absoluta y la no repudiación de las contribuciones.
 

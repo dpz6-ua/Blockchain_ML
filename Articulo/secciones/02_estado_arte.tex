@@ -39,12 +39,13 @@ A pesar de sus ventajas de privacidad, los sistemas FL tradicionales sufren de s
 \end{enumerate}
 
 Diversas aproximaciones en la literatura han explorado la hibridación de Blockchain y FL. No obstante, gran parte de los trabajos teóricos sufren de problemas de escalabilidad al pretender ejecutar la agregación matemática completa dentro de la EVM o depender de redes públicas costosas. En el dominio de los sistemas de transporte inteligentes (ITS), Pujol et al.~\cite{pujol2024blockchain} demostraron que Hyperledger Besu con IBFT 2.0 ofrece latencias subsegundo viables para la cooperación vehicular, y CloudLab-AIA~\cite{cloudlabaia_flblockchain} conceptualizó el registro de hashes de modelos. 
+\\
 
 Para contextualizar el aporte de esta investigación frente a las principales propuestas de la literatura especializada, la Tabla~\ref{tab:estado_arte} sintetiza una comparativa cualitativa y arquitectural. A diferencia de esquemas basados en consenso PoW o de almacenamiento on-chain (como BlockFL), o de aquellos que delegan el consenso en tolerancias a fallos no bizantinas (como FedChain con Raft), nuestra arquitectura articula una doble verificación cruzada bidireccional sobre una red permisionada de consorcio con finalidad inmediata y coste computacional predecible $\mathcal{O}(1)$.
 
 \begin{table*}[htbp]
 \centering
-\caption{Comparativa cualitativa y arquitectural frente a los principales marcos de Blockchain-Federated Learning de la literatura.}
+\caption{Comparativa cualitativa y arquitectural frente a los principales marcos de Blockchain-Federated Learning de la literatura. \\}
 \label{tab:estado_arte}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{@{}lccccc@{}}
