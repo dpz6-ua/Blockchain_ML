@@ -114,3 +114,50 @@ Al recibir los pesos de los clientes en el servidor agregador (Figura~\ref{fig:f
 \end{figure}
 
 Este mecanismo garantiza trazabilidad completa de extremo a extremo, no repudio y aislamiento de participantes disidentes.
+
+\begin{figure*}[htbp]
+\centering
+\begin{minipage}{0.95\textwidth}
+\hrule height 0.8pt
+\vspace{3pt}
+\noindent\textbf{Algoritmo 1:} Protocolo de Doble Verificación Cruzada y Agregación Inmutable en Blockchain
+\vspace{3pt}
+\hrule height 0.4pt
+\vspace{4pt}
+\small
+\begin{tabbing}
+\textbf{Entrada:} Rondas $R$, Clientes $\mathcal{K}$, épocas $E$, tasa $\eta$, contrato \texttt{FLRegistry}. \quad \textbf{Salida:} Modelo global inmutable final $w^{(R)}$.\\[3pt]
+\textbf{Servidor (Inicialización y Agregación):}\\
+\quad 1: Inicializar pesos $w^{(0)}$; publicar en IPFS $\to \text{CID}_{global}^{(0)}$; invocar transacción Besu \texttt{updateModel}($0, \text{CID}_{global}^{(0)}$);\\
+\quad 2: \textbf{para} cada ronda federada $t = 1$ \textbf{hasta} $R$ \textbf{hacer}\\
+\quad 3: \quad Notificar a clientes seleccionados $\mathcal{K}$ con el modelo global $w^{(t-1)}$ vía canal gRPC;\\
+\quad 4: \quad \textbf{para} cada cliente $k \in \mathcal{K}$ en paralelo \textbf{hacer} \quad \textit{// Lado Cliente (Verificación Descendente y Entrenamiento)}\\
+\quad 5: \quad \quad Consultar el hash oficial en la Blockchain: $\text{CID}_{reg} \leftarrow \texttt{getLastModel}()$;\\
+\quad 6: \quad \quad Descargar pesos referenciados desde IPFS: $w_{ipfs} \leftarrow \text{IPFS.get}(\text{CID}_{reg})$;\\
+\quad 7: \quad \quad \textbf{si} $\text{Hash}(w^{(t-1)}) \neq \text{Hash}(w_{ipfs})$ \textbf{entonces}\\
+\quad 8: \quad \quad \quad \textbf{abortar entrenamiento} (\textit{Alerta de Seguridad: Servidor Adulterado detectado en $\approx 0{,}20$~s});\\
+\quad 9: \quad \quad \textbf{fin si}\\
+\quad 10: \quad \quad Entrenar modelo local: $w_k^{(t)} \leftarrow \text{SGD}(w^{(t-1)}, \mathcal{D}_k, E, \eta)$;\\
+\quad 11: \quad \quad Publicar pesos locales en almacenamiento distribuido: $\text{CID}_k^{(t)} \leftarrow \text{IPFS.add}(w_k^{(t)})$;\\
+\quad 12: \quad \quad Sellar compromiso en Besu y esperar recibo de bloque: \texttt{registerClientModel}($t, \text{CID}_k^{(t)}$);\\
+\quad 13: \quad \quad Retornar parámetros calculados $w_k^{(t)}$ e identificador $\text{CID}_k^{(t)}$ al servidor vía gRPC;\\
+\quad 14: \quad \textbf{fin para}\\
+\quad 15: \quad $\mathcal{K}_{valid} \leftarrow \emptyset$; \quad \textit{// Lado Servidor (Verificación Ascendente y Filtrado)}\\
+\quad 16: \quad \textbf{para} cada contribución recibida $(k, w_k^{(t)}, \text{CID}_k^{(t)})$ \textbf{hacer}\\
+\quad 17: \quad \quad Consultar hash firmado por el cliente en Besu: $\text{CID}_{onchain} \leftarrow \texttt{getClientModel}(t, \text{address}_k)$;\\
+\quad 18: \quad \quad \textbf{si} $\text{CID}_k^{(t)} == \text{CID}_{onchain}$ y $\text{CID}_k^{(t)} == \text{Hash}(w_k^{(t)})$ \textbf{entonces}\\
+\quad 19: \quad \quad \quad $\mathcal{K}_{valid} \leftarrow \mathcal{K}_{valid} \cup \{k\}$; \quad \textit{// Contribución legítima admitida}\\
+\quad 20: \quad \quad \textbf{si no}\\
+\quad 21: \quad \quad \quad Descartar $w_k^{(t)}$ (\textit{Alerta de Seguridad: Cliente Malicioso/CID falso detectado en $\approx 0{,}09$~s});\\
+\quad 22: \quad \quad \textbf{fin si}\\
+\quad 23: \quad \textbf{fin para}\\
+\quad 24: \quad Calcular nuevo modelo consolidado: $w^{(t)} \leftarrow \sum_{k \in \mathcal{K}_{valid}} \frac{n_k}{n_{valid}} w_k^{(t)}$; \quad \textit{// Agregación FedAvg}\\
+\quad 25: \quad Publicar modelo agregado en IPFS: $\text{CID}_{global}^{(t)} \leftarrow \text{IPFS.add}(w^{(t)})$;\\
+\quad 26: \quad Sellar estado global en bloque Besu mediante transacción: \texttt{updateModel}($t, \text{CID}_{global}^{(t)}$);\\
+\quad 27: \textbf{fin para}\\
+\quad 28: \textbf{retornar} Modelo global inmutable final $w^{(R)}$
+\end{tabbing}
+\vspace{2pt}
+\hrule height 0.8pt
+\end{minipage}
+\end{figure*}

@@ -20,6 +20,25 @@ El mínimo de pérdida en la ronda 4 sugiere que la incorporación de técnicas 
 
 Es fundamental enfatizar que \textbf{la curva de convergencia es estrictamente idéntica con o sin la presencia de Blockchain}. Dado que la capa de trazabilidad opera exclusivamente en la verificación e indexación criptográfica fuera de cadena y no interfiere en los tensores ni en los gradientes de FedAvg, la dinámica de entrenamiento se mantiene inalterada.
 
+\subsection{Formalización Matemática de Métricas de Rendimiento}
+Con el fin de aislar de forma unívoca la latencia impuesta por cada componente del sistema, el tiempo total por ronda en los nodos de borde ($T_{\text{client}}$) y en el servidor agregador ($T_{\text{server}}$) en la iteración $t$ se define analíticamente como:
+\begin{align}
+T_{\text{client}}^{(t)} &= t_{\text{verif\_desc}}^{(t)} + t_{\text{train}}^{(t)} + t_{\text{ipfs\_up}}^{(t)} + t_{\text{tx\_besu}}^{(t)} \label{eq:t_client} \\
+T_{\text{server}}^{(t)} &= t_{\text{wait}}^{(t)} + t_{\text{verif\_asc}}^{(t)} + t_{\text{fedavg}}^{(t)} \nonumber \\
+&\quad + t_{\text{ipfs\_global}}^{(t)} + t_{\text{block\_confirm}}^{(t)} \label{eq:t_server}
+\end{align}
+donde $t_{\text{verif\_desc}}$ representa la comprobación local contra el CID de Besu; $t_{\text{train}}$, el tiempo de cálculo de gradientes con PyTorch; $t_{\text{ipfs\_up}}$, la publicación binaria de pesos; $t_{\text{tx\_besu}}$, la emisión y confirmación de \texttt{registerClientModel}; $t_{\text{wait}}$, la ventana de recepción gRPC; $t_{\text{verif\_asc}}$, la validación en \texttt{getClientModel}; $t_{\text{fedavg}}$, la agregación matricial; y $t_{\text{block\_confirm}}$, la confirmación del bloque IBFT~2.0 tras invocar \texttt{updateModel}.
+
+Para medir el sobrecoste relativo ($\Delta_{\text{overhead}}$) entre una configuración con seguridad $E_{\text{BC}}$ y su respectiva línea base $E_{\text{base}}$, se emplea la mediana de las distribuciones:
+\begin{equation}
+\Delta_{\text{overhead}} = \frac{\text{Med}(T_{E_{\text{BC}}}) - \text{Med}(T_{E_{\text{base}}})}{\text{Med}(T_{E_{\text{base}}})} \times 100 \quad [\%] \label{eq:overhead}
+\end{equation}
+Asimismo, la reproducibilidad y dispersión estadística se caracterizan mediante el Error Estándar de la Media ($SE$):
+\begin{equation}
+SE = \frac{\sigma}{\sqrt{N_{\text{rounds}}}} \label{eq:se}
+\end{equation}
+donde $\sigma$ denota la desviación típica muestral y $N_{\text{rounds}} = 90$ el total de observaciones agregadas por configuración ($30$ rondas $\times 3$ ejecuciones independientes).
+
 \subsection{Visión General del Rendimiento Temporal Consolidado}
 La Tabla~\ref{tab:tiempos_resumen} sintetiza el tiempo total requerido por ronda federada en las cinco configuraciones experimentales, consolidando las tres ejecuciones independientes ($90$ rondas por configuración) y reportando la mediana, media, desviación típica ($\sigma$) y error estándar ($SE$). Asimismo, la Figura~\ref{fig:tiempo_todas} refleja la serie temporal a lo largo de las rondas.
 
@@ -56,7 +75,7 @@ El análisis multiejecución revela diferencias clave en la estabilidad de cada 
 Para cuantificar con exactitud el coste temporal impuesto por la serialización de tensores, la publicación en IPFS, la firma ECDSA y el consenso IBFT~2.0, se comparan las configuraciones equivalentes con y sin capa de seguridad (Figura~\ref{fig:coste_bc}):
 \begin{itemize}
     \item \textbf{Escenario Monomáquina ($E_1$ vs. $E_2$)}: El tiempo mediano pasa de 75,70~s a 85,42~s, representando un sobrecoste de \textbf{+9,72~s (+12,8\%)}.
-    \item \textbf{Escenario Distribuido ($E_4$ vs. $E_3$)}: El tiempo mediano se incrementa de 66,62~s a 72,96~s, lo que supone una sobrecarga de tan solo \textbf{+6,34~s (+9,5\%)}.
+    \item \textbf{Escenario Distribuido ($E_3$ vs. $E_4$)}: El tiempo mediano se incrementa de 66,62~s a 72,96~s, lo que supone una sobrecarga de tan solo \textbf{+6,34~s (+9,5\%)}.
 \end{itemize}
 
 \begin{figure}[H]
@@ -136,11 +155,11 @@ Este incremento simétrico de 100~ms confirma experimentalmente que ampliar la r
 Para validar empíricamente que la arquitectura no solo registra transacciones, sino que neutraliza efectivamente vectores de ataque reales, se sometió el marco a una batería de pruebas de inyección adversarial controlada:
 
 \begin{enumerate}
-    \item \textbf{Ataque Descendente (Servidor Comprometido / Man-in-the-Middle):} Se simuló un servidor malicioso que modifica deliberadamente los pesos globales antes de entregarlos al cliente $k$. Al recibir la instrucción, el cliente descarga el identificador oficial $\text{CID}_{reg}^{(t)}$ registrado en el contrato \texttt{FLRegistry} y realiza una comparación bit a bit frente al hash de los pesos candidatos. Al constatar la discrepancia, el cliente \textbf{aborta inmediatamente la ronda en $0{,}20$~s}, impidiendo la ingestión de parámetros envenenados en la memoria del vehículo.
-    \item \textbf{Ataque Ascendente (Cliente Envenenador / CID Falsificado):} Se simuló un cliente malicioso que remite al servidor pesos arbitrarios acompañados de un identificador de IPFS no registrado o falseado. Antes de proceder a la agregación de FedAvg, el servidor ejecuta \texttt{getClientModel($t$, address)} en Besu. Al detectar la incompatibilidad con la firma criptográfica del cliente, el servidor \textbf{descarta la contribución en $0{,}09$~s}, completando la agregación global exclusivamente con los participantes honestos.
+    \item \textbf{Ataque Descendente (Servidor Comprometido / Man-in-the-Middle):} Se simuló un servidor malicioso que modifica deliberadamente los pesos globales antes de entregarlos al cliente $k$. Al recibir la instrucción, el cliente descarga el identificador oficial $\text{CID}_{reg}^{(t)}$ registrado en el contrato \texttt{FLRegistry} y realiza una comparación bit a bit frente al hash de los pesos candidatos. Al constatar la discrepancia, el cliente \textbf{aborta inmediatamente la ronda en $0{,}074$~s} (74~ms), impidiendo la ingestión de parámetros envenenados en la memoria del vehículo.
+    \item \textbf{Ataque Ascendente (Cliente Envenenador / CID Falsificado):} Se simuló un cliente malicioso que remite al servidor pesos arbitrarios acompañados de un identificador de IPFS no registrado o falseado. Antes de proceder a la agregación de FedAvg, el servidor ejecuta \texttt{getClientModel($t$, address)} en Besu. Al detectar la incompatibilidad con la firma criptográfica del cliente, el servidor \textbf{descarta la contribución en $0{,}044$~s} (44~ms), completando la agregación global exclusivamente con los participantes honestos.
 \end{enumerate}
 
-La Tabla~\ref{tab:resumen_ataques} resume los resultados obtenidos en las pruebas de verificación cruzada.
+La Tabla~\ref{tab:resumen_ataques} resume los resultados obtenidos en las pruebas de verificación cruzada, y la Figura~\ref{fig:logs_ataque} muestra los registros reales de consola generados durante la intercepción y mitigación de ambos vectores.
 
 \begin{table}[H]
 \centering
@@ -151,14 +170,21 @@ La Tabla~\ref{tab:resumen_ataques} resume los resultados obtenidos en las prueba
 \toprule
 \textbf{Vector de Ataque} & \textbf{Entidad Defensora} & \textbf{Tasa Detección} & \textbf{Latencia} & \textbf{Impacto Modelo Global} \\
 \midrule
-Servidor Adulterado & Cliente (Edge) & \textbf{100,0\%} & 0,20 s & Aborto local; envenenamiento nulo \\
-Cliente Malicioso & Servidor Agregador & \textbf{100,0\%} & 0,09 s & Descarte inmediato; FedAvg íntegro \\
+Servidor Adulterado & Cliente (Edge) & \textbf{100,0\%} & 0,074 s & Aborto local; envenenamiento nulo \\
+Cliente Malicioso & Servidor Agregador & \textbf{100,0\%} & 0,044 s & Descarte inmediato; FedAvg íntegro \\
 \bottomrule
 \end{tabular}%
 }
 \end{table}
 
-La subsección demuestra que la sobrecarga de 6 segundos introducida por la capa de seguridad confiere inmunidad determinista frente a manipulaciones de pesos con latencias de mitigación inferiores al cuarto de segundo.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figuras/logs_deteccion_ataque.png}
+    \caption{Evidencia experimental de mitigación de ataques en tiempo de ejecución: (arriba) el nodo cliente detecta la alteración del modelo global respecto al CID sellado en el bloque 15 y aborta en 0,074~s; (abajo) el servidor agregador detecta el CID fraudulento de un cliente no coincidente con el registro del bloque 16 y lo descarta de FedAvg en 0,044~s.}
+    \label{fig:logs_ataque}
+\end{figure}
+
+La subsección demuestra que la sobrecarga de 6 segundos introducida por la capa de seguridad confiere inmunidad determinista frente a manipulaciones de pesos con latencias de mitigación inferiores a los 100~ms.
 
 \subsection{Consumo y Previsibilidad del Gas en la EVM}
 La Figura~\ref{fig:consumo_gas} ilustra el consumo de gas computacional de las operaciones registradas a lo largo de las rondas.
@@ -178,3 +204,37 @@ El perfil de consumo resulta rigurosamente constante en todas las iteraciones:
 La única excepción observable corresponde a la ronda 0 del servidor, que demandó \textbf{184.560 unidades de gas}. Dicha discrepancia (+17.100 unidades) responde al coste de la instrucción \texttt{SSTORE} de la EVM al escribir por primera vez en posiciones de memoria previamente vacías (\textit{cold write}) y modificar el valor del flag booleano \texttt{hasModel}.
 
 La invariabilidad del consumo valida formalmente el diseño desacoplado: al mantener almacenamiento de complejidad $\mathcal{O}(1)$ en el contrato (hashes de 32 bytes y metadatos acotados), el coste en recursos computacionales es determinista e independiente del tamaño del modelo neuronal o del número de rondas ejecutadas, garantizando una total previsibilidad operativa en redes de consorcio.
+
+\subsection{Auditoría de Inmutabilidad On-Chain y Trazabilidad Forense}
+\label{subsec:auditoria_onchain}
+Para verificar empíricamente la correspondencia unívoca entre los eventos del ciclo de vida de Flower y la persistencia inmutable en la cadena de bloques, la Tabla~\ref{tab:auditoria_transacciones} recoge una muestra representativa de los recibos de transacción (\textit{transaction receipts}) extraídos de la telemetría en tiempo de ejecución, correlacionada directamente con la visualización en el explorador de bloques de la red de consorcio (Figura~\ref{fig:auditoria_bloque}).
+
+\begin{table}[H]
+\centering
+\caption{Muestra de trazabilidad y auditoría forense on-chain.}
+\label{tab:auditoria_transacciones}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}cccccc@{}}
+\toprule
+\textbf{Bloque} & \textbf{Entidad} & \textbf{Evento / Método} & \textbf{Dirección Emisora} & \textbf{Prefijo Tx Hash} & \textbf{Gas EVM} \\
+\midrule
+8 & Servidor & Despliegue \texttt{FLRegistry} & \texttt{0xfe3b557e...} & \texttt{0x939eb46c...} & 1.999.000 \\
+15 & Servidor & \texttt{updateModel} (Oficial) & \texttt{0xfe3b557e...} & \texttt{0x0af3ebfb...} & 167.460 \\
+16 & Cliente 2 & \texttt{registerClientModel} & \texttt{0xf17f5215...} & \texttt{0x3e15209c...} & 160.200 \\
+\midrule
+765 & Servidor & \texttt{updateModel} (Ronda 23) & \texttt{0xfe3b557e...} & \texttt{0x4ceabb7a...} & 167.460 \\
+783 & Servidor & \texttt{updateModel} (Ronda 24) & \texttt{0xfe3b557e...} & \texttt{0xb9cb75f5...} & 167.460 \\
+801 & Servidor & \texttt{updateModel} (Ronda 25) & \texttt{0xfe3b557e...} & \texttt{0xdf69295f...} & 167.460 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figuras/auditoria_grafana_bloque.png}
+    \caption{Auditoría de inmutabilidad on-chain: visualización en el explorador de bloques de Hyperledger Besu de las transacciones correspondientes al sellado del modelo global en el bloque 15 (\textit{updateModel}) y del modelo local en el bloque 16 (\textit{registerClientModel}), reflejando exactamente las direcciones y hashes criptográficos auditados.}
+    \label{fig:auditoria_bloque}
+\end{figure}
+
+Cada identificador de bloque y hash criptográfico actúa como una prueba forense no repudiable de la autoría y momento exacto de emisión de cada iteración, confirmando la viabilidad de la arquitectura para auditorías regulatorias en sistemas vehiculares y de misión crítica.
