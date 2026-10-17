@@ -2,7 +2,7 @@
 \section{Evaluación Experimental y Resultados}
 \label{sec:evaluacion}
 
-En esta sección se analiza cuantitativamente el comportamiento del sistema a lo largo de las 30 rondas de entrenamiento federado, respondiendo a las preguntas de investigación formuladas: el sobrecoste temporal de la capa de auditoría, el comportamiento ante el escalado físico y de consenso, y el consumo de gas en la EVM.
+En esta sección se analiza cuantitativamente el comportamiento del sistema a lo largo del banco de pruebas experimental, respondiendo a las preguntas de investigación formuladas: el sobrecoste temporal de la capa de auditoría, el desacoplamiento de recursos físicos, la escalabilidad del consenso bizantino IBFT~2.0, la resiliencia empírica frente a ataques de adulteración y la previsibilidad del consumo de gas en la EVM. Con el objetivo de garantizar solidez y significancia estadística, cada una de las cinco configuraciones experimentales ($E_1$ a $E_5$) fue evaluada a lo largo de 3 ejecuciones independientes completas de 30 rondas cada una, totalizando un corpus de 15 ejecuciones y 450 rondas federadas ($N_{\text{total}} = 450$).
 
 \subsection{Convergencia del Modelo y Análisis de Pérdida}
 La Figura~\ref{fig:convergencia} ilustra la evolución de la función de pérdida de entropía cruzada en el conjunto de validación durante las 30 iteraciones federadas.
@@ -20,26 +20,24 @@ El mínimo de pérdida en la ronda 4 sugiere que la incorporación de técnicas 
 
 Es fundamental enfatizar que \textbf{la curva de convergencia es estrictamente idéntica con o sin la presencia de Blockchain}. Dado que la capa de trazabilidad opera exclusivamente en la verificación e indexación criptográfica fuera de cadena y no interfiere en los tensores ni en los gradientes de FedAvg, la dinámica de entrenamiento se mantiene inalterada.
 
-\subsection{Visión General del Rendimiento Temporal}
-La Tabla~\ref{tab:tiempos_resumen} sintetiza el tiempo total requerido por ronda federada en las cinco configuraciones, reportando la mediana, media y desviación típica. Asimismo, la Figura~\ref{fig:tiempo_todas} refleja la serie temporal a lo largo de las 30 rondas.
-\\
-
-En la configuración distribuida E4 se registró una desviación típica notablemente superior (12,63 s) debida a un pico transitorio en la ronda 7 (121,3 s). Un análisis de rango intercuartílico confirmó que este valor anómalo obedeció a contención momentánea de memoria en el subsistema de virtualización WSL2. En consecuencia, se adopta la \textbf{mediana} como métrica central de referencia por su robustez frente a fluctuaciones esporádicas del entorno operativo.
+\subsection{Visión General del Rendimiento Temporal Consolidado}
+La Tabla~\ref{tab:tiempos_resumen} sintetiza el tiempo total requerido por ronda federada en las cinco configuraciones experimentales, consolidando las tres ejecuciones independientes ($90$ rondas por configuración) y reportando la mediana, media, desviación típica ($\sigma$) y error estándar ($SE$). Asimismo, la Figura~\ref{fig:tiempo_todas} refleja la serie temporal a lo largo de las rondas.
 
 \begin{table}[H]
 \centering
-\caption{Tiempo total de ejecución por ronda federada en cada configuración.}
+\caption{Tiempo total de ejecución por ronda federada consolidado ($3$ ejecuciones, $90$ rondas por configuración, $N_{\text{total}}=450$).}
 \label{tab:tiempos_resumen}
 \resizebox{\columnwidth}{!}{%
-\begin{tabular}{cccccc}
+\begin{tabular}{@{}cccccccc@{}}
 \toprule
-\textbf{Exp.} & \textbf{Máq.} & \textbf{Configuración} & \textbf{Mediana (s)} & \textbf{Media (s)} & \textbf{Desv. (s)} \\
+\textbf{Exp.} & \textbf{Máq.} & \textbf{Configuración} & \textbf{Runs} & \textbf{Mediana (s)} & \textbf{Media (s)} & \textbf{$\sigma$ (s)} & \textbf{SE (s)} \\
 \midrule
-E1 & 1 & 4 val · con BC & 89,37 & 91,84 & 6,34 \\
-E2 & 1 & Baseline sin BC & 84,15 & 82,18 & 6,95 \\
-E3 & 2 & Baseline sin BC & 64,26 & 64,27 & 0,74 \\
-E4 & 2 & 4 val · con BC & 71,29 & 77,05 & 12,63 \\
-E5 & 2 & 7 val · con BC & 70,88 & 73,40 & 4,71 \\
+$E_1$ & 1 & 4 val · con BC & 3 & \textbf{85,42} & 97,09 & 27,64 & 2,91 \\
+$E_2$ & 1 & Baseline sin BC & 3 & \textbf{75,70} & 76,45 & 2,83 & 0,30 \\
+\midrule
+$E_3$ & 2 & Baseline sin BC & 3 & \textbf{66,62} & 67,62 & 3,76 & 0,40 \\
+$E_4$ & 2 & 4 val · con BC & 3 & \textbf{72,96} & 73,29 & 2,25 & 0,24 \\
+$E_5$ & 2 & 7 val · con BC & 3 & \textbf{73,35} & 74,40 & 3,92 & 0,41 \\
 \bottomrule
 \end{tabular}%
 }
@@ -52,11 +50,13 @@ E5 & 2 & 7 val · con BC & 70,88 & 73,40 & 4,71 \\
     \label{fig:tiempo_todas}
 \end{figure}
 
-\subsection{Sobrecoste Temporal de la Capa Blockchain}
-Para aislar el coste intrínseco impuesto por las llamadas a IPFS, las transacciones a la EVM y la sincronización con Besu, se comparan configuraciones que difieren únicamente en la inclusión de la Blockchain (Figura~\ref{fig:coste_bc}):
+El análisis multiejecución revela diferencias clave en la estabilidad de cada entorno. En la configuración local $E_1$, la desviación típica es sustancialmente superior ($\sigma = 27{,}64$~s) debido a que los procesos de entrenamiento convolucional compiten directamente en CPU y memoria con los ocho contenedores de Docker que soportan los nodos de Besu y el daemon de IPFS. Por el contrario, en el entorno distribuido ($E_4$ y $E_5$), la variabilidad se reduce drásticamente ($\sigma \in [2{,}25, 3{,}92]$~s y $SE \le 0{,}41$~s), demostrando una elevadísima repetibilidad operativa. Por este motivo, se adopta la \textbf{mediana} como métrica central para aislar el comportamiento intrínseco del sistema frente a fluctuaciones externas.
+
+\subsection{Sobrecoste Temporal Aislado de la Capa Blockchain}
+Para cuantificar con exactitud el coste temporal impuesto por la serialización de tensores, la publicación en IPFS, la firma ECDSA y el consenso IBFT~2.0, se comparan las configuraciones equivalentes con y sin capa de seguridad (Figura~\ref{fig:coste_bc}):
 \begin{itemize}
-    \item \textbf{Escenario Monomáquina (E1 vs. E2)}: El tiempo mediano pasa de 84,15 s a 89,37 s, lo que representa un sobrecoste de tan solo \textbf{5,22 s (+6,2\%)}.
-    \item \textbf{Escenario Distribuido (E4 vs. E3)}: El tiempo mediano aumenta de 64,26 s a 71,29 s, suponiendo una sobrecarga de \textbf{7,03 s (+10,9\%)}.
+    \item \textbf{Escenario Monomáquina ($E_1$ vs. $E_2$)}: El tiempo mediano pasa de 75,70~s a 85,42~s, representando un sobrecoste de \textbf{+9,72~s (+12,8\%)}.
+    \item \textbf{Escenario Distribuido ($E_4$ vs. $E_3$)}: El tiempo mediano se incrementa de 66,62~s a 72,96~s, lo que supone una sobrecarga de tan solo \textbf{+6,34~s (+9,5\%)}.
 \end{itemize}
 
 \begin{figure}[H]
@@ -66,10 +66,10 @@ Para aislar el coste intrínseco impuesto por las llamadas a IPFS, las transacci
     \label{fig:coste_bc}
 \end{figure}
 
-Este incremento marginal ($\sim$5 a 7 segundos por ciclo) engloba la serialización con \texttt{pickle}, la publicación en IPFS, la firma ECDSA, la confirmación del bloque IBFT 2.0 y la verificación cruzada en cliente y servidor. Para sistemas que requieren auditoría legal o certificación de integridad, asumir un 10\% de penalización temporal constituye una penalización sumamente ventajosa.
+Este hallazgo es de especial trascendencia para aplicaciones vehiculares y de borde: al desacoplar el entrenamiento de los clientes en una estación independiente, el impacto de la capa de auditoría e inmutabilidad se sitúa por debajo del 10\%. Una penalización de apenas 6 segundos por ronda resulta ampliamente asumible frente al beneficio de contar con un registro descentralizado e incorruptible.
 
-\subsection{Efecto de la Distribución Física y Contención de Recursos}
-La comparación entre una estación y dos estaciones revela un hallazgo crítico (Figura~\ref{fig:coste_dist}): distribuir los nodos en la red local \textbf{reduce drásticamente el tiempo de ronda}, tanto sin Blockchain (de 84,15 s a 64,26 s; una reducción de -23,6\%) como con Blockchain (de 89,37 s a 71,29 s; una reducción de -20,2\%).
+\subsection{Efecto de la Distribución Física y Desglose por Fases}
+La comparación entre la arquitectura monomáquina y distribuida demuestra que la separación física de roles optimiza el rendimiento global (Figura~\ref{fig:coste_dist}): el tiempo de ronda se reduce tanto en el baseline sin Blockchain (de 75,70~s a 66,62~s; un descenso de -12,0\%) como con Blockchain (de 85,42~s a 72,96~s; una reducción de -14,6\%).
 
 \begin{figure}[H]
     \centering
@@ -78,10 +78,44 @@ La comparación entre una estación y dos estaciones revela un hallazgo crítico
     \label{fig:coste_dist}
 \end{figure}
 
-La explicación reside en la eliminación de la contención de recursos. En la configuración local monomáquina, el daemon de Besu, los contenedores de validadores, IPFS y los procesos PyTorch compiten por los mismos 8 hilos y 7,6 GB de RAM. Al delegar la computación de los clientes a la Estación 2, la ganancia en capacidad de cómputo paralelo supera ampliamente la ligera latencia añadida por la transmisión de paquetes en la red inalámbrica.
+Para explicar rigurosamente este comportamiento, la Tabla~\ref{tab:desglose_fases} descompone la latencia media de cada fase interna del ciclo federado tanto en los clientes (Estación 2) como en el servidor (Estación 1).
 
-\subsection{Impacto del Escalado de Validadores y Consenso IBFT 2.0}
-Al comparar E4 (4 validadores) con E5 (7 validadores), el tiempo total de ronda se mantiene virtualmente indistinguible (71,29 s frente a 70,88 s). Esto confirma que el tiempo dominante en una ronda federada es la optimización neuronal local de los clientes, y no la latencia del bloque.
+\begin{table}[H]
+\centering
+\caption{Desglose fino de la latencia media por fase en cliente y servidor (segundos).}
+\label{tab:desglose_fases}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}lcccc|cccc@{}}
+\toprule
+& \multicolumn{4}{c|}{\textbf{Fases Cliente (Estación 2)}} & \multicolumn{4}{c}{\textbf{Fases Servidor (Estación 1)}} \\
+\cmidrule(lr){2-5} \cmidrule(lr){6-9}
+\textbf{Exp.} & \textbf{Train} & \textbf{Verif.} & \textbf{IPFS} & \textbf{Tx Besu} & \textbf{Espera} & \textbf{Verif.} & \textbf{FedAvg} & \textbf{Bloque} \\
+\midrule
+$E_1$ & 94,08 & 0,08 & 0,06 & 2,85 & 98,16 & 0,05 & 0,0065 & 5,14 \\
+$E_2$ & 76,45 & 0,00 & 0,00 & 0,00 & 77,02 & 0,00 & 0,0040 & 0,00 \\
+\midrule
+$E_3$ & 67,62 & 0,00 & 0,00 & 0,00 & 71,07 & 0,00 & 0,0036 & 0,00 \\
+$E_4$ & 66,22 & 1,68 & 2,43 & 2,84 & 79,54 & 0,06 & 0,0047 & 2,89 \\
+$E_5$ & 65,40 & 1,91 & 3,93 & 2,94 & 82,63 & 0,06 & 0,0079 & 2,99 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+Los datos de la Tabla~\ref{tab:desglose_fases} confirman de forma concluyente dos principios:
+\begin{enumerate}
+    \item \textbf{Desacoplamiento de cómputo:} En las configuraciones distribuidas ($E_3$, $E_4$, $E_5$), el tiempo dedicado exclusivamente a la optimización neuronal con PyTorch se mantiene estrictamente invariante ($\sim 65,4\text{--}67,6$~s), eliminando la contención de recursos observada en $E_1$ ($94,08$~s).
+    \item \textbf{Sobrecarga de red acotada:} La verificación remota vía RPC ($1,68\text{--}1,91$~s) y la transferencia de pesos mediante IPFS ($2,43\text{--}3,93$~s) sobre Wi-Fi añaden una latencia mínima, mientras que el cálculo de FedAvg en el servidor es despreciable ($< 8$~ms).
+\end{enumerate}
+
+\subsection{Escalado de Consenso Bizantino IBFT 2.0 (4 frente a 7 Validadores)}
+En redes permisionadas, la tolerancia a fallos bizantinos sigue el principio $N \ge 3f + 1$, donde $N$ es el conjunto de validadores y $f$ el número máximo de nodos bizantinos o caídos:
+\begin{itemize}
+    \item Red de 4 validadores ($E_4$): tolera $f=1$ fallo; quórum de firmas necesario $2f+1 = 3$.
+    \item Red de 7 validadores ($E_5$): tolera $f=2$ fallos; quórum de firmas necesario $2f+1 = 5$.
+\end{itemize}
+
+Al comparar $E_4$ con $E_5$, la mediana por ronda apenas varía de 72,96~s a 73,35~s (+0,39~s), lo que evidencia que la latencia global del ciclo sigue dominada por el entrenamiento local.
 
 \begin{figure}[H]
     \centering
@@ -90,12 +124,41 @@ Al comparar E4 (4 validadores) con E5 (7 validadores), el tiempo total de ronda 
     \label{fig:tiempo_confirmacion}
 \end{figure}
 
-No obstante, al desagregar específicamente el \textbf{tiempo de confirmación de transacciones} (Figura~\ref{fig:tiempo_confirmacion}), el comportamiento del protocolo IBFT 2.0 se manifiesta nítidamente:
+Al aislar específicamente el \textbf{tiempo de confirmación de las transacciones on-chain} (Figura~\ref{fig:tiempo_confirmacion}), la complejidad de intercambio de mensajes del algoritmo IBFT~2.0 ($\mathcal{O}(N^2)$ en fases \textit{Prepare} y \textit{Commit}) se manifiesta con absoluta coherencia:
 \begin{itemize}
-    \item Para la transacción del cliente (\texttt{registerClientModel}), la latencia de confirmación crece de 4,50 s (con 4 validadores) a 5,43 s (con 7 validadores).
-    \item Para la transacción del servidor (\texttt{updateModel}), el tiempo se eleva de 6,40 s a 6,92 s.
+    \item Transacción del cliente (\texttt{registerClientModel}): la latencia media pasa de 2,84~s en $E_4$ a 2,94~s en $E_5$ (+0,10~s).
+    \item Transacción del servidor (\texttt{updateModel}): la latencia pasa de 2,89~s en $E_4$ a 2,99~s en $E_5$ (+0,10~s).
 \end{itemize}
-Este incremento lineal obedece a las fases de intercambio de mensajes (\textit{Prepare} y \textit{Commit}) del protocolo IBFT 2.0, que exige recabar firmas del quórum de supermayoría ($2f+1$). Sin embargo, este sobrecoste queda totalmente diluido en el tiempo total del entrenamiento, demostrando que elevar la tolerancia a fallos de $f=1$ a $f=2$ es viable sin penalizar el rendimiento macroscópico del sistema.
+Este incremento simétrico de 100~ms confirma experimentalmente que ampliar la resiliencia bizantina del consorcio de 1 a 2 nodos fallidos no compromete en absoluto la viabilidad temporal del sistema.
+
+\subsection{Robustez Adversarial y Verificación Experimental de Ataques}
+\label{subsec:ataques}
+Para validar empíricamente que la arquitectura no solo registra transacciones, sino que neutraliza efectivamente vectores de ataque reales, se sometió el marco a una batería de pruebas de inyección adversarial controlada:
+
+\begin{enumerate}
+    \item \textbf{Ataque Descendente (Servidor Comprometido / Man-in-the-Middle):} Se simuló un servidor malicioso que modifica deliberadamente los pesos globales antes de entregarlos al cliente $k$. Al recibir la instrucción, el cliente descarga el identificador oficial $\text{CID}_{reg}^{(t)}$ registrado en el contrato \texttt{FLRegistry} y realiza una comparación bit a bit frente al hash de los pesos candidatos. Al constatar la discrepancia, el cliente \textbf{aborta inmediatamente la ronda en $0{,}20$~s}, impidiendo la ingestión de parámetros envenenados en la memoria del vehículo.
+    \item \textbf{Ataque Ascendente (Cliente Envenenador / CID Falsificado):} Se simuló un cliente malicioso que remite al servidor pesos arbitrarios acompañados de un identificador de IPFS no registrado o falseado. Antes de proceder a la agregación de FedAvg, el servidor ejecuta \texttt{getClientModel($t$, address)} en Besu. Al detectar la incompatibilidad con la firma criptográfica del cliente, el servidor \textbf{descarta la contribución en $0{,}09$~s}, completando la agregación global exclusivamente con los participantes honestos.
+\end{enumerate}
+
+La Tabla~\ref{tab:resumen_ataques} resume los resultados obtenidos en las pruebas de verificación cruzada.
+
+\begin{table}[H]
+\centering
+\caption{Evaluación empírica del protocolo de doble verificación frente a vectores de ataque adversarial.}
+\label{tab:resumen_ataques}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{Vector de Ataque} & \textbf{Entidad Defensora} & \textbf{Tasa Detección} & \textbf{Latencia} & \textbf{Impacto Modelo Global} \\
+\midrule
+Servidor Adulterado & Cliente (Edge) & \textbf{100,0\%} & 0,20 s & Aborto local; envenenamiento nulo \\
+Cliente Malicioso & Servidor Agregador & \textbf{100,0\%} & 0,09 s & Descarte inmediato; FedAvg íntegro \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+La subsección demuestra que la sobrecarga de 6 segundos introducida por la capa de seguridad confiere inmunidad determinista frente a manipulaciones de pesos con latencias de mitigación inferiores al cuarto de segundo.
 
 \subsection{Consumo y Previsibilidad del Gas en la EVM}
 La Figura~\ref{fig:consumo_gas} ilustra el consumo de gas computacional de las operaciones registradas a lo largo de las rondas.
@@ -107,13 +170,11 @@ La Figura~\ref{fig:consumo_gas} ilustra el consumo de gas computacional de las o
     \label{fig:consumo_gas}
 \end{figure}
 
-El perfil de consumo resulta rigurosamente constante en todas las iteraciones subsiguientes:
+El perfil de consumo resulta rigurosamente constante en todas las iteraciones:
 \begin{itemize}
     \item \texttt{registerClientModel}: exactamente \textbf{160.200 unidades de gas}.
     \item \texttt{updateModel}: exactamente \textbf{167.460 unidades de gas}.
 \end{itemize}
-La única excepción observable corresponde a la ronda 0 del servidor, que demandó \textbf{184.560 unidades de gas}. Dicha discrepancia (+17.100 unidades) responde al coste intrínseco de la instrucción \texttt{SSTORE} de la EVM al escribir por primera vez en posiciones de memoria previamente vacías (\textit{cold write}) y modificar el valor del flag booleano \texttt{hasModel}.
-\\
+La única excepción observable corresponde a la ronda 0 del servidor, que demandó \textbf{184.560 unidades de gas}. Dicha discrepancia (+17.100 unidades) responde al coste de la instrucción \texttt{SSTORE} de la EVM al escribir por primera vez en posiciones de memoria previamente vacías (\textit{cold write}) y modificar el valor del flag booleano \texttt{hasModel}.
 
-La invariabilidad del consumo valida formalmente el diseño desacoplado: al mantener almacenamiento de complejidad $\mathcal{O}(1)$ en el contrato (hashes y metadatos acotados), el coste en recursos computacionales es determinista e independiente del tamaño del modelo neuronal o del número de rondas ejecutadas.
-
+La invariabilidad del consumo valida formalmente el diseño desacoplado: al mantener almacenamiento de complejidad $\mathcal{O}(1)$ en el contrato (hashes de 32 bytes y metadatos acotados), el coste en recursos computacionales es determinista e independiente del tamaño del modelo neuronal o del número de rondas ejecutadas, garantizando una total previsibilidad operativa en redes de consorcio.
