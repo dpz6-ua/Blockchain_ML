@@ -1,69 +1,212 @@
-Trabajo de fin de grado desarrollado por David Znojek, estudiante de Ingeniería Informática en la Universidad de Alicante, con ayuda del profesor y tutor Francisco Pujol.
+# Integración de Blockchain e IPFS para la Trazabilidad y Auditoría en el Aprendizaje Federado Vehicular
 
-Para poner en funcionamiento la red de entrenamiento distribuido con registro de datos en la Blockchain, es necesario instalar la red de Blockchain Hyperldger Besu con Tessera que viene ya configurada y lista para usar, que es el GoQuorum Quickstart, desarrollada por el grupo GoQuorum. Cabe destacar que el trabajo se ha desarrollado en un entorno WSL de Ubuntu-22.04, por lo que todo está configurado para correr en un entorno de Linux.
+[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/release/python-3120/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![Flower FL](https://img.shields.io/badge/Flower-FL-000000.svg)](https://flower.ai/)
+[![Hyperledger Besu](https://img.shields.io/badge/Hyperledger-Besu-2F3134.svg)](https://www.hyperledger.org/projects/besu)
+[![IPFS](https://img.shields.io/badge/IPFS-Kubo_v0.32.1-65C2CB.svg)](https://ipfs.tech/)
+[![Solidity](https://img.shields.io/badge/Solidity-0.8.20-363636.svg)](https://soliditylang.org/)
 
-Primero necesitamos instalar los prerequisitos del entorno, que son Docker y Node.js:
-- Actualización del sistema operativo:
-    - sudo apt update
-    - sudo apt upgrade -y
+Repositorio oficial del framework híbrido de **Aprendizaje Federado (Flower)**, **Blockchain de Consorcio (Hyperledger Besu, IBFT 2.0)** y **Almacenamiento Distribuido Fuera de Cadena (IPFS)** para la auditoría, trazabilidad e integridad de modelos neuronales en Vehículos Conectados y Autónomos (CAVs).
 
-- Instalación de dependencias de Docker:
-    - sudo apt install -y curl apt-transport-https ca-certificates software-properties-common
+Este trabajo ha sido desarrollado en la **Escuela Politécnica Superior de la Universidad de Alicante (Departamento de Tecnología Informática y Computación)** por **David Piotr Znojek** bajo la tutoría de **Francisco A. Pujol López**.
 
-- Clave GPG y adición del repositorio de Docker:
-    - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-    - echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+---
 
-- Instalación de Docker Engine y Docker Compose:
-    - sudo apt update
-    - sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+## 📋 Resumen del Proyecto
 
-- Permitir al usuario usar Docker (cerrar y volver a abrir la terminal para guardar los cambios después de ejecutar el siguiente comando):
-    - sudo usermod -aG docker $USER
+El Aprendizaje Federado tradicional (*Federated Learning*) permite entrenar modelos colectivos preservando la privacidad de los datos locales, pero depende críticamente de un agregador central y carece de mecanismos nativos para auditar la legitimidad de las contribuciones locales, siendo vulnerable a ataques de envenenamiento (*model poisoning* o *server tampering*).
 
-- Instalación de node.js:
-    - sudo apt install -y nodejs npm
+Esta arquitectura implementa un **protocolo de doble verificación criptográfica**:
+1. **Almacenamiento fuera de cadena (*Off-Chain*)**: Los pesos neuronales binarios se suben a **IPFS Kubo**, obteniendo un identificador determinista de contenido (**CID**).
+2. **Registro inmutable en cadena (*On-Chain*)**: Mediante un Smart Contract en Solidity (`FLRegistry.sol`) ejecutado sobre una red permisionada **Hyperledger Besu (IBFT 2.0)**, tanto el servidor central como los clientes firman y registran los CIDs de sus contribuciones por ronda.
+3. **Auditoría cruzada en tiempo real**: 
+   - **Verificación Descendente**: Los clientes cotejan el modelo global descargado frente al CID consolidado en Blockchain antes de entrenar (mitigando servidores comprometidos en $\sim 0{,}074$~s).
+   - **Verificación Ascendente**: El servidor coteja las contribuciones recibidas frente a los CIDs firmados por los clientes en la EVM antes de ejecutar *FedAvg* (mitigando clientes envenenadores en $\sim 0{,}044$~s).
 
-Una vez teniendo todos los elementos instalados, podemos pasar a instalar la red Quickstart. En el mismo directiorio donde tengamos las demás carpetas (Scripts, Smart_Contracts...), ejecutamos el siguiente comando:
+La sobrecarga temporal en red real es de tan solo el **9,5\%** (6,34~s por ronda), con un coste de gas determinista $\mathcal{O}(1)$ que garantiza escalabilidad operativa e independencia del tamaño del modelo neuronal.
 
-- npx quorum-dev-quickstart
+---
 
-Con esto se ejecutará el script de instalación de la red y tendremos que responder a un par de preguntas para llevar a cabo la instalación. Para la pregunta de "Which Ethereum client..." elegimos Hyperledger Besu. Para "Do you wish to enable support for private transactions?", elegimos que sí ("Y"). Para el resto pulsamos la tecla Enter.
+## 📂 Estructura del Repositorio
 
-Con esto tendremos la red de Blockchain instalada y lista para usar.
+```text
+Blockchain_ML/
+├── Articulo/                    # Fuentes LaTeX del artículo científico y figuras
+│   ├── main.tex                 # Documento principal (plantilla IEEE PES)
+│   ├── main.pdf                 # Manuscrito compilado completo (15 páginas)
+│   ├── secciones/               # Capítulos modulares del artículo
+│   ├── figuras/                 # Gráficas, diagramas y evidencias de auditoría
+│   └── rua.pdf                  # Memoria original del TFG
+├── Dataset/                     # Conjunto de datos de eventos vehiculares
+│   ├── traffic-images/          # 3.415 imágenes distribuidas en 4 clases
+│   └── etiquetar.py             # Script de preparación y balanceo de datos
+├── Metricas/                    # Telemetría experimental de 15 ejecuciones (450 rondas)
+│   ├── E1/ a E5/                # Logs individuales por escenario y repetición
+│   ├── Server/ y Client/        # Archivos CSV detallados de servidor y clientes
+│   ├── Loss/                    # Convergencia de pérdida y precisión por ronda
+│   └── consolidado/             # Métricas estadísticas agregadas
+├── Redes_Blockchain/            # Redes Hyperledger Besu preconfiguradas
+│   ├── 4_validadores/           # Quórum IBFT 2.0 base (f=1)
+│   └── 7_validadores/           # Quórum IBFT 2.0 ampliado (f=2)
+├── Scripts/                     # Scripts de ejecución, benchmarking y análisis
+│   ├── server.py                # Servidor Flower con auditoría en Blockchain
+│   ├── client.py                # Cliente Flower con verificación en IPFS y Besu
+│   ├── server_sin_bc.py         # Servidor FL base sin Blockchain (baseline)
+│   ├── client_sin_bc.py         # Cliente FL base sin Blockchain (baseline)
+│   ├── contract_address.py      # Gestor de dirección y ABI de Smart Contracts
+│   ├── test_verificacion.py     # Suite de validación de ataques adversariales
+│   ├── generar_graficas_paper.py# Generador de figuras de alta resolución
+│   └── README_EXPERIMENTACION.md# Protocolo detallado de pruebas
+└── Smart_Contracts/             # Contratos inteligentes en Solidity
+    ├── FLRegistry.sol           # Contrato de registro y doble verificación
+    └── FLRegistry.json          # Bytecode y ABI compilada
+```
 
-Ahora necesitamos instalar las dependencias de los scripts de Python (3.12). Necesitamos instalar las librerías web3 para la interacción con Blockchain y Flower para el entrenamiento distribuido. Para ello ejecutamos el siguiente comando:
-- pip install web3 flwr
+---
 
-Ahora sólamente nos falta instalar el servidor de IPFS para el almacenamiento distribuido de los modelos. Para ello, en la terminal ejecutamos la siguiente serie de comandos:
- - wget https://dist.ipfs.tech/kubo/v0.32.1/kubo_v0.32.1_linux-amd64.tar.gz
- - tar -xvzf kubo_v0.32.1_linux-amd64.tar.gz
- - cd kubo
- - sudo ./install.sh
- - ipfs --version  (para comprobar que se ha instalado correctamente)
+## 🛠️ Requisitos Previos e Instalación
 
-Con el servidor IPFS instalado, procedemos a inicializarlo, que se hace únicamente la primera vez que se instala, para configurar el repositorio de IPFS. Para ello ejecutamos los siguientes comandos:
- - ipfs init
- - ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["*"]'
- - ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "GET", "POST"]'
+El entorno de pruebas ha sido desarrollado y validado sobre **Ubuntu 22.04 LTS (WSL2 / Linux)** y **Python 3.12**.
 
+### 1. Actualización y Dependencias del Sistema
+```bash
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y curl wget git build-essential software-properties-common
+```
 
-Con esto tendremos el servidor de IPFS instalado y configurado para su uso en el sistema de entrenamiento distribuido con registro en Blockchain. Con todos los elementos necesarios instalados, ya podemos pasar a ejecutar los scripts para poner en marcha el sistema de entrenamiento distribuido con registro en Blockchain.
+### 2. Docker Engine y Docker Compose
+```bash
+# Repositorio oficial de Docker
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
-Primero ponemos en marcha la red de Blockchain. Para ello nos vamos al directorio donde se ha instalado la red Quickstart y ejecutamos el siguiente comando:
+# Instalación de Docker y plugins
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-- ./run.sh
+# Asignar permisos al usuario actual (reiniciar sesión tras ejecutar)
+sudo usermod -aG docker $USER
+```
 
-(Para parar la ejecución de la red, se puede ejecutar el comando "./stop.sh" en el mismo directorio o el "./restart.sh" para reiniciarla).
+### 3. IPFS Kubo (`v0.32.1`)
+```bash
+wget https://dist.ipfs.tech/kubo/v0.32.1/kubo_v0.32.1_linux-amd64.tar.gz
+tar -xvzf kubo_v0.32.1_linux-amd64.tar.gz
+cd kubo && sudo ./install.sh && cd ..
+rm -rf kubo kubo_v0.32.1_linux-amd64.tar.gz
 
-Ahora con la red en marcha, ya podemos pasar a ejecutar los scripts que se encuentran en la carpeta "Scripts" para poner en marcha el sistema de entrenamiento distribuido con registro en Blockchain. El proceso es el siguiente:
+# Inicializar y configurar CORS para la API HTTP
+ipfs init
+ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["*"]'
+ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "GET", "POST"]'
+```
 
-1. Ejecutamos "contract_address.py" para obtener la dirección del contrato inteligente desplegado en la red de Blockchain. Esta dirección es necesaria para que los miembros de la red puedan interactuar con el contrato inteligente y registrar los datos de entrenamiento. La información del contrato inteligente se guarda en un archivo "FLRegistry_info.json" que se genera al ejecutar el script en "Smart_Contracts/Contract_Data".
+### 4. Entorno de Python y Librerías
+```bash
+pip install torch torchvision flwr web3 pandas numpy matplotlib seaborn scipy requests
+```
 
-2. Ejecutamos "ipfs daemon" para iniciar el servidor de IPFS, que se encargará del almacenamiento distribuido de los modelos entrenados.
+---
 
-3. Ejecutamos "server.py" para iniciar el servidor de entrenamiento distribuido, que se encargará de coordinar el proceso de entrenamiento entre los diferentes clientes y registrar los datos en la Blockchain.
+## 🚀 Guía de Puesta en Marcha Rápida
 
-4. Ejecutamos "client.py" en cada uno de los clientes que participarán en el proceso de entrenamiento distribuido, para que puedan conectarse al servidor y participar en el proceso de entrenamiento. Para ello, es necesario ejecutar el siguiente comando:
-    - python client.py --member <ID_DEL_CLIENTE>
-Donde <ID_DEL_CLIENTE> es un identificador único para cada cliente, que se utiliza para registrar los datos de entrenamiento en la Blockchain. En mi red los únicos clientes que participarán en el entrenamiento serán los clientes con ID 2 y 3.
+### Paso 1: Iniciar la Red Blockchain Besu (IBFT 2.0)
+El repositorio incluye las redes preconfiguradas en `Redes_Blockchain/`. Para iniciar la red de 4 validadores:
+```bash
+cd Redes_Blockchain/4_validadores
+./run.sh
+```
+*(Para detenerla en cualquier momento: `./stop.sh`)*.
+
+Servicios desplegados automáticamente:
+* **Nodo RPC Besu**: `http://localhost:8545`
+* **Explorador de Bloques (Alethio / Quorum Explorer)**: `http://localhost:25000`
+* **Monitorización (Grafana / Prometheus)**: `http://localhost:3000`
+
+### Paso 2: Extraer la Dirección del Contrato Inteligente
+En otra terminal, accede a la carpeta `Scripts/` y ejecuta:
+```bash
+cd Scripts
+python contract_address.py
+```
+Este comando sincroniza la dirección de `FLRegistry.sol` en `Smart_Contracts/Contract_Data/FLRegistry_info.json`.
+
+### Paso 3: Iniciar el Daemon de IPFS
+```bash
+ipfs daemon
+```
+
+### Paso 4: Ejecutar el Aprendizaje Federado con Trazabilidad
+1. **Lanzar el Servidor Agregador**:
+   ```bash
+   cd Scripts
+   python server.py --exp E1 --run 1 --rounds 30
+   ```
+2. **Lanzar los Clientes de Entrenamiento** (en terminales separadas o clientes remotos):
+   ```bash
+   # Cliente 2
+   python client.py --member 2 --exp E1 --run 1
+   
+   # Cliente 3
+   python client.py --member 3 --exp E1 --run 1
+   ```
+
+---
+
+## 🛡️ Evaluación de Resiliencia y Ataques Adversariales
+
+Para validar empíricamente la efectividad del protocolo frente a intentos de fraude sin esperar al ciclo completo de rondas:
+
+```bash
+cd Scripts
+python test_verificacion.py
+# O bien mediante el script automatizado:
+./ejecutar_pruebas_verificacion.sh
+```
+
+El script simula de manera controlada dos vectores críticos de ataque:
+* **Prueba 1 (Descendente - Servidor Malicioso)**: El servidor inyecta un modelo adulterado. El cliente coteja el CID recibido con el emitido en la Blockchain y aborta la ronda de forma preventiva en $\approx 0{,}074$~segundos.
+* **Prueba 2 (Ascendente - Cliente Envenenador)**: Un cliente intenta colar gradientes manipulados con un hash no respaldado en la EVM. El agregador detecta la discrepancia on-chain y descarta la contribución en $\approx 0{,}044$~segundos.
+
+---
+
+## 📊 Reproducción de Métricas y Gráficas del Artículo
+
+Todas las métricas de las 15 ejecuciones y 450 rondas están registradas en la carpeta `Metricas/`. Para regenerar las tablas estadísticas y las figuras de alta resolución que ilustran el artículo:
+
+```bash
+cd Scripts
+# Análisis numérico de medias, medianas, desviaciones y pruebas t-Student:
+python analizar_metricas.py
+
+# Generación automática de todas las figuras en formato PDF y PNG:
+python generar_graficas_paper.py
+```
+Las figuras resultantes se exportan directamente a `Articulo/figuras/`.
+
+---
+
+## 📚 Dataset Vehicular CloudLab-AIA
+
+El sistema entrena una red neuronal convolucional (**CNN**) sobre el conjunto de datos de eventos de tráfico de CloudLab-AIA, compuesto por **3.415 imágenes** etiquetadas en 4 categorías:
+1. `accident`: 663 imágenes
+2. `dense_traffic`: 778 imágenes
+3. `sparse_traffic`: 947 imágenes
+4. `weather`: 1.027 imágenes
+
+---
+
+## ✒️ Autores y Referencia
+
+* **David Piotr Znojek** (`dawidznojek@gmail.com`) — Autor principal.
+* **Francisco A. Pujol López** (`fpujol@ua.es`) — Tutor y coautor.
+
+**Institución:** Escuela Politécnica Superior, Universidad de Alicante (España).  
+**Artículo científico:** *Integración de Blockchain para la Trazabilidad y Auditoría en el Entrenamiento Distribuido de Modelos de Inteligencia Artificial* (Manuscrito disponible en [`Articulo/main.pdf`](Articulo/main.pdf)).
+
+---
+
+## 📄 Licencia
+
+Este proyecto se distribuye bajo fines de investigación y docencia académica. Consulta los archivos individuales para licencias específicas de componentes de terceros (Flower, Hyperledger Besu, IPFS).
