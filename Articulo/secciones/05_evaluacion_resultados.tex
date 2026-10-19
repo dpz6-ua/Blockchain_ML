@@ -29,22 +29,25 @@ T_{\text{server}}^{(t)} &= t_{\text{wait}}^{(t)} + t_{\text{verif\_asc}}^{(t)} +
 \end{align}
 donde $t_{\text{verif\_desc}}$ representa la comprobación local contra el CID de Besu; $t_{\text{train}}$, el tiempo de cálculo de gradientes con PyTorch; $t_{\text{ipfs\_up}}$, la publicación binaria de pesos; $t_{\text{tx\_besu}}$, la emisión y confirmación de \texttt{registerClientModel}; $t_{\text{wait}}$, la ventana de recepción gRPC; $t_{\text{verif\_asc}}$, la validación en \texttt{getClientModel}; $t_{\text{fedavg}}$, la agregación matricial; y $t_{\text{block\_confirm}}$, la confirmación del bloque IBFT~2.0 tras invocar \texttt{updateModel}.
 
+Es crucial destacar la complementariedad entre ambas perspectivas temporales:
+\begin{itemize}
+    \item \textbf{Tiempo de ciclo en el cliente ($T_{\text{client}}$, reportado en la Tabla~\ref{tab:tiempos_resumen}):} Cuantifica la duración de la computación y comunicación local en los nodos de borde (vehículos), desde que reciben el modelo global hasta que sellan su contribución en la Blockchain. Esta métrica gobierna la autonomía operativa de los clientes y mantiene la comparabilidad directa con los estudios previos~\cite{cloudlabaia_flblockchain}.
+    \item \textbf{Tiempo de ronda extremo a extremo en el servidor ($T_{\text{server}}$, desglosado en la Tabla~\ref{tab:desglose_fases}):} Engloba la totalidad del ciclo orquestado por el agregador central, incorporando la sincronización gRPC de todos los clientes concurrentes y la inclusión en bloque del nuevo modelo global mediante \texttt{updateModel} ($\approx 2{,}8\text{--}5{,}1$~s adicionales por ronda).
+\end{itemize}
+
 Para medir el sobrecoste relativo ($\Delta_{\text{overhead}}$) entre una configuración con seguridad $E_{\text{BC}}$ y su respectiva línea base $E_{\text{base}}$, se emplea la mediana de las distribuciones:
 \begin{equation}
 \Delta_{\text{overhead}} = \frac{\text{Med}(T_{E_{\text{BC}}}) - \text{Med}(T_{E_{\text{base}}})}{\text{Med}(T_{E_{\text{base}}})} \times 100 \quad [\%] \label{eq:overhead}
 \end{equation}
-Asimismo, la reproducibilidad y dispersión estadística se caracterizan mediante el Error Estándar de la Media ($SE$):
-\begin{equation}
-SE = \frac{\sigma}{\sqrt{N_{\text{rounds}}}} \label{eq:se}
-\end{equation}
-donde $\sigma$ denota la desviación típica muestral y $N_{\text{rounds}} = 90$ el total de observaciones agregadas por configuración ($30$ rondas $\times 3$ ejecuciones independientes).
+
+En cuanto al rigor metodológico del análisis estadístico, el diseño experimental considera como unidades muestrales independientes las \textbf{15 ejecuciones completas} ($N_{\text{runs}} = 3$ repeticiones independientes por cada una de las 5 configuraciones). Las 30 rondas federadas consecutivas de cada ejecución no se presentan como observaciones independientes idénticamente distribuidas (i.i.d.), ya que cada iteración $t+1$ depende intrínsecamente del estado paramétrico y las condiciones del sistema en la ronda $t$. Por consiguiente, las 450 rondas totales ($90$ por configuración) se emplean para el análisis descriptivo longitudinal y la visualización de trayectorias (Figura~\ref{fig:tiempo_todas}), mientras que la reproducibilidad inter-ejecución se cuantifica a través del Error Estándar ($SE$) entre las medias de las ejecuciones independientes ($SE = \sigma_{\text{runs}} / \sqrt{N_{\text{runs}}}$).
 
 \subsection{Visión General del Rendimiento Temporal Consolidado}
-La Tabla~\ref{tab:tiempos_resumen} sintetiza el tiempo total requerido por ronda federada en las cinco configuraciones experimentales, consolidando las tres ejecuciones independientes ($90$ rondas por configuración) y reportando la mediana, media, desviación típica ($\sigma$) y error estándar ($SE$). Asimismo, la Figura~\ref{fig:tiempo_todas} refleja la serie temporal a lo largo de las rondas.
+La Tabla~\ref{tab:tiempos_resumen} sintetiza el tiempo de ciclo por ronda en los nodos de borde ($T_{\text{client}}$) a lo largo de las 15 ejecuciones independientes (3 por configuración, totalizando 90 rondas por entorno para análisis descriptivo continuo), reportando la mediana, media, desviación típica ($\sigma$) y error estándar ($SE$). Asimismo, la Figura~\ref{fig:tiempo_todas} refleja la serie temporal continua a lo largo de las rondas.
 
 \begin{table}[H]
 \centering
-\caption{Tiempo total de ejecución por ronda federada consolidado ($3$ ejecuciones, $90$ rondas por configuración, $N_{\text{total}}=450$).}
+\caption{Tiempo de ciclo por ronda en los nodos de borde ($T_{\text{client}}$) consolidado ($15$ ejecuciones independientes, $3$ por configuración, $30$ rondas/run).}
 \label{tab:tiempos_resumen}
 \resizebox{\columnwidth}{!}{%
 \begin{tabular}{@{}cccccccc@{}}
@@ -65,11 +68,11 @@ $E_5$ & 2 & 7 val · con BC & 3 & \textbf{73,35} & 74,40 & 3,92 & 0,41 \\
 \begin{figure}[H]
     \centering
     \includegraphics[width=\columnwidth]{figuras/tiempo_ronda_todas.png}
-    \caption{Comparativa del tiempo total por ronda federada en las cinco configuraciones experimentales.}
+    \caption{Comparativa del tiempo de ciclo en clientes ($T_{\text{client}}$) a lo largo de las rondas en las cinco configuraciones experimentales.}
     \label{fig:tiempo_todas}
 \end{figure}
 
-El análisis multiejecución revela diferencias clave en la estabilidad de cada entorno. En la configuración local $E_1$, la desviación típica es sustancialmente superior ($\sigma = 27{,}64$~s) debido a que los procesos de entrenamiento convolucional compiten directamente en CPU y memoria con los ocho contenedores de Docker que soportan los nodos de Besu y el daemon de IPFS. Por el contrario, en el entorno distribuido ($E_4$ y $E_5$), la variabilidad se reduce drásticamente ($\sigma \in [2{,}25, 3{,}92]$~s y $SE \le 0{,}41$~s), demostrando una elevadísima repetibilidad operativa. Por este motivo, se adopta la \textbf{mediana} como métrica central para aislar el comportamiento intrínseco del sistema frente a fluctuaciones externas.
+El análisis multiejecución revela diferencias clave en la estabilidad de cada entorno. En la configuración local $E_1$, la dispersión longitudinal es sustancialmente superior ($\sigma = 27{,}64$~s) debido a que los procesos de entrenamiento convolucional compiten directamente en CPU y memoria con los ocho contenedores de Docker que soportan los nodos de Besu y el daemon de IPFS. Por el contrario, en el entorno distribuido ($E_4$ y $E_5$), la variabilidad se reduce drásticamente ($\sigma \in [2{,}25, 3{,}92]$~s y $SE \le 0{,}41$~s), demostrando una gran estabilidad operativa. Por este motivo, se adopta la \textbf{mediana} como métrica central para aislar el comportamiento intrínseco del sistema frente a fluctuaciones externas.
 
 \subsection{Sobrecoste Temporal Aislado de la Capa Blockchain}
 Para cuantificar con exactitud el coste temporal impuesto por la serialización de tensores, la publicación en IPFS, la firma ECDSA y el consenso IBFT~2.0, se comparan las configuraciones equivalentes con y sin capa de seguridad (Figura~\ref{fig:coste_bc}):
@@ -85,7 +88,7 @@ Para cuantificar con exactitud el coste temporal impuesto por la serialización 
     \label{fig:coste_bc}
 \end{figure}
 
-Este hallazgo es de especial trascendencia para aplicaciones vehiculares y de borde: al desacoplar el entrenamiento de los clientes en una estación independiente, el impacto de la capa de auditoría e inmutabilidad se sitúa por debajo del 10\%. Una penalización de apenas 6 segundos por ronda resulta ampliamente asumible frente al beneficio de contar con un registro descentralizado e incorruptible.
+Este hallazgo es de especial trascendencia para aplicaciones vehiculares y de borde: al desacoplar el entrenamiento de los clientes en una estación independiente, el impacto de la capa de auditoría e inmutabilidad se sitúa por debajo del 10\%. Una penalización de apenas 6 segundos por ronda resulta ampliamente asumible frente al beneficio de contar con un registro descentralizado inmutable y auditable.
 
 \subsection{Efecto de la Distribución Física y Desglose por Fases}
 La comparación entre la arquitectura monomáquina y distribuida demuestra que la separación física de roles optimiza el rendimiento global (Figura~\ref{fig:coste_dist}): el tiempo de ronda se reduce tanto en el baseline sin Blockchain (de 75,70~s a 66,62~s; un descenso de -12,0\%) como con Blockchain (de 85,42~s a 72,96~s; una reducción de -14,6\%).
@@ -97,11 +100,11 @@ La comparación entre la arquitectura monomáquina y distribuida demuestra que l
     \label{fig:coste_dist}
 \end{figure}
 
-Para explicar rigurosamente este comportamiento, la Tabla~\ref{tab:desglose_fases} descompone la latencia media de cada fase interna del ciclo federado tanto en los clientes (Estación 2) como en el servidor (Estación 1).
+Para explicar rigurosamente este comportamiento, la Tabla~\ref{tab:desglose_fases} descompone la latencia media de cada fase interna del ciclo federado tanto en los clientes (Estación 2) como en el servidor (Estación 1), evidenciando la correspondencia con las métricas agregadas de la Tabla~\ref{tab:tiempos_resumen}.
 
 \begin{table}[H]
 \centering
-\caption{Desglose fino de la latencia media por fase en cliente y servidor (segundos).}
+\caption{Desglose fino de la latencia media por fase en cliente ($T_{\text{client}}$) y servidor ($T_{\text{server}}$) (segundos).}
 \label{tab:desglose_fases}
 \resizebox{\columnwidth}{!}{%
 \begin{tabular}{@{}lcccc|cccc@{}}
@@ -121,10 +124,11 @@ $E_5$ & 65,40 & 1,91 & 3,93 & 2,94 & 82,63 & 0,06 & 0,0079 & 2,99 \\
 }
 \end{table}
 
-Los datos de la Tabla~\ref{tab:desglose_fases} confirman de forma concluyente dos principios:
+Los datos de la Tabla~\ref{tab:desglose_fases} confirman de forma concluyente tres principios fundamentales:
 \begin{enumerate}
     \item \textbf{Desacoplamiento de cómputo:} En las configuraciones distribuidas ($E_3$, $E_4$, $E_5$), el tiempo dedicado exclusivamente a la optimización neuronal con PyTorch se mantiene estrictamente invariante ($\sim 65,4\text{--}67,6$~s), eliminando la contención de recursos observada en $E_1$ ($94,08$~s).
     \item \textbf{Sobrecarga de red acotada:} La verificación remota vía RPC ($1,68\text{--}1,91$~s) y la transferencia de pesos mediante IPFS ($2,43\text{--}3,93$~s) sobre Wi-Fi añaden una latencia mínima, mientras que el cálculo de FedAvg en el servidor es despreciable ($< 8$~ms).
+    \item \textbf{Correspondencia entre métricas ($T_{\text{client}}$ y $T_{\text{server}}$):} La suma de las cuatro fases locales del cliente (\textit{Train} + \textit{Verif.} + \textit{IPFS} + \textit{Tx Besu}) totaliza con exactitud el tiempo de ciclo reportado en la Tabla~\ref{tab:tiempos_resumen} (por ejemplo, en $E_4$: $66{,}22 + 1{,}68 + 2{,}43 + 2{,}84 = 73{,}17$~s, en plena coherencia con la media de $73{,}29$~s). Paralelamente, la perspectiva del servidor refleja la duración global de la ronda en el agregador ($T_{\text{server}}$), donde el servidor aguarda la concurrencia de todos los clientes (\textit{Espera}, $79{,}54$~s) y añade la confirmación del nuevo modelo consolidado en la cadena (\textit{Bloque}, $2{,}89$~s), totalizando una latencia extremo a extremo de $\approx 82{,}49$~s.
 \end{enumerate}
 
 \subsection{Escalado de Consenso Bizantino IBFT 2.0 (4 frente a 7 Validadores)}
@@ -269,7 +273,7 @@ Cliente Malicioso & Servidor Agregador & \textbf{100,0\%} & 0,044 s & Descarte i
 Estos resultados demuestran que la sobrecarga temporal introducida por el marco confiere una garantía determinista de integridad frente a manipulaciones de pesos y modelos disidentes en tránsito, neutralizando dichos vectores con tiempos de respuesta inferiores a la décima de segundo.
 \\
 
-Conviene delimitar con rigor el alcance de este mecanismo defensivo: la doble verificación criptográfica en cadena protege de forma exhaustiva contra la adulteración directa de parámetros (\textit{tampering}), la suplantación de identidad y la inyección de modelos no autorizados on-chain. No obstante, si un cliente malicioso genera una actualización perjudicial mediante manipulación local de sus datos de entrenamiento (\textit{data poisoning} o \textit{label flipping}) y la firma legítimamente con su clave privada en la Blockchain, el compromiso criptográfico coincidirá formalmente pero el contenido neuronal estará contaminado. La mitigación de esta tipología de ataques semánticos requiere complementar la trazabilidad con filtros de agregación estadística bizantina (como Krum, Median o Trimmed-Mean) coordinados desde el contrato, aspecto que se analiza formalmente en las líneas futuras.
+Conviene delimitar con rigor el alcance de este mecanismo defensivo: la doble verificación criptográfica en cadena protege de forma exhaustiva contra la adulteración directa de parámetros en tránsito (\textit{tampering}), la emisión no autorizada a nombre de terceros mediante la autenticación con firmas asimétricas ECDSA en cada transacción y la inyección de modelos disidentes no respaldados on-chain. Cabe señalar que la autenticidad en la EVM descansa sobre la custodia rigurosa de las claves privadas de los participantes (lo que en entornos comerciales de producción exige módulos HSM o enclaves seguros), y que el protocolo no previene per se la sustracción o cesión física de credenciales en el cliente. Asimismo, si un nodo malicioso genera una actualización perjudicial mediante manipulación local de sus datos de entrenamiento (\textit{data poisoning} o \textit{label flipping}) y la firma legítimamente con su clave privada en la Blockchain, el compromiso criptográfico coincidirá formalmente pero el contenido neuronal estará contaminado. La mitigación de esta tipología de ataques semánticos requiere complementar la trazabilidad con filtros de agregación estadística bizantina (como Krum~\cite{blanchard2017byzantine}, Median o Trimmed-Mean) coordinados desde el contrato, aspecto que se analiza formalmente en las líneas futuras.
 
 \subsection{Consumo y Previsibilidad del Gas en la EVM}
 La Figura~\ref{fig:consumo_gas} ilustra el consumo de gas computacional de las operaciones registradas a lo largo de las rondas.
@@ -289,7 +293,7 @@ El perfil de consumo resulta rigurosamente constante en todas las iteraciones:
 La única excepción observable corresponde a la ronda 0 del servidor, que demandó \textbf{184.560 unidades de gas}. Dicha discrepancia (+17.100 unidades) responde al coste de la instrucción \texttt{SSTORE} de la EVM al escribir por primera vez en posiciones de memoria previamente vacías (\textit{cold write}) y modificar el valor del flag booleano \texttt{hasModel}.
 \\
 
-La invariabilidad del consumo valida formalmente el diseño desacoplado: al mantener almacenamiento de complejidad $\mathcal{O}(1)$ en el contrato (hashes de 32 bytes y metadatos acotados), el coste en recursos computacionales es determinista e independiente del tamaño del modelo neuronal o del número de rondas ejecutadas, garantizando una total previsibilidad operativa en redes de consorcio.
+La invariabilidad del consumo valida formalmente el diseño desacoplado: al almacenar en el contrato únicamente resúmenes de longitud fija (hashes SHA-256 de 32 bytes y metadatos acotados), el coste de gas se mantiene estable por transacción e independiente tanto del tamaño del modelo neuronal como del número acumulado de rondas, asegurando un consumo de recursos acotado y predecible en redes de consorcio.
 
 \subsection{Auditoría de Inmutabilidad On-Chain y Trazabilidad Forense}
 \label{subsec:auditoria_onchain}

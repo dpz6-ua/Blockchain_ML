@@ -34,7 +34,7 @@ El estado del contrato se organiza mediante dos tablas hash (\textit{mappings}) 
     \item \texttt{mapping(uint256 => mapping(address => \\ ModelRound)) public clientHistory}: indexa las contribuciones locales individuales de cada cliente en cada ronda, posibilitando la auditoría forense granular de las participaciones.
 \end{itemize}
 
-Adicionalmente, se mantienen los punteros de estado \texttt{latestRound} y el indicador booleano \texttt{hasModel} para optimizar lecturas directas $\mathcal{O}(1)$ sin requerir iteraciones sobre el almacenamiento persistente.
+Adicionalmente, se mantienen los punteros de estado \texttt{latestRound} y el indicador booleano \texttt{hasModel} para optimizar lecturas directas de acceso constante sin requerir iteraciones sobre el almacenamiento persistente.
 \\
 
 \subsubsection{Primitivas de escritura y autenticación}

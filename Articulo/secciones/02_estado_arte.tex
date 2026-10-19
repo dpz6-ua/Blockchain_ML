@@ -30,31 +30,39 @@ El marco de referencia \textbf{Flower}~\cite{beutel2020flower} proporciona una i
 
 \begin{table*}[t]
 \centering
-\caption{Comparativa cualitativa y arquitectural frente a los principales marcos de Blockchain-FL de la literatura.}
+\caption{Comparativa cualitativa y arquitectural frente a los principales marcos de Blockchain-FL y robustez de la literatura.}
 \label{tab:estado_arte}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{@{}lccccc@{}}
 \toprule
 \textbf{Propuesta / Framework} & \textbf{Consenso Blockchain} & \textbf{Almacenamiento Modelo} & \textbf{Protocolo Verificación} & \textbf{Coste Transaccional} & \textbf{Tolerancia a Fallos} \\
 \midrule
-BlockFL (Kim et al., 2019) & PoW (Lento / Ineficiente) & On-Chain (Cuello de botella) & Unidireccional & Criptomoneda volátil & Probabilística ($< 50\%$) \\
-FedChain (Zhai et al., 2021) & Raft (No bizantino) & Off-Chain centralizado & Sin verificación previa & Red privada & Solo caídas (\textit{crash}, $f < N/2$) \\
+Krum (Blanchard et al., 2017)~\cite{blanchard2017byzantine} & Sin Blockchain (Centralizado) & Servidor central (SPOF) & Selección geométrica ($L_2$) & Inexistente (Sin ledger) & Bizantina estricta ($f < \frac{N-2}{2}$) \\
+BlockFL (Kim et al., 2019)~\cite{kim2019blockfl} & PoW (Lento / Ineficiente) & On-Chain (Cuello de botella) & Unidireccional & Criptomoneda volátil & Probabilística ($< 50\%$) \\
+AV-BFL (Pokhrel \& Choi, 2020)~\cite{pokhrel2020federated} & PoW adaptativo / DPoS & On-Chain en RSUs & Verificación en estación base & Retransmisiones inalámbricas & Limitada por canal vehicular \\
+B5G-FL (Lu et al., 2020)~\cite{lu2020blockchain} & Permisionado (PBFT / BFT) & On-Chain en estaciones base & Consenso en estaciones base & Optimización por DRL & Bizantina formal ($f < N/3$) \\
 BFL Vehicular (Pujol et al., 2024)~\cite{pujol2024blockchain} & IBFT 2.0 (Permisionado) & Registro de alertas IoT & Monitoreo de tráfico & Libre de gas comercial & Bizantina formal ($N \ge 3f + 1$) \\
-\textbf{Nuestra Arquitectura} & \textbf{QBFT / IBFT 2.0 (Besu)} & \textbf{Híbrido Off-Chain (IPFS DHT)} & \textbf{Doble Cruzada (Asc./Desc.)} & \textbf{Gas determinista $\mathcal{O}(1)$} & \textbf{Bizantina formal ($f=1 \to 2$)} \\
+\textbf{Nuestra Arquitectura} & \textbf{QBFT / IBFT 2.0 (Besu)} & \textbf{Híbrido Off-Chain (IPFS DHT)} & \textbf{Doble Cruzada (Asc./Desc.)} & \textbf{Gas estable por transacción} & \textbf{Bizantina formal ($f=1 \to 2$)} \\
 \bottomrule
 \end{tabular}%
 }
 \end{table*}
 
 \subsection{Vulnerabilidades en FL y Trabajos Relacionados}
-A pesar de sus ventajas de privacidad, los sistemas FL tradicionales sufren de severas vulnerabilidades de seguridad:
+A pesar de sus ventajas de privacidad, los sistemas tradicionales de Aprendizaje Federado sufren de vulnerabilidades intrínsecas clasificadas en recientes taxonomías y revisiones de seguridad~\cite{bouacida2021vulnerabilities, jere2021taxonomy}:
 \begin{enumerate}
-    \item \textbf{Servidor central como punto único de fallo y confianza}: No existe salvaguarda para verificar si el servidor manipuló la ponderación de FedAvg o si inyectó sesgos maliciosos en $w^{(t+1)}$.
-    \item \textbf{Ataques de envenenamiento y falta de trazabilidad}: Nodos malintencionados pueden realizar \textit{model poisoning} o inyectar puertas traseras (\textit{backdoors}). Sin un historial no repudiable de identidades y hashes, resulta imposible deslindar qué participante contaminó el modelo global.
+    \item \textbf{Servidor central como punto único de fallo y confianza}: No existe una salvaguarda nativa para comprobar si el servidor agregador manipuló la ponderación de FedAvg o si inyectó sesgos maliciosos en $w^{(t+1)}$.
+    \item \textbf{Ataques de envenenamiento y falta de no repudio}: Nodos clientes malintencionados pueden realizar envenenamiento de modelos (\textit{model poisoning}) o introducir puertas traseras (\textit{backdoors}). Sin un historial no repudiable de identidades criptográficas y resúmenes de pesos, resulta inviable identificar y deslindar qué participante contaminó el modelo global consolidado.
 \end{enumerate}
 
-Diversas aproximaciones en la literatura han explorado la hibridación de Blockchain y FL. No obstante, gran parte de los trabajos teóricos sufren de problemas de escalabilidad al pretender ejecutar la agregación matemática completa dentro de la EVM o depender de redes públicas costosas. En el dominio de los sistemas de transporte inteligentes (ITS), Pujol et al.~\cite{pujol2024blockchain} demostraron que Hyperledger Besu con IBFT 2.0 ofrece latencias subsegundo viables para la cooperación vehicular, y CloudLab-AIA~\cite{cloudlabaia_flblockchain} conceptualizó el registro de hashes de modelos. 
+Para solventar estas carencias, la literatura especializada ha investigado la hibridación de Blockchain y FL (BCFL). No obstante, el diseño de arquitecturas prácticas para sistemas vehiculares inteligentes (CAVs/IoV) plantea tres compromisos críticos:
 
-Para contextualizar el aporte de esta investigación frente a las principales propuestas de la literatura especializada, la Tabla~\ref{tab:estado_arte} sintetiza una comparativa cualitativa y arquitectural. A diferencia de esquemas basados en consenso PoW o de almacenamiento on-chain (como BlockFL), o de aquellos que delegan el consenso en tolerancias a fallos no bizantinas (como FedChain con Raft), nuestra arquitectura articula una doble verificación cruzada bidireccional sobre una red permisionada de consorcio con finalidad inmediata y coste computacional predecible $\mathcal{O}(1)$.
+\textbf{1. Almacenamiento y Cómputo On-Chain frente a Híbrido Off-Chain:} Las propuestas pioneras como BlockFL~\cite{kim2019blockfl} concibieron el intercambio completo de pesos neuronales a través del libro mayor distribuido. Sin embargo, serializar matrices con millones de parámetros en transacciones de la cadena colapsa el rendimiento y satura el estado de la EVM (\textit{state bloat}), volviéndose inviable ante modelos profundos. Por ello, el paradigma híbrido (almacenamiento direccionable por contenido fuera de cadena con anclaje criptográfico de hashes en cadena) constituye la aproximación idónea para garantizar escalabilidad a escala industrial.
+
+\textbf{2. Mecanismos de Consenso y Latencia en Redes Inalámbricas y Vehiculares:} En la conducción autónoma y las redes de borde avanzadas (5G y más allá), los retardos temporales y la disponibilidad de recursos de cómputo y comunicación son factores determinantes~\cite{pokhrel2020federated, lu2020blockchain}. Los esquemas pioneros basados en Proof-of-Work (PoW) introducen demoras de varios minutos y bifurcaciones probabilísticas inasumibles para sistemas cooperativos en tiempo real~\cite{kim2019blockfl}. Para optimizar el compromiso entre consumo de recursos y convergencia del modelo en redes celulares de borde, Lu et al.~\cite{lu2020blockchain} formularon una arquitectura de Blockchain permisionada gestionada por estaciones base que emplea aprendizaje por refuerzo profundo (DRL) para la asignación dinámica de recursos, mientras que Pokhrel y Choi~\cite{pokhrel2020federated} modelaron analíticamente el impacto del canal inalámbrico vehicular en el retardo de consenso. Frente a esquemas que asumen redes públicas con alta latencia y sobrecoste o alternativas que renuncian a la tolerancia a fallos bizantinos, los consorcios permisionados con consenso IBFT 2.0 / QBFT como Hyperledger Besu~\cite{pujol2024blockchain} proporcionan finalidad determinista inmediata y tolerancia bizantina rigurosa ($N \ge 3f + 1$) sin volatilidad económica de gas.
+
+\textbf{3. Integridad Criptográfica frente a Robustez Estadística:} Conviene deslindar con rigor dos planos defensivos complementarios analizados en la literatura sobre seguridad en FL~\cite{bouacida2021vulnerabilities, jere2021taxonomy}. Por un lado, la capa de registro descentralizado e inmutable garantiza la integridad de los artefactos en tránsito, la autenticación de los emisores y el no repudio. Por otro lado, si un cliente manipula sus datos de entrenamiento de forma deliberada pero firma y registra legítimamente el resultado en la red (\textit{data/model poisoning}), se requiere incorporar algoritmos de agregación robusta frente a gradientes anómalos, tales como Krum~\cite{blanchard2017byzantine} o filtros de selección geométrica por distancias euclídeas.
+
+Para contextualizar el aporte de esta investigación frente a las principales propuestas de la literatura especializada, la Tabla~\ref{tab:estado_arte} sintetiza una comparativa cualitativa y arquitectural. A diferencia de esquemas puramente estadísticos centralizados (como Krum), de arquitecturas basadas en consenso PoW o almacenamiento masivo on-chain, o de propuestas que omiten la tolerancia bizantina, nuestra arquitectura articula una doble verificación cruzada bidireccional sobre una red permisionada de consorcio con finalidad inmediata y coste de gas predecible y estable por transacción.
 
 

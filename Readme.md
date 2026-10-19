@@ -24,7 +24,7 @@ Esta arquitectura implementa un **protocolo de doble verificación criptográfic
    - **Verificación Descendente**: Los clientes cotejan el modelo global descargado frente al CID consolidado en Blockchain antes de entrenar (mitigando servidores comprometidos en $\sim 0{,}074$~s).
    - **Verificación Ascendente**: El servidor coteja las contribuciones recibidas frente a los CIDs firmados por los clientes en la EVM antes de ejecutar *FedAvg* (mitigando clientes envenenadores en $\sim 0{,}044$~s).
 
-La sobrecarga temporal en red real es de tan solo el **9,5\%** (6,34~s por ronda), con un coste de gas determinista $\mathcal{O}(1)$ que garantiza escalabilidad operativa e independencia del tamaño del modelo neuronal.
+La sobrecarga temporal en red real es de tan solo el **9,5\%** (6,34~s por ronda), con un coste de gas estable y predecible por transacción que garantiza escalabilidad operativa e independencia del tamaño del modelo neuronal.
 
 ---
 
