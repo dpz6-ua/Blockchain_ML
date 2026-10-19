@@ -124,7 +124,7 @@ $E_5$ & 65,40 & 1,91 & 3,93 & 2,94 & 82,63 & 0,06 & 0,0079 & 2,99 \\
 }
 \end{table}
 
-Los datos de la Tabla~\ref{tab:desglose_fases} confirman de forma concluyente tres principios fundamentales:
+Los datos de la Tabla~\ref{tab:desglose_fases} confirman tres principios fundamentales:
 \begin{enumerate}
     \item \textbf{Desacoplamiento de cómputo:} En las configuraciones distribuidas ($E_3$, $E_4$, $E_5$), el tiempo dedicado exclusivamente a la optimización neuronal con PyTorch se mantiene estrictamente invariante ($\sim 65,4\text{--}67,6$~s), eliminando la contención de recursos observada en $E_1$ ($94,08$~s).
     \item \textbf{Sobrecarga de red acotada:} La verificación remota vía RPC ($1,68\text{--}1,91$~s) y la transferencia de pesos mediante IPFS ($2,43\text{--}3,93$~s) sobre Wi-Fi añaden una latencia mínima, mientras que el cálculo de FedAvg en el servidor es despreciable ($< 8$~ms).
@@ -147,7 +147,7 @@ Al comparar $E_4$ con $E_5$, la mediana por ronda apenas varía de 72,96~s a 73,
     \label{fig:tiempo_confirmacion}
 \end{figure}
 
-Al aislar específicamente el \textbf{tiempo de confirmación de las transacciones on-chain} (Figura~\ref{fig:tiempo_confirmacion}), la complejidad de intercambio de mensajes del algoritmo IBFT~2.0 ($\mathcal{O}(N^2)$ en fases \textit{Prepare} y \textit{Commit}) se manifiesta con absoluta coherencia:
+Al aislar específicamente el \textbf{tiempo de confirmación de las transacciones on-chain} (Figura~\ref{fig:tiempo_confirmacion}), la complejidad de intercambio de mensajes del algoritmo IBFT~2.0 ($\mathcal{O}(N^2)$ en fases \textit{Prepare} y \textit{Commit}) se manifiesta de manera clara:
 \begin{itemize}
     \item Transacción del cliente (\texttt{registerClientModel}): la latencia media pasa de 2,84~s en $E_4$ a 2,94~s en $E_5$ (+0,10~s).
     \item Transacción del servidor (\texttt{updateModel}): la latencia pasa de 2,89~s en $E_4$ a 2,99~s en $E_5$ (+0,10~s).

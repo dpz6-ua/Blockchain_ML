@@ -30,12 +30,11 @@ El marco de referencia \textbf{Flower}~\cite{beutel2020flower} proporciona una i
 
 \begin{table*}[t]
 \centering
-\caption{Comparativa cualitativa y arquitectural frente a los principales marcos de Blockchain-FL y robustez de la literatura.\\
-}
+\caption{Comparativa cualitativa y arquitectural frente a los principales marcos de Blockchain-FL y robustez de la literatura. \\}
 \label{tab:estado_arte}
 \renewcommand{\arraystretch}{1.35}
 \resizebox{\textwidth}{!}{%
-\begin{tabular}{@{}lccccc@{}}
+\begin{tabular}{@{}l|ccccc@{}}
 \toprule
 \textbf{Propuesta / Framework} & \makecell{\textbf{Consenso}\\\textbf{Blockchain}} & \makecell{\textbf{Almacenamiento}\\\textbf{Modelo}} & \makecell{\textbf{Protocolo}\\\textbf{Verificación}} & \makecell{\textbf{Coste}\\\textbf{Transaccional}} & \makecell{\textbf{Tolerancia}\\\textbf{a Fallos}} \\
 \midrule
@@ -63,7 +62,7 @@ Para solventar estas carencias, la literatura especializada ha investigado la hi
 
 \textbf{2. Mecanismos de Consenso y Latencia en Redes Inalámbricas y Vehiculares:} En la conducción autónoma y las redes de borde avanzadas (5G y más allá), los retardos temporales y la disponibilidad de recursos de cómputo y comunicación son factores determinantes~\cite{pokhrel2020federated, lu2020blockchain}. Los esquemas pioneros basados en Proof-of-Work (PoW) introducen demoras de varios minutos y bifurcaciones probabilísticas inasumibles para sistemas cooperativos en tiempo real~\cite{kim2019blockfl}. Para optimizar el compromiso entre consumo de recursos y convergencia del modelo en redes celulares de borde, Lu et al.~\cite{lu2020blockchain} formularon una arquitectura de Blockchain permisionada gestionada por estaciones base que emplea aprendizaje por refuerzo profundo (DRL) para la asignación dinámica de recursos, mientras que Pokhrel y Choi~\cite{pokhrel2020federated} modelaron analíticamente el impacto del canal inalámbrico vehicular en el retardo de consenso. Frente a esquemas que asumen redes públicas con alta latencia y sobrecoste o alternativas que renuncian a la tolerancia a fallos bizantinos, los consorcios permisionados con consenso IBFT 2.0 / QBFT como Hyperledger Besu~\cite{pujol2024blockchain} proporcionan finalidad determinista inmediata y tolerancia bizantina rigurosa ($N \ge 3f + 1$) sin volatilidad económica de gas.
 
-\textbf{3. Integridad Criptográfica frente a Robustez Estadística:} Conviene deslindar con rigor dos planos defensivos complementarios analizados en la literatura sobre seguridad en FL~\cite{bouacida2021vulnerabilities, jere2021taxonomy}. Por un lado, la capa de registro descentralizado e inmutable garantiza la integridad de los artefactos en tránsito, la autenticación de los emisores y el no repudio. Por otro lado, si un cliente manipula sus datos de entrenamiento de forma deliberada pero firma y registra legítimamente el resultado en la red (\textit{data/model poisoning}), se requiere incorporar algoritmos de agregación robusta frente a gradientes anómalos, tales como Krum~\cite{blanchard2017byzantine} o filtros de selección geométrica por distancias euclídeas.
+\textbf{3. Integridad Criptográfica frente a Robustez Estadística:} Conviene explicar dos planos defensivos complementarios analizados en la literatura sobre seguridad en FL~\cite{bouacida2021vulnerabilities, jere2021taxonomy}. Por un lado, la capa de registro descentralizado e inmutable garantiza la integridad de los artefactos en tránsito, la autenticación de los emisores y el no repudio. Por otro lado, si un cliente manipula sus datos de entrenamiento de forma deliberada pero firma y registra legítimamente el resultado en la red (\textit{data/model poisoning}), se requiere incorporar algoritmos de agregación robusta frente a gradientes anómalos, tales como Krum~\cite{blanchard2017byzantine} o filtros de selección geométrica por distancias euclídeas.
 
 Para contextualizar el aporte de esta investigación frente a las principales propuestas de la literatura especializada, la Tabla~\ref{tab:estado_arte} sintetiza una comparativa cualitativa y arquitectural. A diferencia de esquemas puramente estadísticos centralizados (como Krum), de arquitecturas basadas en consenso PoW o almacenamiento masivo on-chain, o de propuestas que omiten la tolerancia bizantina, nuestra arquitectura articula una doble verificación cruzada bidireccional sobre una red permisionada de consorcio con finalidad inmediata y coste de gas predecible y estable por transacción.
 
