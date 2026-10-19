@@ -30,7 +30,8 @@ El marco de referencia \textbf{Flower}~\cite{beutel2020flower} proporciona una i
 
 \begin{table*}[t]
 \centering
-\caption{Comparativa cualitativa y arquitectural frente a los principales marcos de Blockchain-FL y robustez de la literatura.}
+\caption{Comparativa cualitativa y arquitectural frente a los principales marcos de Blockchain-FL y robustez de la literatura.\\
+}
 \label{tab:estado_arte}
 \renewcommand{\arraystretch}{1.35}
 \resizebox{\textwidth}{!}{%
@@ -38,11 +39,11 @@ El marco de referencia \textbf{Flower}~\cite{beutel2020flower} proporciona una i
 \toprule
 \textbf{Propuesta / Framework} & \makecell{\textbf{Consenso}\\\textbf{Blockchain}} & \makecell{\textbf{Almacenamiento}\\\textbf{Modelo}} & \makecell{\textbf{Protocolo}\\\textbf{Verificación}} & \makecell{\textbf{Coste}\\\textbf{Transaccional}} & \makecell{\textbf{Tolerancia}\\\textbf{a Fallos}} \\
 \midrule
-\makecell[l]{Krum (Blanchard et al., 2017)~\cite{blanchard2017byzantine}} & \makecell{Sin Blockchain\\(Centralizado)} & \makecell{Servidor central\\(SPOF)} & \makecell{Selección geométrica\\($L_2$)} & \makecell{Inexistente\\(Sin ledger)} & \makecell{Bizantina estricta\\($f < \frac{N-2}{2}$)} \\
-\makecell[l]{BlockFL (Kim et al., 2019)~\cite{kim2019blockfl}} & \makecell{PoW\\(Lento / Ineficiente)} & \makecell{On-Chain\\(Cuello de botella)} & Unidireccional & \makecell{Criptomoneda\\volátil} & \makecell{Probabilística\\($< 50\%$)} \\
-\makecell[l]{AV-BFL (Pokhrel \& Choi, 2020)~\cite{pokhrel2020federated}} & \makecell{PoW adaptativo /\\DPoS} & \makecell{On-Chain\\en RSUs} & \makecell{Verificación en\\estación base} & \makecell{Retransmisiones\\inalámbricas} & \makecell{Limitada por\\canal vehicular} \\
-\makecell[l]{B5G-FL (Lu et al., 2020)~\cite{lu2020blockchain}} & \makecell{Permisionado\\(PBFT / BFT)} & \makecell{On-Chain en\\estaciones base} & \makecell{Consenso en\\estaciones base} & \makecell{Optimización por\\DRL} & \makecell{Bizantina formal\\($f < N/3$)} \\
-\makecell[l]{BFL Vehicular (Pujol et al., 2024)~\cite{pujol2024blockchain}} & \makecell{IBFT 2.0\\(Permisionado)} & \makecell{Registro de\\alertas IoT} & \makecell{Monitoreo de\\tráfico} & \makecell{Libre de gas\\comercial} & \makecell{Bizantina formal\\($N \ge 3f + 1$)} \\
+\makecell[l]{Krum (Blanchard et al., 2017)~\cite{blanchard2017byzantine}} & \makecell{Sin Blockchain\\(Centralizado)} & \makecell{Servidor central\\(SPOF)} & \makecell{Selección geométrica\\($L_2$)} & \makecell{Inexistente\\(Sin ledger)} & \makecell{Bizantina estricta\\($f < \frac{N-2}{2}$)} \\ \midrule
+\makecell[l]{BlockFL (Kim et al., 2019)~\cite{kim2019blockfl}} & \makecell{PoW\\(Lento / Ineficiente)} & \makecell{On-Chain\\(Cuello de botella)} & Unidireccional & \makecell{Criptomoneda\\volátil} & \makecell{Probabilística\\($< 50\%$)} \\ \midrule
+AV-BFL (Pokhrel \& Choi, 2020)~\cite{pokhrel2020federated} & \makecell{PoW adaptativo /\\DPoS} & \makecell{On-Chain\\en RSUs} & \makecell{Verificación en\\estación base} & \makecell{Retransmisiones\\inalámbricas} & \makecell{Limitada por\\canal vehicular} \\ \midrule
+B5G-FL (Lu et al., 2020)~\cite{lu2020blockchain} & \makecell{Permisionado\\(PBFT / BFT)} & \makecell{On-Chain en\\estaciones base} & \makecell{Consenso en\\estaciones base} & \makecell{Optimización por\\DRL} & \makecell{Bizantina formal\\($f < N/3$)} \\ \midrule
+BFL Vehicular (Pujol et al., 2024)~\cite{pujol2024blockchain} & \makecell{IBFT 2.0\\(Permisionado)} & \makecell{Registro de\\alertas IoT} & \makecell{Monitoreo de\\tráfico} & \makecell{Libre de gas\\comercial} & \makecell{Bizantina formal\\($N \ge 3f + 1$)} \\ \midrule
 \makecell[l]{\textbf{Nuestra Arquitectura}} & \makecell{\textbf{QBFT / IBFT 2.0}\\\textbf{(Besu)}} & \makecell{\textbf{Híbrido Off-Chain}\\\textbf{(IPFS DHT)}} & \makecell{\textbf{Doble Cruzada}\\\textbf{(Asc./Desc.)}} & \makecell{\textbf{Gas estable por}\\\textbf{transacción}} & \makecell{\textbf{Bizantina formal}\\\textbf{($f=1 \to 2$)}} \\
 \bottomrule
 \end{tabular}%
