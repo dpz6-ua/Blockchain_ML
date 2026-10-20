@@ -97,7 +97,6 @@ Si la comprobación previa es satisfactoria (Figura~\ref{fig:flujo_cliente_entre
 \subsubsection{Fase 3: Verificación Ascendente y Agregación Global}
 Al recibir los pesos de los clientes en el servidor agregador (Figura~\ref{fig:flujo_servidor_agregacion}):
 \begin{enumerate}
-    \item Para cada cliente $k$, el servidor consulta \texttt{getClientModel(}$t$, $\text{address}_k$\texttt{)} en la Blockchain.
     \item Para cada cliente $k$, el servidor consulta la función \texttt{getClientModel($t$, address$_k$)} en la Blockchain.
     \item Comprueba que el CID reportado por gRPC coincida con el hash inmutable registrado y firmado por el cliente. Si la comprobación falla, la contribución es descartada de forma preventiva.
     \item Aplica la agregación ponderada FedAvg únicamente sobre las contribuciones debidamente auditadas:
