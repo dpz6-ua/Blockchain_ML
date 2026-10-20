@@ -1,0 +1,70 @@
+\documentclass{ieeeaccess}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{booktabs}
+\usepackage{makecell}
+\usepackage{url}
+\usepackage{microtype}
+\usepackage{float}
+
+\newdimen\xfigwd
+\xfigwd=\columnwidth
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+\history{Date of publication xxxx 00, 0000, date of current version xxxx 00, 0000.}
+\doi{xxx}
+
+\title{Integración de Blockchain para la Trazabilidad y Auditoría en el Entrenamiento Distribuido de Modelos de Inteligencia Artificial}
+
+\author{\uppercase{David Piotr Znojek}\authorrefmark{1}, and
+\uppercase{Francisco A. Pujol}\authorrefmark{1}, \IEEEmembership{Senior Member, IEEE}}
+
+\address[1]{Departamento de Tecnología Informática y Computación, Escuela Politécnica Superior, Universidad de Alicante, 03690 San Vicente del Raspeig, Alicante, España (e-mail: dawidznojek@gmail.com, fpujol@ua.es)}
+\tfootnote{}
+
+\markboth
+{D. P. Znojek and F. A. Pujol: Integración de Blockchain para Trazabilidad y Auditoría en Aprendizaje Federado}
+{D. P. Znojek and F. A. Pujol: Integración de Blockchain para Trazabilidad y Auditoría en Aprendizaje Federado}
+
+\corresp{Corresponding author: David Piotr Znojek (e-mail: dawidznojek@gmail.com).}
+
+\begin{abstract}
+El entrenamiento distribuido mediante Aprendizaje Federado (\textit{Federated Learning}) permite preservar la privacidad de datos sensibles pero carece intrínsecamente de mecanismos para auditar la legitimidad de las contribuciones de los participantes, exponiendo al sistema a ataques de envenenamiento (\textit{model poisoning}) con consecuencias críticas en sectores como el de los vehículos autónomos. En este artículo se presenta y evalúa una arquitectura híbrida que integra una red Blockchain permisionada basada en Hyperledger Besu y consenso IBFT 2.0 con el framework Flower y almacenamiento distribuido fuera de cadena mediante IPFS. Se diseña un contrato inteligente en Solidity que implementa un protocolo de doble verificación cruzada entre clientes y servidor agregador utilizando compromisos criptográficos SHA-256 de los pesos neuronales. La viabilidad del marco se valida empíricamente sobre un banco de pruebas distribuido entrenando un clasificador convolucional de señales y eventos viales bajo un riguroso protocolo experimental multiejecución (15 ejecuciones y 450 rondas federadas en total) bajo cinco configuraciones. Los resultados cuantitativos demuestran que, en el despliegue distribuido realista, la capa de trazabilidad añade una sobrecarga temporal reducida de tan solo el 9,5\% (6,34~s por ronda), manteniendo un coste de gas estable y predecible por transacción y escalando con un impacto marginal (+0,39~s en mediana de ronda y +0,10~s en confirmación de bloque) al ampliar el quórum de 4 a 7 nodos validadores ($f=1 \to f=2$). Asimismo, la evaluación adversarial confirma una tasa de detección del 100\% frente a los vectores evaluados de adulteración e inyección no registrada en servidor y clientes con latencias de mitigación inferiores a 0,10~s (74~ms para aborto local y 44~ms para descarte en agregación). Esta investigación confirma que el coste de incorporar inmutabilidad y no repudio resulta plenamente asumible frente a las garantías de auditoría obtenidas.
+\end{abstract}
+
+\begin{keywords}
+Aprendizaje Federado, Auditoría Criptográfica, Blockchain, Consenso IBFT 2.0, Hyperledger Besu, IPFS, Trazabilidad, Vehículos Autónomos.
+\end{keywords}
+
+\titlepgskip=-15pt
+
+\maketitle
+
+\input{secciones/01_introduccion}
+\input{secciones/02_estado_arte}
+\input{secciones/03_arquitectura}
+\input{secciones/04_implementacion}
+\input{secciones/05_evaluacion_resultados}
+\input{secciones/06_conclusiones}
+
+\bibliographystyle{ieeepes}
+\bibliography{bibliografia}
+
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{a1.png}}]{David Piotr Znojek}
+Graduado en Ingeniería Informática por la Universidad de Alicante, España. Sus líneas de investigación se centran en la intersección de arquitecturas distribuidas, redes permisionadas de Blockchain y sistemas de Aprendizaje Federado para aplicaciones vehiculares críticas.
+\end{IEEEbiography}
+
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{a2.png}}]{Francisco A. Pujol}
+(Senior Member, IEEE) es Profesor Titular en el Departamento de Tecnología Informática y Computación de la Universidad de Alicante, España. Sus intereses de investigación abarcan sistemas inteligentes de transporte, arquitecturas de computación de alto rendimiento, ciberseguridad y Blockchain aplicada al Internet de los Vehículos.
+\end{IEEEbiography}
+
+\EOD
+
+\end{document}
