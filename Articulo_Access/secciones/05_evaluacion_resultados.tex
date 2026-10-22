@@ -171,7 +171,7 @@ En un entorno convencional, si el servidor agregador o un intermediario en red (
 \small
 \fbox{
 \begin{minipage}{0.95\columnwidth}
-\textbf{Verificación Descendente en el Cliente Edge}
+\textbf{Algoritmo 1. Verificación Descendente en el Cliente Edge}
 \begin{enumerate}
     \item \textbf{Entrada:} Pesos candidatos $\mathbf{w}_{\text{cand}}$ remitidos vía gRPC por el servidor.
     \item Consultar contrato en Besu: $\text{CID}_{\text{onchain}} \leftarrow \texttt{FLRegistry.getLastModel().cid}$
@@ -218,7 +218,7 @@ La segunda vulnerabilidad crítica consiste en la inyección de gradientes o pes
 \small
 \fbox{
 \begin{minipage}{0.95\columnwidth}
-\textbf{Auditoría RPC Ascendente en el Servidor Agregador}
+\textbf{Algoritmo 2. Auditoría RPC Ascendente en el Servidor Agregador}
 \begin{enumerate}
     \item \textbf{Entrada:} Identificador $\text{CID}_{\text{rep}}^{(k)}$ reportado por el cliente $k$ con dirección $\text{addr}_k$.
     \item Consultar registro del cliente en Besu: \\
@@ -273,7 +273,7 @@ Cliente Malicioso & Servidor Agregador & \textbf{100,0\%} & 0,044 s & Descarte i
 Estos resultados demuestran que la sobrecarga temporal introducida por el marco confiere una sólida protección empírica frente a manipulaciones de pesos y modelos disidentes en tránsito, interceptando dichos vectores evaluados con tiempos de respuesta inferiores a la décima de segundo.
 \\
 
-Conviene delimitar con rigor el alcance de este mecanismo defensivo: la doble verificación criptográfica en cadena actúa con eficacia contra la adulteración directa de parámetros en tránsito (\textit{tampering}), la emisión no autorizada a nombre de terceros mediante la autenticación con firmas asimétricas ECDSA en cada transacción y la inyección de modelos disidentes no respaldados on-chain. Cabe señalar que la autenticidad en la EVM descansa sobre la custodia rigurosa de las claves privadas de los participantes (lo que en entornos comerciales de producción exige módulos HSM o enclaves seguros), y que el protocolo no previene per se la sustracción o cesión física de credenciales en el cliente. Asimismo, si un nodo malicioso genera una actualización perjudicial mediante manipulación local de sus datos de entrenamiento (\textit{data poisoning} o \textit{label flipping}) y la firma legítimamente con su clave privada en la Blockchain, el compromiso criptográfico coincidirá formalmente pero el contenido neuronal estará contaminado. La mitigación de esta tipología de ataques semánticos requiere complementar la trazabilidad con filtros de agregación estadística bizantina (como Krum~\cite{blanchard2017byzantine}, Median o Trimmed-Mean) coordinados desde el contrato, aspecto que se analiza formalmente en las líneas futuras.
+Conviene delimitar con rigor el alcance de este mecanismo defensivo: la doble verificación criptográfica en cadena actúa con eficacia contra la adulteración directa de parámetros en tránsito (\textit{tampering}), la emisión no autorizada a nombre de terceros mediante la autenticación con firmas asimétricas ECDSA en cada transacción y la inyección de modelos disidentes no respaldados on-chain. Cabe señalar que la autenticidad en la EVM descansa sobre la custodia rigurosa de las claves privadas de los participantes (lo que en entornos comerciales de producción exige módulos HSM o enclaves seguros), y que el protocolo no previene per se la sustracción o cesión física de credenciales en el cliente. Asimismo, si un nodo malicioso genera una actualización perjudicial mediante manipulación local de sus datos de entrenamiento (\textit{data poisoning} o \textit{label flipping})~\cite{tolpegin2020data} y la firma legítimamente con su clave privada en la Blockchain, el compromiso criptográfico coincidirá formalmente pero el contenido neuronal estará contaminado. La mitigación de esta tipología de ataques semánticos requiere complementar la trazabilidad con filtros de agregación estadística bizantina (como Krum~\cite{blanchard2017byzantine}, Median o Trimmed-Mean) coordinados desde el contrato, aspecto que se analiza formalmente en las líneas futuras.
 
 \subsection{Consumo y Previsibilidad del Gas en la EVM}
 La Figura~\ref{fig:consumo_gas} ilustra el consumo de gas computacional de las operaciones registradas a lo largo de las rondas.
