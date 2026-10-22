@@ -13,7 +13,7 @@ n \ge 3f + 1
 \end{equation}
 donde $n$ denota el número total de nodos validadores y $f$ el número máximo de participantes defectuosos o bizantinos tolerables. 
 
-IBFT 2.0 ofrece una propiedad determinante frente a otros consensos: la \textbf{finalidad determinista inmediata}. Al carecer de bifurcaciones probabilísticas (\textit{forks}), una vez que una ronda de entrenamiento o contribución se sella en un bloque, es irrefutable y permanente. Asimismo, aunque el precio del gas (\textit{gas price}) se configure en cero para anular tarifas monetarias, el cómputo de \textit{gas used}~\cite{ethereum_gas} se mantiene como métrica objetiva del coste de cómputo y almacenamiento impuesto a la red.
+IBFT 2.0 ofrece una propiedad determinante frente a otros consensos: la \textbf{finalidad determinista inmediata}. Al carecer de bifurcaciones probabilísticas (\textit{forks}), una vez que una ronda de entrenamiento o contribución se sella en un bloque, adquiere finalidad inmediata e inmutabilidad en el libro mayor distribuido. Asimismo, aunque el precio del gas (\textit{gas price}) se configure en cero para anular tarifas monetarias, el cómputo de \textit{gas used}~\cite{ethereum_gas} se mantiene como métrica objetiva del coste de cómputo y almacenamiento impuesto a la red.
 
 \subsection{Almacenamiento Distribuido Off-Chain (IPFS)}
 El almacenamiento directo de redes neuronales profundas en una Blockchain es inviable debido al tamaño de los pesos (decenas o cientos de megabytes), lo cual provocaría una saturación crítica del estado de la EVM (\textit{state bloat}) y un consumo prohibitivo de gas.

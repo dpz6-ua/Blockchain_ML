@@ -50,6 +50,9 @@ Para no sobrecargar la red con costes de ejecución, las consultas de verificaci
     \item \texttt{getClientModel(uint256 round, address client)}: Permite al servidor y a auditores externos cotejar el CID reportado por un cliente frente a su registro on-chain firmado.
 \end{itemize}
 
+\subsubsection{Generalización y desacoplamiento del modelo}
+Conviene destacar que el diseño del marco es conceptual y operativamente agnóstico a la topología de la red neuronal, a la modalidad de los datos y al framework de aprendizaje empleado. Debido a que el contrato \texttt{FLRegistry} gestiona exclusivamente cadenas de longitud uniforme (los CIDs de IPFS y los resúmenes SHA-256), el coste de gas en la EVM permanece predecible y desacoplado de la complejidad del modelo, independientemente de si los parámetros corresponden a un clasificador ligero, una red convolucional profunda o una arquitectura basada en Transformers. Asimismo, el plano de almacenamiento IPFS maneja los pesos serializados como secuencias de bytes genéricas, posibilitando que el protocolo de doble verificación sea extrapolable a diversas modalidades (datos tabulares, series temporales, señales acústicas o visión artificial) y algoritmos de optimización federada.
+
 \subsection{Flujo Operacional y Doble Verificación Cruzada}
 El ciclo de vida del entrenamiento federado se estructura en una fase de inicialización única seguida de un protocolo iterativo con verificación bidireccional estricta, como se resume a continuación:
 \\
