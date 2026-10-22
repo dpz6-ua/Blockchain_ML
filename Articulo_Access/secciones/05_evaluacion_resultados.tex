@@ -2,7 +2,7 @@
 \section{Evaluación Experimental y Resultados}
 \label{sec:evaluacion}
 
-En esta sección se analiza cuantitativamente el comportamiento del sistema a lo largo del banco de pruebas experimental, respondiendo a las preguntas de investigación formuladas: el sobrecoste temporal de la capa de auditoría, el desacoplamiento de recursos físicos, la escalabilidad del consenso bizantino IBFT~2.0, la resiliencia empírica frente a ataques de adulteración y la previsibilidad del consumo de gas en la EVM. Con el objetivo de garantizar solidez y significancia estadística, cada una de las cinco configuraciones experimentales ($E_1$ a $E_5$) fue evaluada a lo largo de 3 ejecuciones independientes completas de 30 rondas cada una, totalizando un corpus de 15 ejecuciones y 450 rondas federadas ($N_{\text{total}} = 450$).
+En esta sección se analiza cuantitativamente el comportamiento del sistema a lo largo del banco de pruebas experimental, respondiendo a las preguntas de investigación formuladas: el sobrecoste temporal de la capa de auditoría, el desacoplamiento de recursos físicos, la escalabilidad del consenso bizantino IBFT~2.0, la resiliencia empírica frente a ataques de adulteración y la previsibilidad del consumo de gas en la EVM. Con el objetivo de afianzar la solidez, robustez y reproducibilidad experimental, cada una de las cinco configuraciones experimentales ($E_1$ a $E_5$) fue evaluada a lo largo de 3 ejecuciones independientes completas de 30 rondas cada una, totalizando un corpus de 15 ejecuciones y 450 rondas federadas ($N_{\text{total}} = 450$).
 
 \subsection{Convergencia del Modelo y Análisis de Pérdida}
 La Figura~\ref{fig:convergencia} ilustra la evolución de la función de pérdida de entropía cruzada en el conjunto de validación durante las 30 iteraciones federadas.
@@ -43,23 +43,23 @@ Para medir el sobrecoste relativo ($\Delta_{\text{overhead}}$) entre una configu
 En cuanto al rigor metodológico del análisis estadístico, el diseño experimental considera como unidades muestrales independientes las \textbf{15 ejecuciones completas} ($N_{\text{runs}} = 3$ repeticiones independientes por cada una de las 5 configuraciones). Las 30 rondas federadas consecutivas de cada ejecución no se presentan como observaciones independientes idénticamente distribuidas (i.i.d.), ya que cada iteración $t+1$ depende intrínsecamente del estado paramétrico y las condiciones del sistema en la ronda $t$. Por consiguiente, las 450 rondas totales ($90$ por configuración) se emplean para el análisis descriptivo longitudinal y la visualización de trayectorias (Figura~\ref{fig:tiempo_todas}), mientras que la reproducibilidad inter-ejecución se cuantifica a través del Error Estándar ($SE$) entre las medias de las ejecuciones independientes ($SE = \sigma_{\text{runs}} / \sqrt{N_{\text{runs}}}$).
 
 \subsection{Visión General del Rendimiento Temporal Consolidado}
-La Tabla~\ref{tab:tiempos_resumen} sintetiza el tiempo de ciclo por ronda en los nodos de borde ($T_{\text{client}}$) a lo largo de las 15 ejecuciones independientes (3 por configuración, totalizando 90 rondas por entorno para análisis descriptivo continuo), reportando la mediana, media, desviación típica ($\sigma$) y error estándar ($SE$). Asimismo, la Figura~\ref{fig:tiempo_todas} refleja la serie temporal continua a lo largo de las rondas.
+La Tabla~\ref{tab:tiempos_resumen} sintetiza el tiempo de ciclo por ronda en los nodos de borde ($T_{\text{client}}$) a lo largo de las 15 ejecuciones independientes (3 por configuración, totalizando 90 rondas por entorno para análisis descriptivo continuo), reportando la mediana, media, desviación típica inter-ejecución ($\sigma_{\text{runs}}$) y error estándar ($SE = \sigma_{\text{runs}} / \sqrt{3}$). Asimismo, la Figura~\ref{fig:tiempo_todas} refleja la serie temporal continua a lo largo de las rondas.
 
 \begin{table}[H]
 \centering
-\caption{Tiempo de ciclo por ronda en los nodos de borde ($T_{\text{client}}$) consolidado ($15$ ejecuciones independientes, $3$ por configuración, $30$ rondas/run).}
+\caption{Tiempo de ciclo por ronda en los nodos de borde ($T_{\text{client}}$) consolidado ($15$ ejecuciones independientes, $3$ por configuración, $30$ rondas/run). Los valores de $\sigma_{\text{runs}}$ y $SE$ cuantifican la dispersión y el error estándar entre las medias de las $3$ ejecuciones independientes ($SE = \sigma_{\text{runs}} / \sqrt{3}$).}
 \label{tab:tiempos_resumen}
 \resizebox{\columnwidth}{!}{%
 \begin{tabular}{@{}cccccccc@{}}
 \toprule
-\textbf{Exp.} & \textbf{Máq.} & \textbf{Configuración} & \textbf{Runs} & \textbf{Mediana (s)} & \textbf{Media (s)} & \textbf{$\sigma$ (s)} & \textbf{SE (s)} \\
+\textbf{Exp.} & \textbf{Máq.} & \textbf{Configuración} & \textbf{Runs} & \textbf{Mediana (s)} & \textbf{Media (s)} & \textbf{$\sigma_{\text{runs}}$ (s)} & \textbf{SE (s)} \\
 \midrule
-$E_1$ & 1 & 4 val · con BC & 3 & \textbf{85,42} & 97,09 & 27,64 & 2,91 \\
-$E_2$ & 1 & Baseline sin BC & 3 & \textbf{75,70} & 76,45 & 2,83 & 0,30 \\
+$E_1$ & 1 & 4 val · con BC & 3 & \textbf{85,42} & 97,09 & 20,01 & 11,55 \\
+$E_2$ & 1 & Baseline sin BC & 3 & \textbf{75,70} & 76,45 & 1,65 & 0,95 \\
 \midrule
-$E_3$ & 2 & Baseline sin BC & 3 & \textbf{66,62} & 67,62 & 3,76 & 0,40 \\
-$E_4$ & 2 & 4 val · con BC & 3 & \textbf{72,96} & 73,29 & 2,25 & 0,24 \\
-$E_5$ & 2 & 7 val · con BC & 3 & \textbf{73,35} & 74,40 & 3,92 & 0,41 \\
+$E_3$ & 2 & Baseline sin BC & 3 & \textbf{66,62} & 67,62 & 2,29 & 1,32 \\
+$E_4$ & 2 & 4 val · con BC & 3 & \textbf{72,96} & 73,29 & 1,28 & 0,74 \\
+$E_5$ & 2 & 7 val · con BC & 3 & \textbf{73,35} & 74,40 & 0,54 & 0,31 \\
 \bottomrule
 \end{tabular}%
 }
@@ -72,7 +72,7 @@ $E_5$ & 2 & 7 val · con BC & 3 & \textbf{73,35} & 74,40 & 3,92 & 0,41 \\
     \label{fig:tiempo_todas}
 \end{figure}
 
-El análisis multiejecución revela diferencias clave en la estabilidad de cada entorno. En la configuración local $E_1$, la dispersión longitudinal es sustancialmente superior ($\sigma = 27{,}64$~s) debido a que los procesos de entrenamiento convolucional compiten directamente en CPU y memoria con los ocho contenedores de Docker que soportan los nodos de Besu y el daemon de IPFS. Por el contrario, en el entorno distribuido ($E_4$ y $E_5$), la variabilidad se reduce drásticamente ($\sigma \in [2{,}25, 3{,}92]$~s y $SE \le 0{,}41$~s), demostrando una gran estabilidad operativa. Por este motivo, se adopta la \textbf{mediana} como métrica central para aislar el comportamiento intrínseco del sistema frente a fluctuaciones externas.
+El análisis multiejecución revela diferencias clave en la estabilidad de cada entorno. En la configuración local $E_1$, la dispersión inter-ejecución entre las medias de las tres repeticiones es de $\sigma_{\text{runs}} = 20{,}01$~s ($SE = 11{,}55$~s), registrando una dispersión longitudinal acumulada a lo largo de las 90 rondas de $\sigma_{\text{pool}} = 27{,}64$~s. Esta mayor variabilidad se debe a que, en la primera ejecución en monomáquina, los procesos de entrenamiento convolucional compitieron directamente en CPU y memoria con los ocho contenedores de Docker que soportaban los nodos de Besu y el daemon de IPFS. Por el contrario, en el entorno distribuido ($E_4$ y $E_5$), la variabilidad inter-ejecución se reduce drásticamente ($\sigma_{\text{runs}} \in [0{,}54, 1{,}28]$~s y $SE \le 0{,}74$~s; con dispersiones longitudinales contenidas en $\sigma_{\text{pool}} \le 3{,}92$~s), demostrando una gran estabilidad y reproducibilidad operativa. Por este motivo, se adopta la \textbf{mediana} como métrica central para aislar el comportamiento intrínseco del sistema frente a fluctuaciones externas.
 
 \subsection{Sobrecoste Temporal Aislado de la Capa Blockchain}
 Para cuantificar con exactitud el coste temporal impuesto por la serialización de tensores, la publicación en IPFS, la firma ECDSA y el consenso IBFT~2.0, se comparan las configuraciones equivalentes con y sin capa de seguridad (Figura~\ref{fig:coste_bc}):
@@ -270,10 +270,10 @@ Cliente Malicioso & Servidor Agregador & \textbf{100,0\%} & 0,044 s & Descarte i
 }
 \end{table}
 
-Estos resultados demuestran que la sobrecarga temporal introducida por el marco confiere una garantía determinista de integridad frente a manipulaciones de pesos y modelos disidentes en tránsito, neutralizando dichos vectores con tiempos de respuesta inferiores a la décima de segundo.
+Estos resultados demuestran que la sobrecarga temporal introducida por el marco confiere una sólida protección empírica frente a manipulaciones de pesos y modelos disidentes en tránsito, interceptando dichos vectores evaluados con tiempos de respuesta inferiores a la décima de segundo.
 \\
 
-Conviene delimitar con rigor el alcance de este mecanismo defensivo: la doble verificación criptográfica en cadena protege de forma exhaustiva contra la adulteración directa de parámetros en tránsito (\textit{tampering}), la emisión no autorizada a nombre de terceros mediante la autenticación con firmas asimétricas ECDSA en cada transacción y la inyección de modelos disidentes no respaldados on-chain. Cabe señalar que la autenticidad en la EVM descansa sobre la custodia rigurosa de las claves privadas de los participantes (lo que en entornos comerciales de producción exige módulos HSM o enclaves seguros), y que el protocolo no previene per se la sustracción o cesión física de credenciales en el cliente. Asimismo, si un nodo malicioso genera una actualización perjudicial mediante manipulación local de sus datos de entrenamiento (\textit{data poisoning} o \textit{label flipping}) y la firma legítimamente con su clave privada en la Blockchain, el compromiso criptográfico coincidirá formalmente pero el contenido neuronal estará contaminado. La mitigación de esta tipología de ataques semánticos requiere complementar la trazabilidad con filtros de agregación estadística bizantina (como Krum~\cite{blanchard2017byzantine}, Median o Trimmed-Mean) coordinados desde el contrato, aspecto que se analiza formalmente en las líneas futuras.
+Conviene delimitar con rigor el alcance de este mecanismo defensivo: la doble verificación criptográfica en cadena actúa con eficacia contra la adulteración directa de parámetros en tránsito (\textit{tampering}), la emisión no autorizada a nombre de terceros mediante la autenticación con firmas asimétricas ECDSA en cada transacción y la inyección de modelos disidentes no respaldados on-chain. Cabe señalar que la autenticidad en la EVM descansa sobre la custodia rigurosa de las claves privadas de los participantes (lo que en entornos comerciales de producción exige módulos HSM o enclaves seguros), y que el protocolo no previene per se la sustracción o cesión física de credenciales en el cliente. Asimismo, si un nodo malicioso genera una actualización perjudicial mediante manipulación local de sus datos de entrenamiento (\textit{data poisoning} o \textit{label flipping}) y la firma legítimamente con su clave privada en la Blockchain, el compromiso criptográfico coincidirá formalmente pero el contenido neuronal estará contaminado. La mitigación de esta tipología de ataques semánticos requiere complementar la trazabilidad con filtros de agregación estadística bizantina (como Krum~\cite{blanchard2017byzantine}, Median o Trimmed-Mean) coordinados desde el contrato, aspecto que se analiza formalmente en las líneas futuras.
 
 \subsection{Consumo y Previsibilidad del Gas en la EVM}
 La Figura~\ref{fig:consumo_gas} ilustra el consumo de gas computacional de las operaciones registradas a lo largo de las rondas.

@@ -1,6 +1,6 @@
-Exp,Maq,Config,Runs,Rondas_Total,Mediana_s,Media_s,Desv_s,SE_s
-E1,1,4 val · con BC,3,90,85.42,97.09,27.64,2.91
-E2,1,Baseline sin BC,3,90,75.7,76.45,2.83,0.3
-E3,2,Baseline sin BC,3,90,66.62,67.62,3.76,0.4
-E4,2,4 val · con BC,3,90,72.96,73.29,2.25,0.24
-E5,2,7 val · con BC,3,90,73.35,74.4,3.92,0.41
+Exp,Maq,Config,Runs,Rondas_Total,Mediana_s,Media_s,Desv_Runs_s,SE_Runs_s,Desv_Pool_s
+E1,1,4 val · con BC,3,90,85.42,97.09,20.01,11.55,27.64
+E2,1,Baseline sin BC,3,90,75.7,76.45,1.65,0.95,2.83
+E3,2,Baseline sin BC,3,90,66.62,67.62,2.29,1.32,3.76
+E4,2,4 val · con BC,3,90,72.96,73.29,1.28,0.74,2.25
+E5,2,7 val · con BC,3,90,73.35,74.4,0.54,0.31,3.92

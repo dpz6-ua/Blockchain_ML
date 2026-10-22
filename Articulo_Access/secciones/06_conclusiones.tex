@@ -2,7 +2,7 @@
 \section{Conclusiones y Trabajo Futuro}
 \label{sec:conclusiones}
 
-En este artículo se ha presentado, implementado y validado experimentalmente un marco integral para garantizar la trazabilidad, integridad y auditoría criptográfica en sistemas de Aprendizaje Federado, combinando una red Blockchain permisionada (Hyperledger Besu) con almacenamiento direccionable fuera de cadena (IPFS) y el framework Flower.
+En este artículo se ha presentado, implementado y validado experimentalmente un marco integral orientado a proporcionar trazabilidad, integridad y auditoría criptográfica en sistemas de Aprendizaje Federado, combinando una red Blockchain permisionada (Hyperledger Besu) con almacenamiento direccionable fuera de cadena (IPFS) y el framework Flower.
 
 \subsection{Conclusiones Principales}
 Los resultados obtenidos permiten extraer las siguientes conclusiones clave:
@@ -23,5 +23,5 @@ Como líneas de desarrollo futuro que amplían el alcance de este trabajo, se pl
     \item \textbf{Gestión criptográfica de claves}: Sustituir el esquema de cuentas actual por módulos de seguridad de hardware (HSM) o almacenes seguros de secretos tipo Key Vault para un despliegue conforme a estándares industriales.
     \item \textbf{Control de acceso on-chain y gobernanza descentralizada}: Incorporar modificadores formales de control de acceso en el Smart Contract (\texttt{onlyServer} o esquemas de consenso multifirma y gobernanza basada en roles RBAC) para restringir directamente en el bytecode de la EVM la invocación de \texttt{updateModel}, reforzando la seguridad en despliegues con múltiples servidores agregadores o federaciones abiertas.
 \end{enumerate}
-En síntesis, la arquitectura validada demuestra que la convergencia entre Blockchain y Aprendizaje Federado no solo es factible, sino que constituye una solución sólida y escalable para el despliegue confiable de inteligencia artificial en entornos críticos y cooperativos.
+En síntesis, la arquitectura validada demuestra que la convergencia entre Blockchain y Aprendizaje Federado no solo es factible, sino que establece una base metodológica y arquitectónica viable para el despliegue auditable y confiable de inteligencia artificial en entornos críticos y cooperativos.
 

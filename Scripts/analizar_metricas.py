@@ -158,8 +158,9 @@ def analizar():
         global_mean = float(np.mean(global_arr))
         global_std = float(np.std(global_arr, ddof=1)) if len(global_arr) > 1 else 0.0
 
-        # Error estándar de la media
-        se = global_std / np.sqrt(len(global_arr)) if len(global_arr) > 1 else 0.0
+        # Dispersión y Error estándar calculado sobre las 3 ejecuciones independientes
+        std_runs = float(np.std(means_runs, ddof=1)) if len(means_runs) > 1 else 0.0
+        se_runs = std_runs / np.sqrt(len(means_runs)) if len(means_runs) > 1 else 0.0
 
         resumen_filas.append({
             "Exp": exp_id,
@@ -169,8 +170,9 @@ def analizar():
             "Rondas_Total": len(global_arr),
             "Mediana_s": round(global_med, 2),
             "Media_s": round(global_mean, 2),
-            "Desv_s": round(global_std, 2),
-            "SE_s": round(se, 2),
+            "Desv_Runs_s": round(std_runs, 2),
+            "SE_Runs_s": round(se_runs, 2),
+            "Desv_Pool_s": round(global_std, 2),
         })
 
     # DataFrames finales
