@@ -256,7 +256,7 @@ La Figura~\ref{fig:bloque_81_audit} muestra el recibo del \textbf{Bloque~81} en 
 
 \subsubsection{Prueba 3: Auditoría Ex-Post y Verificabilidad Independiente de FedAvg}
 \label{subsubsec:auditoria_expost_eval}
-Para validar la tercera garantía de integridad formalizada en la Sección~\ref{subsec:auditoria_fedavg}, se evaluó experimentalmente la capacidad de un agente auditor externo o regulador para fiscalizar \textit{a posteriori} y de forma autónoma la fidelidad de la agregación ejecutada por el servidor central. Esta prueba garantiza matemáticamente que el agregador no pueda alterar ponderaciones, omitir contribuciones ni inyectar sesgos arbitrarios en el modelo global sin dejar evidencia criptográfica incontrovertible.
+Para validar la tercera garantía de integridad formalizada en la Sección~\ref{subsec:auditoria_fedavg}, se evaluó experimentalmente la capacidad de un agente auditor externo o regulador para fiscalizar \textit{a posteriori} y de forma autónoma la fidelidad de la agregación ejecutada por el servidor central. Esta prueba permite auditar matemáticamente si el agregador ha respetado la regla canónica de agregación sin introducir sesgos, omisiones ni alteraciones paramétricas no autorizadas.
 
 El ensayo se ejecutó sobre la Ronda~2 de un entrenamiento real de aprendizaje federado con dos clientes edge concurrentes conectados a la red Hyperledger Besu (contrato \texttt{0xa50a51c0...}) e IPFS. La Tabla~\ref{tab:trazabilidad_ronda2} sintetiza la cadena de custodia completa de dicha ronda, correlacionando de forma unívoca las cuentas emisoras, las transacciones selladas en los bloques consecutivos 73, 74 y 75, los identificadores multihash IPFS y las latencias registradas.
 
@@ -297,29 +297,30 @@ El protocolo de auditoría operó conforme a las siguientes etapas:
     \label{fig:log_auditoria_expost}
 \end{figure}
 
-Como refleja la telemetría en tiempo de ejecución capturada en la Figura~\ref{fig:log_auditoria_expost}, la auditoría integral (consulta RPC a Besu, descarga de 6,24~MB de IPFS, reconstrucción tensorial y verificación exhaustiva de las 8 capas de la red convolucional) requirió únicamente \textbf{0,2194~segundos}. La discrepancia paramétrica en todas las capas convolucionales y completamente conexas fue estrictamente nula ($\Delta = 0{,}000000\text{e}+00$), derivando en un identificador IPFS idéntico bit a bit al registrado en el Bloque~75 (\texttt{CID Equality: MATCH}), ratificando de forma incontrovertible la honestidad del servidor agregador.
+Como refleja la telemetría en tiempo de ejecución capturada en la Figura~\ref{fig:log_auditoria_expost}, la auditoría integral (consulta RPC a Besu, descarga de 6,24~MB de IPFS, reconstrucción tensorial y verificación exhaustiva de las 8 capas de la red convolucional) requirió únicamente \textbf{0,2194~segundos}. La discrepancia paramétrica en todas las capas convolucionales y completamente conexas fue estrictamente nula ($\Delta = 0{,}000000\text{e}+00$), derivando en un identificador IPFS idéntico bit a bit al registrado en el Bloque~75 (\texttt{CID Equality: MATCH}), ratificando de forma incontrovertible la concordancia de la agregación.
 
-Asimismo, se evaluó la sensibilidad del mecanismo activando el modo adversarial simulado (\texttt{--simulate-tampering}). Al inyectar una perturbación aditiva deliberada de $+0{,}1$ en los pesos del servidor, el auditor detectó la desviación de forma instantánea en tan solo \textbf{0,1805~segundos} ($\Delta = 1{,}000000\text{e}-01$), emitiendo un dictamen público de manipulación no repudiable (\texttt{AUDIT FAILED: SERVER MALFEASANCE DETECTED}).
+Asimismo, se evaluó la sensibilidad del mecanismo activando el modo adversarial simulado (\texttt{--simulate-tampering}). Al inyectar una perturbación aditiva deliberada de $+0{,}1$ en los pesos del servidor, el auditor detectó la desviación de forma instantánea en tan solo \textbf{0,1805~segundos} ($\Delta = 1{,}000000\text{e}-01$), registrando una alerta formal de discrepancia no conforme (\texttt{AUDIT FAILED: DISCREPANCY DETECTED}).
 
 \subsubsection{Síntesis de Validación y Alcance de Seguridad}
 La Tabla~\ref{tab:resumen_ataques} sintetiza las métricas cuantitativas obtenidas a lo largo de las tres pruebas experimentales de integridad y auditoría.
 
-\begin{table}[H]
+\begin{table*}[t]
 \centering
-\caption{Validación experimental del marco de integridad y auditoría frente a escenarios adversariales y de verificación ex-post.}
+\caption{Validación experimental del marco de integridad y auditoría frente a escenarios de manipulación y verificación ex-post.}
 \label{tab:resumen_ataques}
-\resizebox{\columnwidth}{!}{%
+\resizebox{\textwidth}{!}{%
+\renewcommand{\arraystretch}{1.2}
 \begin{tabular}{@{}lcccc@{}}
 \toprule
 \textbf{Escenario de Prueba} & \textbf{Entidad Defensora / Auditora} & \textbf{Acción Preventiva / Resultado} & \textbf{Latencia} & \textbf{Integridad de Pesos} \\
 \midrule
-Servidor Adulterado / MitM & Cliente (Edge) & Intercepción determinista / Aborto preventivo & 0.1486 s & Envenenamiento nulo \\
-Cliente Malicioso & Servidor Agregador & Intercepción determinista / Descarte en FedAvg & 0.0309 s & FedAvg íntegro \\
-Auditoría FedAvg Ex-Post & Auditor Independiente & Reconstrucción matemática / Verificación fiel & 0.2194 s & Coincidencia bit a bit ($\Delta = 0$) \\
+Manipulación en Tránsito / Servidor No Fidedigno & Cliente (Edge) & Intercepción determinista / Aborto preventivo & 0,1486 s & Sin contaminación local \\
+Inyección No Autenticada / Cliente No Registrado & Servidor Agregador & Intercepción determinista / Descarte en FedAvg & 0,0309 s & Agregación preservada \\
+Auditoría FedAvg Ex-Post & Auditor Independiente & Reconstrucción matemática / Verificación fidedigna & 0,2194 s & Coincidencia bit a bit ($\Delta = 0$) \\
 \bottomrule
 \end{tabular}%
 }
-\end{table}
+\end{table*}
 
 Estos ensayos constituyen una validación funcional determinista de las primitivas de intercepción criptográfica implementadas en el marco: ante una alteración bit a bit de los parámetros en tránsito o la ausencia de un compromiso inmutable previamente sellado y firmado en la cadena, el protocolo intercepta la anomalía de manera determinista con tiempos de respuesta en torno a la décima de segundo (149~ms en el cliente y 31~ms en el servidor), impidiendo que los pesos discordantes contaminen los cómputos locales o globales.
 \\

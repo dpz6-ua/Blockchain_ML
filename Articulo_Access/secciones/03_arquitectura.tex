@@ -153,7 +153,7 @@ Gracias a este registro exhaustivo, cualquier nodo cliente de la federación o u
     \end{equation}
     \item \textbf{Cotejo del modelo global:} Serializa $\hat{w}^{(t+1)}$ y genera su identificador de contenido $\text{CID}_{audit}^{(t+1)} = \text{Hash}(\hat{w}^{(t+1)})$. A continuación, compara $\text{CID}_{audit}^{(t+1)}$ frente al $\text{CID}_{global}^{(t+1)}$ registrado en \texttt{FLRegistry}.
 \end{enumerate}
-Si $\text{CID}_{audit}^{(t+1)} \neq \text{CID}_{global}^{(t+1)}$, queda demostrada criptográficamente de manera pública, no repudiable y reproducible la deshonestidad del servidor (ya sea por manipulación de pesos, alteración arbitraria de las ponderaciones $n_k$, o inyección de parámetros maliciosos). Esta verificabilidad transforma la figura del agregador centralizado en un orquestador estrictamente auditable y sujeto a responsabilidad demostrable (\textit{accountability}).
+Si $\text{CID}_{audit}^{(t+1)} \neq \text{CID}_{global}^{(t+1)}$, queda evidenciada criptográficamente de manera pública, no repudiable y reproducible cualquier discrepancia o comportamiento no conforme del servidor (ya sea por alteración arbitraria en las ponderaciones $n_k$, omisión de participantes o modificación no autorizada de parámetros globales). Esta verificabilidad transforma la figura del agregador centralizado en un orquestador estrictamente auditable y sujeto a responsabilidad demostrable (\textit{accountability}).
 
 \subsection{Modelo de Amenazas y Alcance de Seguridad}
 \label{subsec:modelo_amenazas}
