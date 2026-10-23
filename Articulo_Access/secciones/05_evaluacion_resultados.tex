@@ -162,7 +162,7 @@ Para validar empíricamente que la arquitectura no solo registra transacciones e
 \label{subsubsec:ataque_descendente}
 En un entorno federado no confiable, la distribución descendente de parámetros expone a los clientes a dos vectores de riesgo principales: la alteración de los tensores en tránsito por intermediarios de red (\textit{Man-in-the-Middle}) y la bifurcación maliciosa o equivocación del servidor (\textit{server equivocation}), donde un agregador deshonesto intenta distribuir modelos globales distintos o sesgados selectivamente a participantes específicos. Cabe destacar que la validez del modelo global on-chain queda estrictamente acotada a la entidad autorizada gracias al modificador de control de acceso \texttt{onlyServer} en el contrato \texttt{FLRegistry}, el cual revierte cualquier intento de registro por cuentas no autorizadas. Así, la rutina de verificación descendente implementada en el cliente protege de forma autónoma frente a discrepancias entre los pesos recibidos por gRPC y el compromiso sellado institucionalmente en la Blockchain:
 \begin{enumerate}
-    \item \textbf{Generación y Sellado Oficial:} El servidor legítimo instancia el modelo base \texttt{NetCliente}, serializa los tensores mediante \texttt{pickle.dumps} y los publica en el daemon IPFS local a través del endpoint \texttt{/api/v0/add?pin=false}, obteniendo el CID oficial \texttt{QmSEBaqx...}. A continuación, el servidor emite una transacción firmada en la EVM invocando \texttt{updateModel(round, cid\_oficial)} desde su cuenta autorizada (\texttt{0xfe3b55...}), quedando el compromiso criptográfico sellado en el \textbf{Bloque~15}.
+    \item \textbf{Generación y Sellado Oficial:} El servidor legítimo instancia el modelo base \texttt{NetCliente}, serializa los tensores mediante \texttt{pickle.dumps} y los publica en el daemon IPFS local a través del endpoint \texttt{/api/v0/add?pin=false}, obteniendo el CID oficial \texttt{QmQTpgejdzh...}. A continuación, el servidor emite una transacción firmada en la EVM invocando \texttt{updateModel(round, cid\_oficial)} desde su cuenta autorizada (\texttt{0xfe3b55...}), quedando el compromiso criptográfico sellado en el \textbf{Bloque~80}.
     \item \textbf{Inyección Adversarial y Simulación de Discrepancia:} Se emula un escenario adversarial donde se perturban los parámetros transmitidos al cliente inyectando ruido aditivo ($\mathbf{w}_{\text{cand}} = \mathbf{w}_{\text{oficial}} + 0{,}5$) y remitiendo este vector corrupto vía gRPC (simulando alteración en tránsito o un intento del servidor de suministrar una versión discrepante del modelo oficial).
     \item \textbf{Comprobación Cruzada y Aborto Inmediato:} Al recibir la orden de entrenamiento, el cliente edge invoca la función de solo lectura \texttt{getLastModel()} en el Smart Contract mediante una llamada JSON-RPC para recuperar el CID sellado on-chain. Con este identificador descarga de forma paralela el artefacto binario de referencia desde la pasarela IPFS (\texttt{/ipfs/<CID>}) y ejecuta una comparación bit a bit tensor por tensor (\texttt{np.allclose(p\_recibido, p\_ipfs, atol=1e-7)}).
 \end{enumerate}
@@ -196,21 +196,21 @@ La Figura~\ref{fig:log_ataque_descendente} ilustra la telemetría real en tiempo
     \label{fig:log_ataque_descendente}
 \end{figure}
 
-Por su parte, la Figura~\ref{fig:bloque_15_audit} aporta la evidencia inmutable en la cadena de bloques, capturada desde el explorador de la red Hyperledger Besu. En ella se observa el sellado de la transacción \texttt{updateModel} en el \textbf{Bloque~15}, emitida por la dirección del servidor (\texttt{0xfe3b557e...}) con hash criptográfico \texttt{0x0af3ebfb...} y un consumo de gas de 167.460 (límite 500.000). Esta correspondencia unívoca entre el bloque minado y la verificación del cliente valida la consistencia del protocolo.
+Por su parte, la Figura~\ref{fig:bloque_80_audit} aporta la evidencia inmutable en la cadena de bloques, capturada desde el explorador de la red Hyperledger Besu. En ella se observa el sellado de la transacción \texttt{updateModel} en el \textbf{Bloque~80}, emitida por la dirección del servidor (\texttt{0xfe3b557e...}) con hash criptográfico \texttt{0x973b0b...} y un consumo de gas de 167.460 (límite 500.000). Esta correspondencia unívoca entre el bloque minado y la verificación del cliente valida la consistencia del protocolo.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/auditoria_grafana_bloque_15.png}
-    \caption{Prueba 1: Confirmación en Hyperledger Besu del bloque 15, registrando la transacción oficial \texttt{updateModel} emitida por el servidor agregador.}
-    \label{fig:bloque_15_audit}
+    \includegraphics[width=\columnwidth]{figuras/auditoria_grafana_bloque_80.png}
+    \caption{Prueba 1: Confirmación en Hyperledger Besu del bloque 80, registrando la transacción oficial \texttt{updateModel} emitida por el servidor agregador.}
+    \label{fig:bloque_80_audit}
 \end{figure}
 
 \subsubsection{Prueba 2: Verificación Ascendente (Cliente Envenenador frente a Servidor Agregador)}
 \label{subsubsec:ataque_ascendente}
 La segunda vulnerabilidad crítica consiste en la inyección de gradientes o pesos corruptos por parte de un nodo cliente malicioso (\textit{model poisoning}). Para neutralizarla de raíz, el servidor no se limita a cotejar identificadores, sino que valida de forma cruzada la correspondencia biunívoca entre la carga útil recibida en memoria y el registro inmutable on-chain:
 \begin{enumerate}
-    \item \textbf{Registro Legítimo On-Chain:} El nodo cliente honesto (cuenta 3, dirección \texttt{0xf17f52...}) publica sus pesos en IPFS y emite una transacción firmada con su clave privada invocando \texttt{registerClientModel}\allowbreak\texttt{(round, cid\_legitimo)}, la cual queda consolidada por los validadores en el \textbf{Bloque~16}.
-    \item \textbf{Inyección Adversarial:} Se evalúa el comportamiento ante un intento de inyección donde se remite al servidor una actualización cuyos parámetros o metadatos no coinciden con el compromiso sellado on-chain (emulando tanto el envío de un identificador malicioso \texttt{QmClientFraude...} como el envío de pesos envenenados no correspondientes con el CID registrado).
+    \item \textbf{Registro Legítimo On-Chain:} El nodo cliente honesto (cuenta 3, dirección \texttt{0xf17f52...}) publica sus pesos en IPFS y emite una transacción firmada con su clave privada invocando \texttt{registerClientModel}\allowbreak\texttt{(round, cid\_legitimo)}, la cual queda consolidada por los validadores en el \textbf{Bloque~81}.
+    \item \textbf{Inyección Adversarial:} Se evalúa el comportamiento ante un intento de inyección donde se remite al servidor una actualización cuyos parámetros o metadatos no coinciden con el compromiso sellado on-chain (emulando tanto el envío de un identificador malicioso \texttt{QmClientFraud...} como el envío de pesos envenenados no correspondientes con el CID registrado).
     \item \textbf{Auditoría Criptográfica y Descarte en FedAvg:} Antes de procesar la agregación matricial de la ronda, el servidor calcula el hash de los tensores recibidos en memoria ($\text{CID}_{\text{calc}}^{(k)}$) y ejecuta una llamada de solo lectura JSON-RPC \texttt{getClientModel(round, address)} sobre el contrato \texttt{FLRegistry} para obtener $\text{CID}_{\text{onchain}}^{(k)}$. Al constatar la discrepancia, la contribución es excluida de forma preventiva.
 \end{enumerate}
 
@@ -245,13 +245,13 @@ La Figura~\ref{fig:log_ataque_ascendente} documenta la salida en terminal del se
     \label{fig:log_ataque_ascendente}
 \end{figure}
 
-La Figura~\ref{fig:bloque_16_audit} muestra el recibo del \textbf{Bloque~16} en el explorador Besu, donde consta la transacción \texttt{registerClientModel} emitida por la cuenta del cliente (\texttt{0xf17f5215...}) con hash \texttt{0x3e15209c...} y un consumo de gas de 160.200 (límite 200.000). Dado que el atacante remitió un CID ajeno al sellado en dicho bloque, la verificación cruzada interceptó la inyección adversarial gracias a la resistencia a colisiones de la función de resumen SHA-256.
+La Figura~\ref{fig:bloque_81_audit} muestra el recibo del \textbf{Bloque~81} en el explorador Besu, donde consta la transacción \texttt{registerClientModel} emitida por la cuenta del cliente (\texttt{0xf17f5215...}) con hash \texttt{0x347899f...} y un consumo de gas de 160.200 (límite 200.000). Dado que el atacante remitió un CID ajeno al sellado en dicho bloque, la verificación cruzada interceptó la inyección adversarial gracias a la resistencia a colisiones de la función de resumen SHA-256.
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/auditoria_grafana_bloque_16.png}
-    \caption{Prueba 2: Confirmación forense en Hyperledger Besu del bloque 16, registrando la transacción legítima \texttt{registerClientModel} del nodo cliente.}
-    \label{fig:bloque_16_audit}
+    \includegraphics[width=\columnwidth]{figuras/auditoria_grafana_bloque_81.png}
+    \caption{Prueba 2: Confirmación forense en Hyperledger Besu del bloque 81, registrando la transacción legítima \texttt{registerClientModel} del nodo cliente.}
+    \label{fig:bloque_81_audit}
 \end{figure}
 
 La Tabla~\ref{tab:resumen_ataques} sintetiza las métricas cuantitativas obtenidas en ambas pruebas de penetración adversarial.
@@ -265,8 +265,8 @@ La Tabla~\ref{tab:resumen_ataques} sintetiza las métricas cuantitativas obtenid
 \toprule
 \textbf{Escenario de Prueba} & \textbf{Entidad Defensora} & \textbf{Acción Preventiva / Resultado} & \textbf{Latencia} & \textbf{Impacto en Modelo} \\
 \midrule
-Servidor Adulterado / MitM & Cliente (Edge) & Intercepción determinista / Aborto preventivo & 0,074 s & Envenenamiento nulo \\
-Cliente Malicioso & Servidor Agregador & Intercepción determinista / Descarte en FedAvg & 0,044 s & FedAvg íntegro \\
+Servidor Adulterado / MitM & Cliente (Edge) & Intercepción determinista / Aborto preventivo & 0.1486 s & Envenenamiento nulo \\
+Cliente Malicioso & Servidor Agregador & Intercepción determinista / Descarte en FedAvg & 0.0309 s & FedAvg íntegro \\
 \bottomrule
 \end{tabular}%
 }

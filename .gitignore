@@ -6,7 +6,10 @@
 **/*.log
 **/tmp/
 **/data/
+!**/config/tessera/data/
+!**/config/tessera/data/**
 **/database/
+**/*.lock*
 **/.lock*
 **/chainlens/data/
 **/splunk/
