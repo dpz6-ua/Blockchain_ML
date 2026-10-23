@@ -254,19 +254,68 @@ La Figura~\ref{fig:bloque_81_audit} muestra el recibo del \textbf{Bloque~81} en 
     \label{fig:bloque_81_audit}
 \end{figure}
 
-La Tabla~\ref{tab:resumen_ataques} sintetiza las métricas cuantitativas obtenidas en ambas pruebas de penetración adversarial.
+\subsubsection{Prueba 3: Auditoría Ex-Post y Verificabilidad Independiente de FedAvg}
+\label{subsubsec:auditoria_expost_eval}
+Para validar la tercera garantía de integridad formalizada en la Sección~\ref{subsec:auditoria_fedavg}, se evaluó experimentalmente la capacidad de un agente auditor externo o regulador para fiscalizar \textit{a posteriori} y de forma autónoma la fidelidad de la agregación ejecutada por el servidor central. Esta prueba garantiza matemáticamente que el agregador no pueda alterar ponderaciones, omitir contribuciones ni inyectar sesgos arbitrarios en el modelo global sin dejar evidencia criptográfica incontrovertible.
+
+El ensayo se ejecutó sobre la Ronda~2 de un entrenamiento real de aprendizaje federado con dos clientes edge concurrentes conectados a la red Hyperledger Besu (contrato \texttt{0xa50a51c0...}) e IPFS. La Tabla~\ref{tab:trazabilidad_ronda2} sintetiza la cadena de custodia completa de dicha ronda, correlacionando de forma unívoca las cuentas emisoras, las transacciones selladas en los bloques consecutivos 73, 74 y 75, los identificadores multihash IPFS y las latencias registradas.
 
 \begin{table}[H]
 \centering
-\caption{Validación funcional del protocolo de doble verificación frente a los escenarios de manipulación evaluados.}
+\caption{Cadena de custodia y trazabilidad cruzada on-chain/IPFS durante la Ronda 2 y su fiscalización ex-post.}
+\label{tab:trazabilidad_ronda2}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+\textbf{Entidad} & \textbf{Dirección Ethereum} & \textbf{Evento / Método} & \textbf{Bloque Besu} & \textbf{Latencia} & \textbf{CID IPFS} & \textbf{Estado / Resultado} \\
+\midrule
+Cliente 3 & \texttt{0xf17f5215...} & \texttt{registerClientModel} & Bloque 73 & 0,886 s & \texttt{QmfWgkE3...} & Confirmado on-chain \\
+Cliente 2 & \texttt{0x62730609...} & \texttt{registerClientModel} & Bloque 74 & 4,311 s & \texttt{QmZYDmt6...} & Confirmado on-chain \\
+Servidor  & \texttt{0xfe3b557e...} & \texttt{updateModel} (FedAvg) & Bloque 75 & 4,709 s & \texttt{QmNgmFCu...} & Modelo global sellado \\
+\midrule
+Auditor   & \textit{Externo (Off-chain)} & Reconstrucción FedAvg & Consulta 73--75 & 0,219 s & \texttt{QmNgmFCu...} & \textbf{$\Delta = 0{,}000000$ (MATCH)} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+El protocolo de auditoría operó conforme a las siguientes etapas:
+\begin{enumerate}
+    \item \textbf{Extracción e indexación on-chain:} De forma desacoplada y fuera de banda, el auditor consulta el registro inmutable en Besu mediante llamadas de solo lectura JSON-RPC para la Ronda~2, recuperando los compromisos criptográficos del servidor (\texttt{QmNgmFCu...}), del Cliente~2 (\texttt{QmZYDmt6...}) y del Cliente~3 (\texttt{QmfWgkE3...}).
+    \item \textbf{Descarga y reconstrucción determinista:} El auditor descarga los tres artefactos binarios desde la pasarela IPFS ($2{,}08$~MB por modelo, totalizando $6{,}24$~MB recuperados en menos de 105~ms) y ejecuta la agregación matricial canónica de FedAvg:
+    \begin{equation}
+    \mathbf{w}_{\text{recon}}^{(2)} = \frac{1}{2}\mathbf{w}_{\text{cli2}}^{(2)} + \frac{1}{2}\mathbf{w}_{\text{cli3}}^{(2)}
+    \end{equation}
+    generando el hash IPFS del modelo resultante mediante el algoritmo multihash SHA-256.
+    \item \textbf{Verificación tensorial y criptográfica:} Se cotejan capa por capa los parámetros del modelo reconstruido frente al modelo global sellado por el servidor en el Bloque~75.
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\columnwidth]{figuras/logs_auditoria_expost_fedavg.png}
+    \caption{Prueba 3: Registro de consola del auditor independiente reconstruyendo la agregación FedAvg de la Ronda 2 a partir de Besu e IPFS, verificando fidelidad estricta ($\Delta = 0{,}000000$) y coincidencia de CID.}
+    \label{fig:log_auditoria_expost}
+\end{figure}
+
+Como refleja la telemetría en tiempo de ejecución capturada en la Figura~\ref{fig:log_auditoria_expost}, la auditoría integral (consulta RPC a Besu, descarga de 6,24~MB de IPFS, reconstrucción tensorial y verificación exhaustiva de las 8 capas de la red convolucional) requirió únicamente \textbf{0,2194~segundos}. La discrepancia paramétrica en todas las capas convolucionales y completamente conexas fue estrictamente nula ($\Delta = 0{,}000000\text{e}+00$), derivando en un identificador IPFS idéntico bit a bit al registrado en el Bloque~75 (\texttt{CID Equality: MATCH}), ratificando de forma incontrovertible la honestidad del servidor agregador.
+
+Asimismo, se evaluó la sensibilidad del mecanismo activando el modo adversarial simulado (\texttt{--simulate-tampering}). Al inyectar una perturbación aditiva deliberada de $+0{,}1$ en los pesos del servidor, el auditor detectó la desviación de forma instantánea en tan solo \textbf{0,1805~segundos} ($\Delta = 1{,}000000\text{e}-01$), emitiendo un dictamen público de manipulación no repudiable (\texttt{AUDIT FAILED: SERVER MALFEASANCE DETECTED}).
+
+\subsubsection{Síntesis de Validación y Alcance de Seguridad}
+La Tabla~\ref{tab:resumen_ataques} sintetiza las métricas cuantitativas obtenidas a lo largo de las tres pruebas experimentales de integridad y auditoría.
+
+\begin{table}[H]
+\centering
+\caption{Validación experimental del marco de integridad y auditoría frente a escenarios adversariales y de verificación ex-post.}
 \label{tab:resumen_ataques}
 \resizebox{\columnwidth}{!}{%
 \begin{tabular}{@{}lcccc@{}}
 \toprule
-\textbf{Escenario de Prueba} & \textbf{Entidad Defensora} & \textbf{Acción Preventiva / Resultado} & \textbf{Latencia} & \textbf{Impacto en Modelo} \\
+\textbf{Escenario de Prueba} & \textbf{Entidad Defensora / Auditora} & \textbf{Acción Preventiva / Resultado} & \textbf{Latencia} & \textbf{Integridad de Pesos} \\
 \midrule
 Servidor Adulterado / MitM & Cliente (Edge) & Intercepción determinista / Aborto preventivo & 0.1486 s & Envenenamiento nulo \\
 Cliente Malicioso & Servidor Agregador & Intercepción determinista / Descarte en FedAvg & 0.0309 s & FedAvg íntegro \\
+Auditoría FedAvg Ex-Post & Auditor Independiente & Reconstrucción matemática / Verificación fiel & 0.2194 s & Coincidencia bit a bit ($\Delta = 0$) \\
 \bottomrule
 \end{tabular}%
 }
