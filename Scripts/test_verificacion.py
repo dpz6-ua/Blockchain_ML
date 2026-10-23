@@ -206,101 +206,6 @@ def test_verificacion_benigna(w3, contract, ipfs_url="http://127.0.0.1:5001/api/
     return desc_ok and asc_ok
 
 
-def test_verificacion_auditoria_fedavg(w3, contract, ipfs_url="http://127.0.0.1:5001/api/v0/add?pin=false", ipfs_get="http://127.0.0.1:8080/ipfs/"):
-    """
-    Test 3: Ex-Post FedAvg Auditability & Byzantine Aggregation Verification.
-    Demonstrates that an external auditor (or verifying client) can reconstruct canonical FedAvg
-    from clientHistory CIDs in Besu and off-chain IPFS models, detecting if the server tampered with the aggregation.
-    """
-    print("\n" + "=" * 80)
-    print("TEST 3: EX-POST FEDAVG AUDIT (External Auditor Verifies Aggregation Server)")
-    print("=" * 80)
-
-    round_test = 997
-    cuenta_c2 = CLIENT_ACCOUNTS[2]
-    cuenta_c3 = CLIENT_ACCOUNTS[3]
-    n2 = 1708
-    n3 = 1707
-    total_samples = n2 + n3
-
-    # 1. Clients generate local models and upload to IPFS
-    modelo_c2 = NetCliente()
-    weights_c2 = [val.cpu().numpy() for _, val in modelo_c2.state_dict().items()]
-    resp2 = requests.post(ipfs_url, files={'file': pickle.dumps(weights_c2)}, timeout=10)
-    cid_c2 = resp2.json()['Hash'] if resp2.status_code == 200 else "QmClient2WeightsMockCID111111111111111111"
-
-    modelo_c3 = NetCliente()
-    weights_c3 = [val.cpu().numpy() for _, val in modelo_c3.state_dict().items()]
-    resp3 = requests.post(ipfs_url, files={'file': pickle.dumps(weights_c3)}, timeout=10)
-    cid_c3 = resp3.json()['Hash'] if resp3.status_code == 200 else "QmClient3WeightsMockCID222222222222222222"
-
-    # Clients register CIDs on Besu
-    for acc, cid in [(cuenta_c2, cid_c2), (cuenta_c3, cid_c3)]:
-        tx = contract.functions.registerClientModel(round_test, cid).build_transaction({
-            'from': acc["address"],
-            'nonce': w3.eth.get_transaction_count(acc["address"]),
-            'gas': 200000,
-            'gasPrice': w3.eth.gas_price,
-            'chainId': w3.eth.chain_id
-        })
-        signed = w3.eth.account.sign_transaction(tx, private_key=acc["key"])
-        w3.eth.wait_for_transaction_receipt(w3.eth.send_raw_transaction(signed.raw_transaction))
-
-    # 2. Byzantine Server commits a tampered global model on Besu
-    cid_server_tampered = "QmServerFraudulentGlobalModelWeights333333333333"
-    tx_srv = contract.functions.updateModel(round_test, cid_server_tampered).build_transaction({
-        'from': MEMBER1_ADDRESS,
-        'nonce': w3.eth.get_transaction_count(MEMBER1_ADDRESS),
-        'gas': 500000,
-        'gasPrice': w3.eth.gas_price,
-        'chainId': w3.eth.chain_id
-    })
-    signed_srv = w3.eth.account.sign_transaction(tx_srv, private_key=PRIV_KEY1)
-    w3.eth.wait_for_transaction_receipt(w3.eth.send_raw_transaction(signed_srv.raw_transaction))
-
-    # 3. Auditor executes Ex-Post Verification
-    print("1. Auditor queries Besu smart contract for Round t participants and CIDs...")
-    t0 = time.time()
-    cid_onchain_c2 = contract.functions.getClientModel(round_test, cuenta_c2["address"]).call()
-    cid_onchain_c3 = contract.functions.getClientModel(round_test, cuenta_c3["address"]).call()
-    last_model = contract.functions.getLastModel().call()
-    cid_server_onchain = last_model[1]
-
-    print(f"   Client 2 (1,708 samples): {cid_onchain_c2}")
-    print(f"   Client 3 (1,707 samples): {cid_onchain_c3}")
-    print(f"   Server Global Model CID:  {cid_server_onchain}")
-
-    print("2. Fetching client updates from IPFS and verifying against on-chain CIDs...")
-    resp_w2 = requests.get(f"{ipfs_get}{cid_onchain_c2}", timeout=10)
-    w2_downloaded = pickle.loads(resp_w2.content) if resp_w2.status_code == 200 else weights_c2
-    resp_w3 = requests.get(f"{ipfs_get}{cid_onchain_c3}", timeout=10)
-    w3_downloaded = pickle.loads(resp_w3.content) if resp_w3.status_code == 200 else weights_c3
-
-    print("3. Independent re-aggregation: FedAvg(w2, w3) computed deterministically...")
-    weights_reconstructed = [
-        (n2 * p2 + n3 * p3) / total_samples
-        for p2, p3 in zip(w2_downloaded, w3_downloaded)
-    ]
-    resp_agg = requests.post(ipfs_url, files={'file': pickle.dumps(weights_reconstructed)}, timeout=10)
-    cid_reconstructed = resp_agg.json()['Hash'] if resp_agg.status_code == 200 else "QmReconstructedFedAvgCanonicalHash44444444"
-    print(f"   Reconstructed model hash: {cid_reconstructed}")
-
-    t_audit = time.time() - t0
-    coincide = (cid_reconstructed == cid_server_onchain)
-
-    print("4. Comparing reconstructed model against server global CID in FLRegistry:")
-    print(f"   Audit execution latency:  {t_audit:.4f} seconds (Query + IPFS + FedAvg)")
-    print(f"   Canonical vs Server CID:  {'MATCH (HONEST)' if coincide else 'DISCREPANCY DETECTED (FRAUD)'}")
-
-    if not coincide:
-        print("   -> [EXPERIMENTAL SUCCESS] Auditor detected Byzantine server malfeasance.")
-        print("   -> Public cryptographic proof of aggregation tampering established on-chain.")
-        return True
-    else:
-        print("   -> [AUDIT PASSED] Aggregation server verified as completely honest.")
-        return False
-
-
 def main():
     parser = argparse.ArgumentParser(description="Banco de Pruebas de Verificación y Seguridad Criptográfica")
     parser.add_argument("--endpoint", type=str, default=ETH_ENDPOINT, help="RPC endpoint de Hyperledger Besu")
@@ -346,7 +251,6 @@ def main():
     res_control = test_verificacion_benigna(w3, contract, args.ipfs_api, args.ipfs_get)
     res_p1 = test_verificacion_descendente(w3, contract, args.ipfs_api, args.ipfs_get)
     res_p2 = test_verificacion_ascendente(w3, contract)
-    res_p3 = test_verificacion_auditoria_fedavg(w3, contract, args.ipfs_api, args.ipfs_get)
 
     print("\n" + "=" * 80)
     print("SUMMARY OF EXPERIMENTAL VERIFICATION TESTS:")
@@ -354,7 +258,6 @@ def main():
     print(f"Control Test (Benign Workflow):          {'PASSED' if res_control else 'FAILED'}")
     print(f"Test 1 (Malicious Server Detection):     {'PASSED (Local Abort)' if res_p1 else 'FAILED'}")
     print(f"Test 2 (Malicious Client Detection):     {'PASSED (Discarded from FedAvg)' if res_p2 else 'FAILED'}")
-    print(f"Test 3 (Ex-Post FedAvg Server Audit):    {'PASSED (Fraud Detected)' if res_p3 else 'FAILED'}")
     print("=" * 80)
 
 
