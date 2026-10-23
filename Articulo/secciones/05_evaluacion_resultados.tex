@@ -187,7 +187,7 @@ En un entorno convencional, si el servidor agregador o un intermediario en red (
 }
 \end{center}
 
-La Figura~\ref{fig:log_ataque_descendente} ilustra la telemetría real en tiempo de ejecución capturada en la consola del cliente. El proceso íntegro de consulta RPC a Besu, descarga y cotejo tensorial insumió tan solo \textbf{0,0740~segundos} (74~ms). Al constatar la discrepancia, el cliente detuvo de forma inmediata la ejecución, impidiendo la contaminación de su modelo local y salvaguardando los datos de entrenamiento privados del vehículo.
+La Figura~\ref{fig:log_ataque_descendente} ilustra la telemetría real en tiempo de ejecución capturada en la consola del cliente. El proceso íntegro de consulta RPC a Besu, descarga y cotejo tensorial insumió tan solo \textbf{0.1486~segundos} (149~ms). Al constatar la discrepancia, el cliente detuvo de forma inmediata la ejecución, impidiendo la contaminación de su modelo local y salvaguardando los datos de entrenamiento privados del vehículo.
 
 \begin{figure}[H]
     \centering
@@ -263,8 +263,8 @@ La Tabla~\ref{tab:resumen_ataques} sintetiza las métricas cuantitativas obtenid
 \toprule
 \textbf{Vector de Ataque} & \textbf{Entidad Defensora} & \textbf{Tasa Detección} & \textbf{Latencia} & \textbf{Impacto Modelo Global} \\
 \midrule
-Servidor Adulterado & Cliente (Edge) & \textbf{100,0\%} & 0,074 s & Aborto local; envenenamiento nulo \\
-Cliente Malicioso & Servidor Agregador & \textbf{100,0\%} & 0,044 s & Descarte inmediato; FedAvg íntegro \\
+Servidor Adulterado & Cliente (Edge) & \textbf{100,0\%} & 0,149 s & Aborto local; envenenamiento nulo \\
+Cliente Malicioso & Servidor Agregador & \textbf{100,0\%} & 0,031 s & Descarte inmediato; FedAvg íntegro \\
 \bottomrule
 \end{tabular}%
 }

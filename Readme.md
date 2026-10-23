@@ -21,8 +21,8 @@ Esta arquitectura implementa un **protocolo de doble verificación criptográfic
 1. **Almacenamiento fuera de cadena (*Off-Chain*)**: Los pesos neuronales binarios se suben a **IPFS Kubo**, obteniendo un identificador determinista de contenido (**CID**).
 2. **Registro inmutable en cadena (*On-Chain*)**: Mediante un Smart Contract en Solidity (`FLRegistry.sol`) ejecutado sobre una red permisionada **Hyperledger Besu (IBFT 2.0)**, tanto el servidor central como los clientes firman y registran los CIDs de sus contribuciones por ronda.
 3. **Auditoría cruzada en tiempo real**: 
-   - **Verificación Descendente**: Los clientes cotejan el modelo global descargado frente al CID consolidado en Blockchain antes de entrenar (mitigando servidores comprometidos en $\sim 0{,}074$~s).
-   - **Verificación Ascendente**: El servidor coteja las contribuciones recibidas frente a los CIDs firmados por los clientes en la EVM antes de ejecutar *FedAvg* (mitigando clientes envenenadores en $\sim 0{,}044$~s).
+   - **Verificación Descendente**: Los clientes cotejan el modelo global descargado frente al CID consolidado en Blockchain antes de entrenar (mitigando servidores comprometidos en $\sim 0{,}149$~s).
+   - **Verificación Ascendente**: El servidor coteja las contribuciones recibidas frente a los CIDs firmados por los clientes en la EVM antes de ejecutar *FedAvg* (mitigando clientes envenenadores en $\sim 0{,}031$~s).
 
 La sobrecarga temporal en red real es de tan solo el **9,5\%** (6,34~s por ronda), con un coste de gas estable y predecible por transacción que garantiza escalabilidad operativa e independencia del tamaño del modelo neuronal.
 
@@ -166,7 +166,7 @@ python test_verificacion.py
 ```
 
 El script simula de manera controlada dos vectores críticos de ataque:
-* **Prueba 1 (Descendente - Servidor Malicioso)**: El servidor inyecta un modelo adulterado. El cliente coteja el CID recibido con el emitido en la Blockchain y aborta la ronda de forma preventiva en $\approx 0{,}074$~segundos.
+* **Prueba 1 (Descendente - Servidor Malicioso)**: El servidor inyecta un modelo adulterado. El cliente coteja el CID recibido con el emitido en la Blockchain y aborta la ronda de forma preventiva en $\approx 0{,}149$~segundos.
 * **Prueba 2 (Ascendente - Cliente Envenenador)**: Un cliente intenta colar gradientes manipulados con un hash no respaldado en la EVM. El agregador detecta la discrepancia on-chain y descarta la contribución en $\approx 0{,}044$~segundos.
 
 > **Nota metodológica de seguridad:** La doble verificación criptográfica garantiza la detección determinista de ataques de adulteración física en tránsito (*tampering*) e inyección de modelos disidentes no respaldados on-chain. La mitigación de ataques semánticos donde los pesos han sido generados mediante manipulación de datos locales (*data poisoning*) y firmados legítimamente en la red requiere defensas complementarias de agregación bizantina (Krum, Median), contempladas en el trabajo futuro.

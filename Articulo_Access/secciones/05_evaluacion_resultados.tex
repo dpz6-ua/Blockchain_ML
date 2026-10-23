@@ -187,7 +187,7 @@ En un entorno federado no confiable, la distribución descendente de parámetros
 }
 \end{center}
 
-La Figura~\ref{fig:log_ataque_descendente} ilustra la telemetría real en tiempo de ejecución capturada en la consola del cliente. El proceso íntegro de consulta RPC a Besu, descarga y cotejo tensorial insumió tan solo \textbf{0,0740~segundos} (74~ms). Al constatar la discrepancia, el cliente detuvo de forma inmediata la ejecución, impidiendo la contaminación de su modelo local y salvaguardando los datos de entrenamiento privados del vehículo.
+La Figura~\ref{fig:log_ataque_descendente} ilustra la telemetría real en tiempo de ejecución capturada en la consola del cliente. El proceso íntegro de consulta RPC a Besu, descarga y cotejo tensorial insumió tan solo \textbf{0.1486~segundos} (149~ms). Al constatar la discrepancia, el cliente detuvo de forma inmediata la ejecución, impidiendo la contaminación de su modelo local y salvaguardando los datos de entrenamiento privados del vehículo.
 
 \begin{figure}[H]
     \centering
@@ -272,7 +272,7 @@ Cliente Malicioso & Servidor Agregador & Intercepción determinista / Descarte e
 }
 \end{table}
 
-Estos ensayos constituyen una validación funcional determinista de las primitivas de intercepción criptográfica implementadas en el marco: ante una alteración bit a bit de los parámetros en tránsito o la ausencia de un compromiso inmutable previamente sellado y firmado en la cadena, el protocolo intercepta la anomalía de manera determinista con tiempos de respuesta inferiores a la décima de segundo (74~ms en el cliente y 44~ms en el servidor), impidiendo que los pesos discordantes contaminen los cómputos locales o globales.
+Estos ensayos constituyen una validación funcional determinista de las primitivas de intercepción criptográfica implementadas en el marco: ante una alteración bit a bit de los parámetros en tránsito o la ausencia de un compromiso inmutable previamente sellado y firmado en la cadena, el protocolo intercepta la anomalía de manera determinista con tiempos de respuesta en torno a la décima de segundo (149~ms en el cliente y 31~ms en el servidor), impidiendo que los pesos discordantes contaminen los cómputos locales o globales.
 \\
 
 Tal como se formalizó en el modelo de amenazas (Sección~\ref{subsec:modelo_amenazas}), conviene remarcar los límites operacionales de este esquema defensivo: la doble verificación en cadena actúa con eficacia contra la adulteración directa de parámetros en tránsito (\textit{tampering}), la emisión no autorizada a nombre de terceros mediante autenticación asimétrica ECDSA y la inyección de modelos disidentes no respaldados on-chain. No obstante, si un nodo malicioso genera una actualización perjudicial mediante manipulación local de sus datos de entrenamiento (\textit{data poisoning} o \textit{label flipping})~\cite{tolpegin2020data} y la firma legítimamente con su clave privada en Besu, el compromiso criptográfico coincidirá formalmente aunque la semántica del modelo esté contaminada. La neutralización de esta tipología de ataques semánticos requiere complementar la trazabilidad con filtros de agregación estadística bizantina (como Krum~\cite{blanchard2017byzantine}, Median o Trimmed-Mean) o mediante la auditoría ex-post de las contribuciones registradas posibilitada por nuestro diseño (Sección~\ref{subsec:auditoria_fedavg}).
