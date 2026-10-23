@@ -2,6 +2,8 @@
 pragma solidity ^0.8.10;
 
 contract FLRegistry {
+    address public serverAddress;
+
     struct ModelRound {
         uint256 roundNum;
         string modelHash;
@@ -17,12 +19,25 @@ contract FLRegistry {
 
     event ModelUpdated(uint256 round, string modelHash, address author);
 
+    modifier onlyServer() {
+        require(msg.sender == serverAddress, "Solo el servidor agregador autorizado puede actualizar el modelo global");
+        _;
+    }
+
+    constructor() {
+        serverAddress = msg.sender;
+    }
+
+    function setServerAddress(address _newServer) public onlyServer {
+        serverAddress = _newServer;
+    }
+
     function registerClientModel(uint256 round, string memory hash) public {
         clientHistory[round][msg.sender] = ModelRound(round, hash, msg.sender, block.timestamp);
         emit ModelUpdated(round, hash, msg.sender);
     }
 
-    function updateModel(uint256 round, string memory hash) public {
+    function updateModel(uint256 round, string memory hash) public onlyServer {
         history[round] = ModelRound(round, hash, msg.sender, block.timestamp);
         latestRound = round;
         hasModel = true;

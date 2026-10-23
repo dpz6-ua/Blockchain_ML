@@ -160,10 +160,10 @@ Para validar empíricamente que la arquitectura no solo registra transacciones e
 
 \subsubsection{Prueba 1: Verificación Descendente (Servidor Adulterado frente a Cliente Edge)}
 \label{subsubsec:ataque_descendente}
-En un entorno convencional, si el servidor agregador o un intermediario en red (\textit{Man-in-the-Middle}) altera los pesos del modelo global antes de distribuirlos, los clientes entrenan de forma inadvertida sobre parámetros maliciosos. Para impedirlo, el código implementa una rutina de protección en dos fases:
+En un entorno federado no confiable, la distribución descendente de parámetros expone a los clientes a dos vectores de riesgo principales: la alteración de los tensores en tránsito por intermediarios de red (\textit{Man-in-the-Middle}) y la bifurcación maliciosa o equivocación del servidor (\textit{server equivocation}), donde un agregador deshonesto intenta distribuir modelos globales distintos o sesgados selectivamente a participantes específicos. Cabe destacar que la validez del modelo global on-chain queda estrictamente acotada a la entidad autorizada gracias al modificador de control de acceso \texttt{onlyServer} en el contrato \texttt{FLRegistry}, el cual revierte cualquier intento de registro por cuentas no autorizadas. Así, la rutina de verificación descendente implementada en el cliente protege de forma autónoma frente a discrepancias entre los pesos recibidos por gRPC y el compromiso sellado institucionalmente en la Blockchain:
 \begin{enumerate}
-    \item \textbf{Generación y Sellado Oficial:} El servidor legítimo instancia el modelo base \texttt{NetCliente}, serializa los tensores mediante \texttt{pickle.dumps} y los publica en el daemon IPFS local a través del endpoint \texttt{/api/v0/add?pin=false}, obteniendo el CID oficial \texttt{QmSEBaqx...}. A continuación, el servidor emite una transacción firmada en la EVM invocando \texttt{updateModel(round, cid\_oficial)} desde su cuenta (\texttt{0xfe3b55...}), quedando el compromiso criptográfico sellado en el \textbf{Bloque~15}.
-    \item \textbf{Inyección Adversarial y Detección Local:} Se emula un servidor malicioso que perturba los parámetros inyectando ruido aditivo ($\mathbf{w}_{\text{cand}} = \mathbf{w}_{\text{oficial}} + 0{,}5$) y remite este vector corrupto al cliente edge vía gRPC.
+    \item \textbf{Generación y Sellado Oficial:} El servidor legítimo instancia el modelo base \texttt{NetCliente}, serializa los tensores mediante \texttt{pickle.dumps} y los publica en el daemon IPFS local a través del endpoint \texttt{/api/v0/add?pin=false}, obteniendo el CID oficial \texttt{QmSEBaqx...}. A continuación, el servidor emite una transacción firmada en la EVM invocando \texttt{updateModel(round, cid\_oficial)} desde su cuenta autorizada (\texttt{0xfe3b55...}), quedando el compromiso criptográfico sellado en el \textbf{Bloque~15}.
+    \item \textbf{Inyección Adversarial y Simulación de Discrepancia:} Se emula un escenario adversarial donde se perturban los parámetros transmitidos al cliente inyectando ruido aditivo ($\mathbf{w}_{\text{cand}} = \mathbf{w}_{\text{oficial}} + 0{,}5$) y remitiendo este vector corrupto vía gRPC (simulando alteración en tránsito o un intento del servidor de suministrar una versión discrepante del modelo oficial).
     \item \textbf{Comprobación Cruzada y Aborto Inmediato:} Al recibir la orden de entrenamiento, el cliente edge invoca la función de solo lectura \texttt{getLastModel()} en el Smart Contract mediante una llamada JSON-RPC para recuperar el CID sellado on-chain. Con este identificador descarga de forma paralela el artefacto binario de referencia desde la pasarela IPFS (\texttt{/ipfs/<CID>}) y ejecuta una comparación bit a bit tensor por tensor (\texttt{np.allclose(p\_recibido, p\_ipfs, atol=1e-7)}).
 \end{enumerate}
 
@@ -207,28 +207,30 @@ Por su parte, la Figura~\ref{fig:bloque_15_audit} aporta la evidencia inmutable 
 
 \subsubsection{Prueba 2: Verificación Ascendente (Cliente Envenenador frente a Servidor Agregador)}
 \label{subsubsec:ataque_ascendente}
-La segunda vulnerabilidad crítica consiste en la inyección de gradientes o pesos corruptos por parte de un nodo cliente malicioso (\textit{model poisoning}). Para neutralizarla, el servidor exige que toda contribución reportada esté previamente autenticada y sellada en la Blockchain:
+La segunda vulnerabilidad crítica consiste en la inyección de gradientes o pesos corruptos por parte de un nodo cliente malicioso (\textit{model poisoning}). Para neutralizarla de raíz, el servidor no se limita a cotejar identificadores, sino que valida de forma cruzada la correspondencia biunívoca entre la carga útil recibida en memoria y el registro inmutable on-chain:
 \begin{enumerate}
     \item \textbf{Registro Legítimo On-Chain:} El nodo cliente honesto (cuenta 3, dirección \texttt{0xf17f52...}) publica sus pesos en IPFS y emite una transacción firmada con su clave privada invocando \texttt{registerClientModel}\allowbreak\texttt{(round, cid\_legitimo)}, la cual queda consolidada por los validadores en el \textbf{Bloque~16}.
-    \item \textbf{Inyección Adversarial:} Se emula un nodo malicioso que intenta colar una actualización envenenada remitiendo al servidor un identificador arbitrario no respaldado on-chain (\texttt{QmClientFraude}\allowbreak\texttt{QueNoEsta}\allowbreak\texttt{RegistradoEnBesu...}).
-    \item \textbf{Auditoría RPC y Descarte en FedAvg:} Antes de procesar la agregación matricial de la ronda, el servidor ejecuta una llamada de solo lectura JSON-RPC \texttt{getClientModel(round, address)} sobre el contrato \texttt{FLRegistry}. Al comparar el valor reportado con el registro inmutable firmado, se detecta la no coincidencia de hashes.
+    \item \textbf{Inyección Adversarial:} Se evalúa el comportamiento ante un intento de inyección donde se remite al servidor una actualización cuyos parámetros o metadatos no coinciden con el compromiso sellado on-chain (emulando tanto el envío de un identificador malicioso \texttt{QmClientFraude...} como el envío de pesos envenenados no correspondientes con el CID registrado).
+    \item \textbf{Auditoría Criptográfica y Descarte en FedAvg:} Antes de procesar la agregación matricial de la ronda, el servidor calcula el hash de los tensores recibidos en memoria ($\text{CID}_{\text{calc}}^{(k)}$) y ejecuta una llamada de solo lectura JSON-RPC \texttt{getClientModel(round, address)} sobre el contrato \texttt{FLRegistry} para obtener $\text{CID}_{\text{onchain}}^{(k)}$. Al constatar la discrepancia, la contribución es excluida de forma preventiva.
 \end{enumerate}
 
 \begin{center}
 \small
 \fbox{
 \begin{minipage}{0.95\columnwidth}
-\textbf{Algoritmo 2. Auditoría RPC Ascendente en el Servidor Agregador}
+\textbf{Algoritmo 2. Auditoría Criptográfica y RPC Ascendente en el Servidor Agregador}
 \begin{enumerate}
-    \item \textbf{Entrada:} Identificador $\text{CID}_{\text{rep}}^{(k)}$ reportado por el cliente $k$ con dirección $\text{addr}_k$.
+    \item \textbf{Entrada:} Pesos $\mathbf{w}_k^{(t)}$ e identificador $\text{CID}_{\text{rep}}^{(k)}$ reportados por el cliente $k$ con dirección $\text{addr}_k$.
+    \item Computar hash de los pesos recibidos: \\
+    $\text{CID}_{\text{calc}}^{(k)} \leftarrow \text{Hash}(\mathbf{w}_k^{(t)})$
     \item Consultar registro del cliente en Besu: \\
     $\text{CID}_{\text{onchain}}^{(k)} \leftarrow \texttt{getClientModel}(t, \text{addr}_k)$
-    \item \textbf{Si} $\text{CID}_{\text{rep}}^{(k)} \neq \text{CID}_{\text{onchain}}^{(k)}$ \textbf{entonces}
+    \item \textbf{Si} $\text{CID}_{\text{rep}}^{(k)} \neq \text{CID}_{\text{onchain}}^{(k)}$ \textbf{o} $\text{CID}_{\text{calc}}^{(k)} \neq \text{CID}_{\text{onchain}}^{(k)}$ \textbf{entonces}
     \begin{itemize}
-        \item Registrar alerta: \textit{«Discrepancia detectada / Fraude»}
+        \item Registrar alerta: \textit{«Discrepancia detectada / Inyección no autenticada»}
         \item \textbf{DESCARTAR} contribución del cliente $k$ del pool de FedAvg
     \end{itemize}
-    \item \textbf{Si no:} Incorporar pesos de $k$ en la agregación global.
+    \item \textbf{Si no:} Incorporar pesos $\mathbf{w}_k^{(t)}$ en la agregación global.
 \end{enumerate}
 \end{minipage}
 }
@@ -256,24 +258,24 @@ La Tabla~\ref{tab:resumen_ataques} sintetiza las métricas cuantitativas obtenid
 
 \begin{table}[H]
 \centering
-\caption{Evaluación empírica del protocolo de doble verificación frente a los vectores de ataque adversarial evaluados.}
+\caption{Validación funcional del protocolo de doble verificación frente a los escenarios de manipulación evaluados.}
 \label{tab:resumen_ataques}
 \resizebox{\columnwidth}{!}{%
 \begin{tabular}{@{}lcccc@{}}
 \toprule
-\textbf{Vector de Ataque} & \textbf{Entidad Defensora} & \textbf{Tasa Detección} & \textbf{Latencia} & \textbf{Impacto Modelo Global} \\
+\textbf{Escenario de Prueba} & \textbf{Entidad Defensora} & \textbf{Acción Preventiva / Resultado} & \textbf{Latencia} & \textbf{Impacto en Modelo} \\
 \midrule
-Servidor Adulterado & Cliente (Edge) & \textbf{100,0\%} & 0,074 s & Aborto local; envenenamiento nulo \\
-Cliente Malicioso & Servidor Agregador & \textbf{100,0\%} & 0,044 s & Descarte inmediato; FedAvg íntegro \\
+Servidor Adulterado / MitM & Cliente (Edge) & Intercepción determinista / Aborto preventivo & 0,074 s & Envenenamiento nulo \\
+Cliente Malicioso & Servidor Agregador & Intercepción determinista / Descarte en FedAvg & 0,044 s & FedAvg íntegro \\
 \bottomrule
 \end{tabular}%
 }
 \end{table}
 
-Estos resultados demuestran que la sobrecarga temporal introducida por el marco confiere una sólida protección empírica frente a manipulaciones de pesos y modelos disidentes en tránsito, interceptando dichos vectores evaluados con tiempos de respuesta inferiores a la décima de segundo.
+Estos ensayos constituyen una validación funcional determinista de las primitivas de intercepción criptográfica implementadas en el marco: ante una alteración bit a bit de los parámetros en tránsito o la ausencia de un compromiso inmutable previamente sellado y firmado en la cadena, el protocolo intercepta la anomalía de manera determinista con tiempos de respuesta inferiores a la décima de segundo (74~ms en el cliente y 44~ms en el servidor), impidiendo que los pesos discordantes contaminen los cómputos locales o globales.
 \\
 
-Conviene delimitar con rigor el alcance de este mecanismo defensivo: la doble verificación criptográfica en cadena actúa con eficacia contra la adulteración directa de parámetros en tránsito (\textit{tampering}), la emisión no autorizada a nombre de terceros mediante la autenticación con firmas asimétricas ECDSA en cada transacción y la inyección de modelos disidentes no respaldados on-chain. Cabe señalar que la autenticidad en la EVM descansa sobre la custodia rigurosa de las claves privadas de los participantes (lo que en entornos comerciales de producción exige módulos HSM o enclaves seguros), y que el protocolo no previene per se la sustracción o cesión física de credenciales en el cliente. Asimismo, si un nodo malicioso genera una actualización perjudicial mediante manipulación local de sus datos de entrenamiento (\textit{data poisoning} o \textit{label flipping})~\cite{tolpegin2020data} y la firma legítimamente con su clave privada en la Blockchain, el compromiso criptográfico coincidirá formalmente pero el contenido neuronal estará contaminado. La mitigación de esta tipología de ataques semánticos requiere complementar la trazabilidad con filtros de agregación estadística bizantina (como Krum~\cite{blanchard2017byzantine}, Median o Trimmed-Mean) coordinados desde el contrato, aspecto que se analiza formalmente en las líneas futuras.
+Tal como se formalizó en el modelo de amenazas (Sección~\ref{subsec:modelo_amenazas}), conviene remarcar los límites operacionales de este esquema defensivo: la doble verificación en cadena actúa con eficacia contra la adulteración directa de parámetros en tránsito (\textit{tampering}), la emisión no autorizada a nombre de terceros mediante autenticación asimétrica ECDSA y la inyección de modelos disidentes no respaldados on-chain. No obstante, si un nodo malicioso genera una actualización perjudicial mediante manipulación local de sus datos de entrenamiento (\textit{data poisoning} o \textit{label flipping})~\cite{tolpegin2020data} y la firma legítimamente con su clave privada en Besu, el compromiso criptográfico coincidirá formalmente aunque la semántica del modelo esté contaminada. La neutralización de esta tipología de ataques semánticos requiere complementar la trazabilidad con filtros de agregación estadística bizantina (como Krum~\cite{blanchard2017byzantine}, Median o Trimmed-Mean) o mediante la auditoría ex-post de las contribuciones registradas posibilitada por nuestro diseño (Sección~\ref{subsec:auditoria_fedavg}).
 
 \subsection{Consumo y Previsibilidad del Gas en la EVM}
 La Figura~\ref{fig:consumo_gas} ilustra el consumo de gas computacional de las operaciones registradas a lo largo de las rondas.
