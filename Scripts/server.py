@@ -178,19 +178,27 @@ class MiBesuServer(fl.server.strategy.FedAvg):
                 continue
 
             try:
+                # 1. Consultar Blockchain (Besu)
                 blockchain_cid = self.contract.functions.getClientModel(
                     server_round,
                     Web3.to_checksum_address(client_address)
                 ).call()
 
-                if blockchain_cid == client_cid:
+                # 2. Reconstruir el CID de los pesos recibidos vía Flower
+                client_ndarrays = fl.common.parameters_to_ndarrays(fit_res.parameters)
+                client_bytes = pickle.dumps(client_ndarrays)
+                calculated_cid = self.upload_to_ipfs(client_bytes)
+
+                # 3. Triple verificación (pesos == reportado == blockchain)
+                if calculated_cid == client_cid == blockchain_cid:
                     print(f"Verificación exitosa para {client_address} (CID: {client_cid})")
                     valid_results.append((client_proxy, fit_res))
                 else:
-                    print(f"\n[ALERTA DE SEGURIDAD] CID de {client_address} ({client_cid}) no coincide con Blockchain ({blockchain_cid}). Contribución descartada.")
+                    print(f"\n[ALERTA DE SEGURIDAD] Discrepancia tensorial o de registro en {client_address}.")
+                    print(f"  -> Calculado: {calculated_cid} | Reportado: {client_cid} | Blockchain: {blockchain_cid}")
                     descartados_count += 1
             except Exception as e:
-                print(f"Error validando cliente en blockchain: {e}")
+                print(f"Error validando cliente en blockchain/IPFS: {e}")
                 descartados_count += 1
 
         t_verif_clientes = time.time() - t_start_verif
