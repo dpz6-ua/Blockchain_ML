@@ -24,11 +24,18 @@ ETH_ENDPOINT = "http://127.0.0.1:18545"
 IPFS_GATEWAY = "http://127.0.0.1:8080/ipfs/"
 IPFS_API = "http://127.0.0.1:5001/api/v0/add?pin=false"
 
+# Default consortium registry (governance fallback if event log querying is unavailable)
+DEFAULT_CONSORTIUM_CLIENTS = {
+    2: "0x627306090abaB3A6e1400e9345bC60c78a8BEf57",
+    3: "0xf17f52151EbEF6C7334FAD080c5704D77216b732",
+}
+
 
 def discover_participating_clients(contract, round_target: int) -> dict:
     """
     Discovers participating client addresses dynamically for round_target
     by querying ModelUpdated event logs emitted on Hyperledger Besu.
+    Falls back to DEFAULT_CONSORTIUM_CLIENTS if event log queries fail.
     """
     try:
         try:
@@ -55,8 +62,9 @@ def discover_participating_clients(contract, round_target: int) -> dict:
             return discovered
     except Exception as e:
         print(f"   [NOTICE] Event autodiscovery fallback ({e}). Using consortium registry.")
+        return DEFAULT_CONSORTIUM_CLIENTS
 
-    return {}
+    return DEFAULT_CONSORTIUM_CLIENTS
 
 
 def audit_round(round_target: int, w3, contract, ipfs_get: str, ipfs_api: str, clients_dict: dict, samples_dict: dict, simulate_tampering: bool = False):
