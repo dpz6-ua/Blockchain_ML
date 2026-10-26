@@ -24,10 +24,39 @@ ETH_ENDPOINT = "http://127.0.0.1:18545"
 IPFS_GATEWAY = "http://127.0.0.1:8080/ipfs/"
 IPFS_API = "http://127.0.0.1:5001/api/v0/add?pin=false"
 
-DEFAULT_CLIENTS = {
-    2: "0x627306090abaB3A6e1400e9345bC60c78a8BEf57",
-    3: "0xf17f52151EbEF6C7334FAD080c5704D77216b732"
-}
+
+def discover_participating_clients(contract, round_target: int) -> dict:
+    """
+    Discovers participating client addresses dynamically for round_target
+    by querying ModelUpdated event logs emitted on Hyperledger Besu.
+    """
+    try:
+        try:
+            server_addr = contract.functions.serverAddress().call().lower()
+        except Exception:
+            server_addr = ""
+
+        event_filter = contract.events.ModelUpdated.create_filter(from_block=0, to_block="latest")
+        all_events = event_filter.get_all_entries()
+
+        discovered = {}
+        for ev in all_events:
+            if ev.args.round == round_target:
+                author = ev.args.author
+                if author.lower() != server_addr and author not in discovered.values():
+                    cid = contract.functions.getClientModel(round_target, Web3.to_checksum_address(author)).call()
+                    if cid:
+                        discovered[len(discovered) + 2] = Web3.to_checksum_address(author)
+
+        if discovered:
+            print(f"   [AUTODISCOVERY] {len(discovered)} client node(s) discovered dynamically from Besu event logs:")
+            for cid_key, addr in discovered.items():
+                print(f"      * Member {cid_key}: {addr}")
+            return discovered
+    except Exception as e:
+        print(f"   [NOTICE] Event autodiscovery fallback ({e}). Using consortium registry.")
+
+    return DEFAULT_CLIENTS
 
 
 def audit_round(round_target: int, w3, contract, ipfs_get: str, ipfs_api: str, clients_dict: dict, samples_dict: dict, simulate_tampering: bool = False):
@@ -221,13 +250,16 @@ def main():
         except Exception:
             target_round = 1
 
+    # Discover participating clients dynamically from Besu event logs
+    clients_dict = discover_participating_clients(contract, target_round)
+
     # Parse sample counts
     if args.samples == "equal" or not args.samples:
-        samples_dict = {m: 1 for m in DEFAULT_CLIENTS.keys()}
+        samples_dict = {m: 1 for m in clients_dict.keys()}
     else:
         sample_list = [int(s.strip()) for s in args.samples.split(",")]
         samples_dict = {}
-        for idx, m in enumerate(DEFAULT_CLIENTS.keys()):
+        for idx, m in enumerate(clients_dict.keys()):
             samples_dict[m] = sample_list[idx] if idx < len(sample_list) else 1
 
     audit_round(
@@ -236,7 +268,7 @@ def main():
         contract=contract,
         ipfs_get=args.ipfs_get,
         ipfs_api=args.ipfs_api,
-        clients_dict=DEFAULT_CLIENTS,
+        clients_dict=clients_dict,
         samples_dict=samples_dict,
         simulate_tampering=args.simulate_tampering
     )

@@ -127,7 +127,7 @@ $E_5$ & 65,40 & 1,91 & 3,93 & 2,94 & 82,63 & 0,06 & 0,0079 & 2,99 \\
 Los datos de la Tabla~\ref{tab:desglose_fases} confirman tres principios fundamentales:
 \begin{enumerate}
     \item \textbf{Desacoplamiento de cómputo:} En las configuraciones distribuidas ($E_3$, $E_4$, $E_5$), el tiempo dedicado exclusivamente a la optimización neuronal con PyTorch se mantiene estrictamente invariante ($\sim 65,4\text{--}67,6$~s), evitando la contención de recursos observada en $E_1$ ($94,08$~s).
-    \item \textbf{Sobrecarga de red acotada:} La verificación remota vía RPC ($1,68\text{--}1,91$~s) y la transferencia de pesos mediante IPFS ($2,43\text{--}3,93$~s) sobre Wi-Fi añaden una latencia mínima, mientras que el cálculo de FedAvg en el servidor es despreciable ($< 8$~ms).
+    \item \textbf{Sobrecarga de red y verificación acotadas:} La verificación remota vía RPC ($1,68\text{--}1,91$~s en cliente y $\sim 5$~ms en servidor), la transferencia IPFS ($2,43\text{--}3,93$~s) y el cómputo in-memory del multihash de pesos en el servidor ($\sim 52$~ms en el código final, $<0{,}08\%$ del ciclo) añaden una latencia mínima, mientras que el cálculo de FedAvg es despreciable ($< 8$~ms).
     \item \textbf{Correspondencia entre métricas ($T_{\text{client}}$ y $T_{\text{server}}$):} La suma de las cuatro fases locales del cliente (\textit{Train} + \textit{Verif.} + \textit{IPFS} + \textit{Tx Besu}) totaliza con exactitud el tiempo de ciclo reportado en la Tabla~\ref{tab:tiempos_resumen} (por ejemplo, en $E_4$: $66{,}22 + 1{,}68 + 2{,}43 + 2{,}84 = 73{,}17$~s, en plena coherencia con la media de $73{,}29$~s). Paralelamente, la perspectiva del servidor refleja la duración global de la ronda en el agregador ($T_{\text{server}}$), donde el servidor aguarda la concurrencia de todos los clientes (\textit{Espera}, $79{,}54$~s) y añade la confirmación del nuevo modelo consolidado en la cadena (\textit{Bloque}, $2{,}89$~s), totalizando una latencia extremo a extremo de $\approx 82{,}49$~s.
 \end{enumerate}
 
@@ -164,7 +164,7 @@ En un entorno federado no confiable, la distribución descendente de parámetros
 \begin{enumerate}
     \item \textbf{Generación y Sellado Oficial:} El servidor legítimo instancia el modelo base \texttt{NetCliente}, serializa los tensores mediante \texttt{pickle.dumps} y los publica en el daemon IPFS local a través del endpoint \texttt{/api/v0/add?pin=false}, obteniendo el CID oficial \texttt{QmQTpgejdzh...}. A continuación, el servidor emite una transacción firmada en la EVM invocando \texttt{updateModel(round, cid\_oficial)} desde su cuenta autorizada (\texttt{0xfe3b55...}), quedando el compromiso criptográfico sellado en el \textbf{Bloque~80}.
     \item \textbf{Inyección Adversarial y Simulación de Discrepancia:} Se emula un escenario adversarial donde se perturban los parámetros transmitidos al cliente inyectando ruido aditivo ($\mathbf{w}_{\text{cand}} = \mathbf{w}_{\text{oficial}} + 0{,}5$) y remitiendo este vector corrupto vía gRPC (simulando alteración en tránsito o un intento del servidor de suministrar una versión discrepante del modelo oficial).
-    \item \textbf{Comprobación Cruzada y Aborto Inmediato:} Al recibir la orden de entrenamiento, el cliente edge invoca la función de solo lectura \texttt{getLastModel()} en el Smart Contract mediante una llamada JSON-RPC para recuperar el CID sellado on-chain. Con este identificador descarga de forma paralela el artefacto binario de referencia desde la pasarela IPFS (\texttt{/ipfs/<CID>}) y ejecuta una comparación bit a bit tensor por tensor (\texttt{np.allclose(p\_recibido, p\_ipfs, atol=1e-7)}).
+    \item \textbf{Comprobación Cruzada y Aborto Inmediato:} Al recibir la orden de entrenamiento, el cliente edge invoca la función de solo lectura \texttt{getLastModel()} en el Smart Contract mediante una llamada JSON-RPC para recuperar el CID sellado on-chain. Con este identificador descarga de forma paralela el artefacto binario de referencia desde la pasarela IPFS (\texttt{/ipfs/<CID>}) y ejecuta una comparación numérica tensorial elemento a elemento con cota de tolerancia de coma flotante (\texttt{np.allclose(p\_recibido, p\_ipfs, atol=1e-7)}).
 \end{enumerate}
 
 \begin{center}
@@ -245,7 +245,7 @@ La Figura~\ref{fig:log_ataque_ascendente} documenta la salida en terminal del se
     \label{fig:log_ataque_ascendente}
 \end{figure}
 
-La Figura~\ref{fig:bloque_81_audit} muestra el recibo del \textbf{Bloque~81} en el explorador Besu, donde consta la transacción \texttt{registerClientModel} emitida por la cuenta del cliente (\texttt{0xf17f5215...}) con hash \texttt{0x347899f...} y un consumo de gas de 160.200 (límite 200.000). Dado que el atacante remitió un CID ajeno al sellado en dicho bloque, la verificación cruzada interceptó la inyección adversarial gracias a la resistencia a colisiones de la función de resumen SHA-256.
+La Figura~\ref{fig:bloque_81_audit} muestra el recibo del \textbf{Bloque~81} en el explorador Besu, donde consta la transacción \texttt{registerClientModel} emitida por la cuenta del cliente (\texttt{0xf17f5215...}) con hash \texttt{0x347899f...} y un consumo de gas de 160.200 (límite 200.000). Dado que el atacante remitió un CID ajeno al sellado en dicho bloque, la verificación cruzada interceptó la inyección adversarial gracias a la resistencia a colisiones de la función hash SHA-256 subyacente al CID de IPFS.
 
 \begin{figure}[H]
     \centering
@@ -281,7 +281,7 @@ Auditor   & \textit{Externo (Off-chain)} & Reconstrucción FedAvg & Consulta 73-
 
 El protocolo de auditoría operó conforme a las siguientes etapas:
 \begin{enumerate}
-    \item \textbf{Extracción e indexación on-chain:} De forma desacoplada y fuera de banda, el auditor consulta el registro inmutable en Besu mediante llamadas de solo lectura JSON-RPC para la Ronda~2, recuperando los compromisos criptográficos del servidor (\texttt{QmNgmFCu...}), del Cliente~2 (\texttt{QmZYDmt6...}) y del Cliente~3 (\texttt{QmfWgkE3...}).
+    \item \textbf{Extracción e indexación on-chain:} De forma desacoplada y fuera de banda, el auditor identifica dinámicamente a los clientes participantes $\mathcal{K}_2$ consultando los registros de eventos \texttt{ModelUpdated} de la Ronda~2 en Besu (descubriendo las cuentas del Cliente~2 y Cliente~3) y recupera sus compromisos criptográficos sellados (\texttt{QmZYDmt6...} y \texttt{QmfWgkE3...}), junto con el modelo global reportado por el servidor (\texttt{QmNgmFCu...}).
     \item \textbf{Descarga y reconstrucción determinista:} El auditor descarga los tres artefactos binarios desde la pasarela IPFS ($2{,}08$~MB por modelo, totalizando $6{,}24$~MB recuperados en menos de 105~ms) y ejecuta la agregación matricial canónica de FedAvg:
     \begin{equation}
     \mathbf{w}_{\text{recon}}^{(2)} = \frac{1}{2}\mathbf{w}_{\text{cli2}}^{(2)} + \frac{1}{2}\mathbf{w}_{\text{cli3}}^{(2)}
@@ -297,18 +297,18 @@ El protocolo de auditoría operó conforme a las siguientes etapas:
     \label{fig:log_auditoria_expost}
 \end{figure}
 
-Como refleja la telemetría en tiempo de ejecución capturada en la Figura~\ref{fig:log_auditoria_expost}, la auditoría integral (consulta RPC a Besu, descarga de 6,24~MB de IPFS, reconstrucción tensorial y verificación exhaustiva de las 8 capas de la red convolucional) requirió únicamente \textbf{0,2194~segundos}. La discrepancia paramétrica en todas las capas convolucionales y completamente conexas fue estrictamente nula ($\Delta = 0{,}000000\text{e}+00$), derivando en un identificador IPFS idéntico bit a bit al registrado en el Bloque~75 (\texttt{CID Equality: MATCH}), ratificando de forma incontrovertible la concordancia de la agregación.
+Como refleja la telemetría en tiempo de ejecución capturada en la Figura~\ref{fig:log_auditoria_expost}, la auditoría integral (consulta RPC a Besu, descarga de 6,24~MB de IPFS, reconstrucción tensorial y verificación exhaustiva de las 8 capas de la red convolucional) requirió únicamente \textbf{0,2194~segundos}. La discrepancia paramétrica en todas las capas convolucionales y completamente conexas fue estrictamente nula ($\Delta = 0{,}000000\text{e}+00$), derivando en un identificador CID idéntico carácter a carácter al registrado en el Bloque~75 (\texttt{CID Equality: MATCH}), ratificando de forma incontrovertible la concordancia de la agregación.
 
 Asimismo, se evaluó la sensibilidad del mecanismo activando el modo adversarial simulado (\texttt{--simulate-tampering}). Al inyectar una perturbación aditiva deliberada de $+0{,}1$ en los pesos del servidor, el auditor detectó la desviación de forma instantánea en tan solo \textbf{0,1805~segundos} ($\Delta = 1{,}000000\text{e}-01$), registrando una alerta formal de discrepancia no conforme (\texttt{AUDIT FAILED: DISCREPANCY DETECTED}).
 
 \subsubsection{Síntesis de Validación y Alcance de Seguridad}
 La Tabla~\ref{tab:resumen_ataques} sintetiza las métricas cuantitativas obtenidas a lo largo de las tres pruebas experimentales de integridad y auditoría.
 
-\begin{table*}[t]
+\begin{table}[H]
 \centering
 \caption{Validación experimental del marco de integridad y auditoría frente a escenarios de manipulación y verificación ex-post.}
 \label{tab:resumen_ataques}
-\resizebox{\textwidth}{!}{%
+\resizebox{\columnwidth}{!}{%
 \renewcommand{\arraystretch}{1.2}
 \begin{tabular}{@{}lcccc@{}}
 \toprule
@@ -316,14 +316,13 @@ La Tabla~\ref{tab:resumen_ataques} sintetiza las métricas cuantitativas obtenid
 \midrule
 Manipulación en Tránsito / Servidor No Fidedigno & Cliente (Edge) & Intercepción determinista / Aborto preventivo & 0,1486 s & Sin contaminación local \\
 Inyección No Autenticada / Cliente No Registrado & Servidor Agregador & Intercepción determinista / Descarte en FedAvg & 0,0309 s & Agregación preservada \\
-Auditoría FedAvg Ex-Post & Auditor Independiente & Reconstrucción matemática / Verificación fidedigna & 0,2194 s & Coincidencia bit a bit ($\Delta = 0$) \\
+Auditoría FedAvg Ex-Post & Auditor Independiente & Reconstrucción matemática / Verificación fidedigna & 0,2194 s & Fidelidad exacta ($\Delta = 0$, CID MATCH) \\
 \bottomrule
 \end{tabular}%
 }
-\end{table*}
+\end{table}
 
-Estos ensayos constituyen una validación funcional determinista de las primitivas de intercepción criptográfica implementadas en el marco: ante una alteración de los parámetros en tránsito o la ausencia de un compromiso inmutable previamente sellado y firmado en la cadena, el protocolo intercepta la anomalía de manera determinista con tiempos de respuesta en torno a la décima de segundo (149~ms en el cliente, 31~ms en el servidor y 219~ms en la auditoría ex-post de FedAvg), impidiendo que los pesos discordantes contaminen los cómputos locales o globales.
-\\
+Estos ensayos constituyen una validación funcional determinista de las primitivas de intercepción criptográfica implementadas en el marco: ante una alteración de los parámetros en tránsito o la ausencia de un compromiso inmutable previamente sellado y firmado en la cadena, el protocolo intercepta la anomalía de manera determinista con tiempos de respuesta en torno a la décima de segundo (149~ms en el cliente, 31~ms en el servidor y $\approx 200$~ms en la auditoría ex-post de FedAvg), impidiendo que los pesos discordantes contaminen los cómputos locales o globales.
 
 Tal como se formalizó en el modelo de amenazas (Sección~\ref{subsec:modelo_amenazas}), conviene remarcar los límites operacionales de este esquema defensivo: la doble verificación en cadena actúa con eficacia contra la adulteración directa de parámetros en tránsito (\textit{tampering}), la emisión no autorizada a nombre de terceros mediante autenticación asimétrica ECDSA y la inyección de modelos disidentes no respaldados on-chain. No obstante, si un nodo malicioso genera una actualización perjudicial mediante manipulación local de sus datos de entrenamiento (\textit{data poisoning} o \textit{label flipping})~\cite{tolpegin2020data} y la firma legítimamente con su clave privada en Besu, el compromiso criptográfico coincidirá formalmente aunque la semántica del modelo esté contaminada. La neutralización de esta tipología de ataques semánticos requiere complementar la trazabilidad con filtros de agregación estadística bizantina (como Krum~\cite{blanchard2017byzantine}, Median o Trimmed-Mean) o mediante la auditoría ex-post de las contribuciones registradas posibilitada por nuestro diseño (Sección~\ref{subsec:auditoria_fedavg}).
 
@@ -332,7 +331,7 @@ La Figura~\ref{fig:consumo_gas} ilustra el consumo de gas computacional de las o
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/consumo_gas.png}
+    \includegraphics[width=0.70\columnwidth]{figuras/consumo_gas.png}
     \caption{Consumo de gas en la Máquina Virtual de Ethereum por tipo de transacción a lo largo de las 30 rondas.}
     \label{fig:consumo_gas}
 \end{figure}
@@ -342,10 +341,10 @@ El perfil de consumo resulta rigurosamente constante en todas las iteraciones:
     \item \texttt{registerClientModel}: exactamente \textbf{160.200 unidades de gas}.
     \item \texttt{updateModel}: exactamente \textbf{167.460 unidades de gas}.
 \end{itemize}
+Conviene destacar que este consumo refleja la versión definitiva del contrato inteligente \texttt{FLRegistry}: la inclusión del modificador de control de acceso \texttt{onlyServer} en \texttt{updateModel} introduce una comprobación de identidad en la EVM (\texttt{SLOAD} y salto condicional sobre \texttt{serverAddress}) que añade únicamente 100 unidades de gas (+0,06\% de sobrecoste respecto a una versión abierta sin control de acceso), manteniendo el coste acotado y plenamente predecible.
 La única excepción observable corresponde a la ronda 0 del servidor, que demandó \textbf{184.560 unidades de gas}. Dicha discrepancia (+17.100 unidades) responde al coste de la instrucción \texttt{SSTORE} de la EVM al escribir por primera vez en posiciones de memoria previamente vacías (\textit{cold write}) y modificar el valor del flag booleano \texttt{hasModel}.
-\\
 
-La invariabilidad del consumo valida formalmente el diseño desacoplado: al almacenar en el contrato únicamente resúmenes de longitud fija (hashes SHA-256 de 32 bytes y metadatos acotados), el coste de gas se mantiene estable por transacción e independiente tanto del tamaño del modelo neuronal como del número acumulado de rondas, asegurando un consumo de recursos acotado y predecible en redes de consorcio.
+La invariabilidad del consumo valida formalmente el diseño desacoplado: al almacenar en el contrato únicamente cadenas de longitud uniforme (los identificadores CIDv0 de IPFS de 46 caracteres que encapsulan el multihash SHA-256 y metadatos acotados), el coste de gas se mantiene estable por transacción e independiente tanto del tamaño del modelo neuronal como del número acumulado de rondas, asegurando un consumo de recursos acotado y predecible en redes de consorcio.
 
 \subsection{Auditoría de Inmutabilidad On-Chain y Trazabilidad Forense}
 \label{subsec:auditoria_onchain}
@@ -374,9 +373,9 @@ Para verificar empíricamente la correspondencia unívoca entre los eventos del 
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/bloque_contrato.png}
-    \caption{Auditoría de inmutabilidad on-chain: visualización en el explorador de bloques de Hyperledger Besu del despliegue del contrato inteligente \texttt{FLRegistry} (tarjeta inferior en amarillo, Bloque~8) por la dirección del servidor (\texttt{0xfe3b55...}) junto a los bloques subsiguientes de transacciones operativas 13 y 14.}
+    \includegraphics[width=0.52\columnwidth]{figuras/bloque_contrato.png}
+    \caption{Auditoría de inmutabilidad on-chain: visualización en el explorador Besu del despliegue del contrato \texttt{FLRegistry} (Bloque~8) por el servidor (\texttt{0xfe3b55...}) junto a transacciones operativas 13 y 14.}
     \label{fig:auditoria_bloque}
 \end{figure}
 
-Cada identificador de bloque y hash criptográfico actúa como una prueba forense no repudiable de la autoría y momento exacto de emisión de cada iteración, confirmando la viabilidad de la arquitectura para auditorías regulatorias en sistemas vehiculares y de misión crítica.
+Cada identificador de bloque y hash criptográfico actúa como prueba forense no repudiable, confirmando la viabilidad de la arquitectura para auditorías regulatorias en sistemas vehiculares y de misión crítica.

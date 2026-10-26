@@ -25,7 +25,7 @@ struct ModelRound {
     uint256 timestamp;
 }
 \end{verbatim}
-donde \texttt{roundNum} indexa la iteración federada, \texttt{modelHash} almacena el CID o digest SHA-256 del artefacto del modelo, \texttt{author} guarda la dirección pública Ethereum del emisor (\texttt{msg.sender}) y \texttt{timestamp} captura la marca temporal del bloque validado.
+donde \texttt{roundNum} indexa la iteración federada, \texttt{modelHash} almacena el identificador de contenido (CIDv0 de IPFS, representativo del multihash SHA-256 del artefacto), \texttt{author} guarda la dirección pública Ethereum del emisor (\texttt{msg.sender}) y \texttt{timestamp} captura la marca temporal del bloque validado.
 \\
 
 El estado del contrato se organiza mediante dos tablas hash (\textit{mappings}) complementarias:
@@ -60,7 +60,7 @@ Para no sobrecargar la red con costes de ejecución, las consultas de verificaci
 \end{itemize}
 
 \subsubsection{Generalización y desacoplamiento del modelo}
-Conviene destacar que el diseño del marco es conceptual y operativamente agnóstico a la topología de la red neuronal, a la modalidad de los datos y al framework de aprendizaje empleado. Debido a que el contrato \texttt{FLRegistry} gestiona exclusivamente cadenas de longitud uniforme (los CIDs de IPFS y los resúmenes SHA-256), el coste de gas en la EVM permanece predecible y desacoplado de la complejidad del modelo, independientemente de si los parámetros corresponden a un clasificador ligero, una red convolucional profunda o una arquitectura basada en Transformers. Asimismo, el plano de almacenamiento IPFS maneja los pesos serializados como secuencias de bytes genéricas, posibilitando que el protocolo de doble verificación sea extrapolable a diversas modalidades (datos tabulares, series temporales, señales acústicas o visión artificial) y algoritmos de optimización federada.
+Conviene destacar que el diseño del marco es conceptual y operativamente agnóstico a la topología de la red neuronal, a la modalidad de los datos y al framework de aprendizaje empleado. Debido a que el contrato \texttt{FLRegistry} gestiona exclusivamente cadenas de longitud uniforme (los CIDs de IPFS de 46 caracteres que encapsulan el multihash del artefacto), el coste de gas en la EVM permanece predecible y desacoplado de la complejidad del modelo, independientemente de si los parámetros corresponden a un clasificador ligero, una red convolucional profunda o una arquitectura basada en Transformers. Asimismo, el plano de almacenamiento IPFS maneja los pesos serializados como secuencias de bytes genéricas, posibilitando que el protocolo de doble verificación sea extrapolable a diversas modalidades (datos tabulares, series temporales, señales acústicas o visión artificial) y algoritmos de optimización federada.
 
 \subsection{Flujo Operacional y Doble Verificación Cruzada}
 El ciclo de vida del entrenamiento federado se estructura en una fase de inicialización única seguida de un protocolo iterativo con verificación bidireccional estricta, como se resume a continuación:
@@ -79,7 +79,7 @@ Antes de iniciar la concurrencia:
 Al recibir la señal de inicio de ronda junto con los pesos candidatos $w_{cand}^{(t)}$ vía gRPC (Figura~\ref{fig:flujo_cliente_verif}):
 \begin{enumerate}
     \item El cliente consulta la Blockchain invocando \texttt{getLastModel()} y obtiene el $\text{CID}_{reg}^{(t-1)}$ oficial.
-    \item El cliente descarga el modelo referenciado desde IPFS y realiza una verificación bit a bit tensor por tensor frente a $w_{cand}^{(t)}$.
+    \item El cliente descarga el modelo referenciado desde IPFS y realiza una verificación numérica exhaustiva tensor por tensor frente a $w_{cand}^{(t)}$ (comprobando la concordancia paramétrica elemento a elemento dentro de la tolerancia de coma flotante $\epsilon = 10^{-7}$).
     \item Si se detecta cualquier discrepancia entre los pesos entregados y el compromiso sellado en la cadena, el cliente \textbf{aborta el entrenamiento inmediatamente}, neutralizando ataques donde un servidor comprometido intente inyectar modelos sesgados selectivamente a clientes concretos.
 \end{enumerate}
 
@@ -135,18 +135,18 @@ Al recibir las actualizaciones de los clientes en el servidor agregador (Figura~
 \label{subsec:auditoria_fedavg}
 Una propiedad arquitectónica diferencial que se deriva del desacoplamiento híbrido propuesto es la capacidad de verificar de forma determinista y retrospectiva (\textit{ex-post}) el comportamiento del servidor agregador. En los marcos federados convencionales, el servidor actúa como una caja negra de confianza: los clientes deben asumir que los pesos agregados $w^{(t+1)}$ se computaron aplicando honestamente la media ponderada sobre las contribuciones recibidas, sin introducir sesgos no autorizados, omitir clientes arbitrariamente o insertar puertas traseras encubiertas.
 
-En nuestra arquitectura, para cada ronda $t$, quedan registrados de forma inmutable en la cadena de bloques:
+En nuestra arquitectura desacoplada, cada ronda $t$ deja una traza inmutable y reproducible entre la cadena de bloques y el repositorio de contenido:
 \begin{enumerate}
-    \item El conjunto de participantes validados $\mathcal{K}_t$ y sus direcciones de cuenta Ethereum.
-    \item Los CIDs $\text{CID}_k^{(t)}$ firmados individualmente por cada cliente en \texttt{clientHistory}.
-    \item Los volúmenes de datos muestrales $n_k$ correspondientes a cada cliente.
-    \item El CID del modelo global resultante $\text{CID}_{global}^{(t+1)}$ registrado por el servidor en \texttt{history}.
+    \item \textbf{Identificación de participantes $\mathcal{K}_t$:} Dado que las estructuras \texttt{mapping} de Solidity no son iterables por diseño de la EVM, la enumeración de los clientes activos en la ronda $t$ se obtiene de forma determinista mediante la consulta de los registros de eventos (\textit{event logs}) \texttt{ModelUpdated(round, modelHash, author)} emitidos en cada invocación de \texttt{registerClientModel}, indexables mediante llamadas RPC estándar (\texttt{eth\_getLogs}), o a través del censo de identidades autorizadas del consorcio permisionado.
+    \item \textbf{Compromisos de pesos locales:} Cada cliente $k \in \mathcal{K}_t$ firma y registra su identificador $\text{CID}_k^{(t)}$ en \texttt{clientHistory}, recuperable mediante la función de solo lectura \texttt{getClientModel($t$, address$_k$)}.
+    \item \textbf{Ponderación muestral $n_k$:} En escenarios homogéneos y balanceados (como el banco de pruebas experimental evaluado, donde los clientes operan sobre particiones IID equivalentes, $n_k = N / |\mathcal{K}_t|$), los factores de escala son simétricos ($n_k / \sum n_j = 1/|\mathcal{K}_t|$). En el caso general con particiones heterogéneas (no-IID), el valor escalar $n_k$ se almacena en el descriptor de metadatos adjunto a la carga útil en IPFS (o como parámetro complementario en la emisión del evento), permitiendo al auditor reconstruir los pesos sin vulnerar la privacidad de los datos locales.
+    \item \textbf{Compromiso del modelo global resultante:} El servidor sella el identificador consolidado $\text{CID}_{\text{global}}^{(t+1)}$ en \texttt{history}, accesible mediante \texttt{getLastModel()} o consultando directamente el índice de la ronda.
 \end{enumerate}
 
-Gracias a este registro exhaustivo, cualquier nodo cliente de la federación o una entidad auditora externa independiente puede ejecutar en cualquier instante una verificación determinista de la agregación sin requerir acceso a los conjuntos de datos privados:
+A partir de este registro, cualquier nodo cliente o auditor externo independiente puede ejecutar en cualquier instante una verificación determinista de la agregación sin requerir acceso a los conjuntos de datos privados:
 \begin{enumerate}
-    \item \textbf{Recuperación de artefactos:} El auditor consulta en Besu las direcciones participantes y sus CIDs correspondientes a la ronda $t$, y descarga desde IPFS los vectores de pesos $w_k^{(t)}$.
-    \item \textbf{Cotejo de integridad de entrada:} Verifica que para cada cliente $k \in \mathcal{K}_t$, el hash de los pesos descargados coincide con $\text{CID}_k^{(t)}$ sellado en el contrato.
+    \item \textbf{Recuperación de artefactos:} El auditor reconstruye el conjunto de clientes $\mathcal{K}_t$ y sus $\text{CID}_k^{(t)}$ consultando el contrato en Besu, y descarga desde IPFS los vectores de parámetros binarios $w_k^{(t)}$.
+    \item \textbf{Cotejo de integridad de entrada:} Verifica que para cada cliente $k \in \mathcal{K}_t$, el identificador generado a partir de los tensores descargados coincide con el $\text{CID}_k^{(t)}$ sellado on-chain.
     \item \textbf{Reconstrucción de la agregación:} Aplica formalmente la fórmula determinista de FedAvg:
     \begin{equation}
     \hat{w}^{(t+1)} = \sum_{k \in \mathcal{K}_t} \frac{n_k}{\sum_{j \in \mathcal{K}_t} n_j} \, w_k^{(t)}
@@ -161,7 +161,7 @@ Para delimitar con precisión las garantías provistas por el marco propuesto, s
 
 \subsubsection{Amenazas Mitigadas (In-Scope)}
 \begin{itemize}
-    \item \textbf{Manipulación en tránsito (\textit{Man-in-the-Middle})}: Un adversario en red que intercepte el canal gRPC e intente modificar los tensores locales enviados al servidor o los pesos globales distribuidos a los clientes. Dicha alteración es detectada de forma inmediata gracias al cotejo tensorial bit a bit y a la verificación frente al CID sellado on-chain.
+    \item \textbf{Manipulación en tránsito (\textit{Man-in-the-Middle})}: Un adversario en red que intercepte el canal gRPC e intente modificar los tensores locales enviados al servidor o los pesos globales distribuidos a los clientes. Dicha alteración es detectada de forma inmediata gracias al cotejo tensorial numérico de parámetros y a la verificación frente al CID sellado on-chain.
     \item \textbf{Bifurcación y equivocación del servidor (\textit{Server Equivocation / Split-View})}: Un servidor malicioso que intente engañar a clientes específicos enviándoles modelos globales diferentes o adulterados. Dado que los clientes únicamente aceptan pesos cuyo CID coincide unívocamente con el último estado publicado en \texttt{FLRegistry}, cualquier intento de distribución divergente es detectado y bloqueado localmente.
     \item \textbf{Inyección de modelos globales por terceros no autorizados}: Intentos por parte de nodos disidentes o atacantes externos de registrar modelos globales falsos en la Blockchain quedan neutralizados en la EVM mediante el modificador de control de acceso \texttt{onlyServer}.
     \item \textbf{Repudio de contribuciones}: La firma digital basada en criptografía de curva elíptica (ECDSA secp256k1) vinculada a cada transacción en Hyperledger Besu impide que un cliente niegue haber generado o subido una actualización registrada a su nombre.
