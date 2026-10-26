@@ -56,7 +56,7 @@ def discover_participating_clients(contract, round_target: int) -> dict:
     except Exception as e:
         print(f"   [NOTICE] Event autodiscovery fallback ({e}). Using consortium registry.")
 
-    return DEFAULT_CLIENTS
+    return {}
 
 
 def audit_round(round_target: int, w3, contract, ipfs_get: str, ipfs_api: str, clients_dict: dict, samples_dict: dict, simulate_tampering: bool = False):
