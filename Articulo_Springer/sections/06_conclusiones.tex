@@ -1,0 +1,28 @@
+% !TeX root = ../main.tex
+\section{Conclusiones y Trabajo Futuro}
+\label{sec:conclusiones}
+
+En este artículo se ha presentado y validado experimentalmente un marco integral orientado a proporcionar trazabilidad, integridad y auditoría criptográfica en Aprendizaje Federado, integrando Hyperledger Besu con IPFS y el framework Flower.
+
+\subsection{Conclusiones Principales}
+Los resultados obtenidos permiten extraer las siguientes conclusiones clave:
+\begin{itemize}
+    \item \textbf{Viabilidad técnica y sobrecoste temporal asumible}: La integración de trazabilidad en un despliegue distribuido añade una sobrecarga de tan solo el \textbf{9,5\%} (+6,34~s por ronda, de 66,62~s a 72,96~s), demostrando que la auditabilidad de extremo a extremo es plenamente viable en IA distribuida sin degradar la cadencia operativa.
+    \item \textbf{Eficacia y rapidez de la doble verificación cruzada}: Se mitiga la dependencia del servidor central como punto único de confianza. Mediante el cotejo de CIDs de IPFS frente al registro on-chain, los clientes quedan protegidos frente a modelos adulterados (abortando en $0{,}149$~s) y el agregador descarta de inmediato contribuciones no firmadas (en $0{,}031$~s), garantizando intercepción determinista.
+    \item \textbf{Eficiencia y predictibilidad on-chain}: El desacoplamiento con IPFS asegura un coste de gas constante por transacción (160.200 gas para clientes y 169.649 gas para el servidor), evitando saturar el estado de la EVM con total independencia del tamaño del modelo.
+    \item \textbf{Escalabilidad del consenso BFT}: Incrementar los nodos validadores de 4 a 7 (elevando la tolerancia a fallos bizantinos de $f=1$ a $f=2$) apenas eleva la latencia de confirmación de transacciones en $0{,}10$~s (100~ms) y la mediana de ronda en tan solo $0{,}39$~s, absorbiéndose dentro del cómputo local.
+    \item \textbf{Fiscalización ex-post y verificabilidad de FedAvg}: Se supera la limitación del servidor central como caja negra mediante auditoría externa independiente. Se validó empíricamente la reconstrucción de la agregación canónica en tan solo $0{,}34$~s con fidelidad estricta ($\Delta = 0{,}000000$), detectando manipulaciones en $0{,}18$~s sin acceder a datos privados locales.
+\end{itemize}
+
+\subsection{Limitaciones y Trabajo Futuro}
+Como líneas de trabajo futuro se plantean:
+\begin{enumerate}
+    \item \textbf{Optimización del modelo de IA}: Al centrarse este estudio en la infraestructura del sistema, se plantea como trabajo futuro incorporar parada temprana (\textit{early stopping}), regularización (Dropout, normalización) y redes más profundas para maximizar la generalización.
+    \item \textbf{Mecanismos de reputación y penalización on-chain}: Explotar el historial inmutable de contribuciones para articular algoritmos de puntuación o penalización (\textit{slashing}) económica/lógica de nodos maliciosos recurrentes.
+    \item \textbf{Agregación bizantina avanzada}: Complementar el esquema con estrategias de agregación robustas frente a envenenamiento no evidente (como Krum~\cite{blanchard2017byzantine} o medias recortadas) coordinadas desde el propio contrato.
+    \item \textbf{Entornos no-IID y despliegue vehicular V2X}: Evaluar la robustez del framework bajo distribuciones heterogéneas y desplegar nodos en hardware embarcado (\textit{edge computing}, como NVIDIA Jetson) con conectividad V2X.
+    \item \textbf{Gestión criptográfica de claves}: Sustituir el esquema de cuentas actual por módulos de seguridad de hardware (HSM) o almacenes seguros de secretos tipo Key Vault para un despliegue industrial.
+    \item \textbf{Gobernanza descentralizada y comités rotatorios}: Extender el control de acceso del servidor (\texttt{onlyServer}) hacia esquemas de gobernanza multifirma (DAO/multisig) o comités rotatorios de agregación para descentralizar la autorización institucional de los modelos globales.
+\end{enumerate}
+En síntesis, la arquitectura validada demuestra que la convergencia entre Blockchain y Aprendizaje Federado no solo es factible, sino que establece una base metodológica viable para el despliegue auditable y confiable de inteligencia artificial en entornos críticos cooperativos.
+

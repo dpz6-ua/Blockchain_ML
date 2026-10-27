@@ -1,0 +1,65 @@
+\documentclass[pdflatex,sn-mathphys-num]{sn-jnl}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{amsthm}
+\usepackage{mathrsfs}
+\usepackage[title]{appendix}
+\usepackage{xcolor}
+\usepackage{textcomp}
+\usepackage{manyfoot}
+\usepackage{booktabs}
+\usepackage{makecell}
+\usepackage{url}
+\usepackage{listings}
+
+\theoremstyle{thmstyleone}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+
+\theoremstyle{thmstyletwo}
+\newtheorem{example}{Example}
+\newtheorem{remark}{Remark}
+
+\theoremstyle{thmstylethree}
+\newtheorem{definition}{Definition}
+
+\raggedbottom
+
+\begin{document}
+
+\title[Integración de Blockchain e IPFS para Auditoría Ex-Post en FL]{Integración de Blockchain e IPFS para la Trazabilidad, Integridad y Auditoría Ex-Post en Aprendizaje Federado}
+
+\author*[1]{\fnm{David Piotr} \sur{Znojek}}\email{dawidznojek@gmail.com}
+
+\author[1]{\fnm{Francisco A.} \sur{Pujol}}\email{fpujol@ua.es}
+
+\affil*[1]{\orgdiv{Departamento de Tecnología Informática y Computación}, \orgname{Universidad de Alicante}, \orgaddress{\street{Carretera de San Vicente del Raspeig s/n}, \city{San Vicente del Raspeig}, \postcode{03690}, \state{Alicante}, \country{España}}}
+
+\abstract{El entrenamiento distribuido mediante Aprendizaje Federado (\textit{Federated Learning}) permite preservar la privacidad de datos sensibles pero carece intrínsecamente de mecanismos para auditar la legitimidad de las contribuciones de los participantes, exponiendo al sistema a ataques de envenenamiento (\textit{model poisoning}) con consecuencias críticas en sectores como el de los vehículos autónomos. En este artículo se presenta y evalúa una arquitectura híbrida que integra una red Blockchain permisionada basada en Hyperledger Besu y consenso IBFT 2.0 con el framework Flower y almacenamiento distribuido fuera de cadena mediante IPFS. Se diseña un contrato inteligente en Solidity que implementa un protocolo de doble verificación cruzada entre clientes y servidor agregador utilizando compromisos criptográficos (CIDs de IPFS) de los pesos neuronales. La viabilidad del marco se valida empíricamente sobre un banco de pruebas distribuido entrenando un clasificador convolucional de señales y eventos viales bajo un riguroso protocolo experimental multiejecución (15 ejecuciones y 450 rondas federadas en total) bajo cinco configuraciones. Los resultados cuantitativos demuestran que, en el despliegue distribuido realista, la capa de trazabilidad añade una sobrecarga temporal reducida de tan solo el 9,5\% (6,34~s por ronda), manteniendo un coste de gas estable y predecible por transacción y escalando con un impacto marginal (+0,39~s en mediana de ronda y +0,10~s en confirmación de bloque) al ampliar el quórum de 4 a 7 nodos validadores ($f=1 \to f=2$). Asimismo, la evaluación adversarial valida funcionalmente la intercepción determinista de manipulaciones en tránsito y contribuciones desalineadas tanto en servidor como en clientes con latencias de mitigación reducidas (149~ms para aborto local preventivo y 31~ms para descarte en agregación), complementado con un protocolo de auditoría ex-post capaz de reconstruir y verificar la agregación FedAvg en $\approx 300$~ms sin discrepancia ($\Delta = 0$). Esta investigación confirma que el coste de incorporar inmutabilidad y no repudio resulta plenamente asumible frente a las garantías de auditoría obtenidas.}
+
+\keywords{Aprendizaje Federado, Auditoría Criptográfica, Blockchain, Consenso IBFT 2.0, Hyperledger Besu, IPFS, Trazabilidad, Vehículos Autónomos}
+
+\maketitle
+
+\input{sections/01_introduccion}
+\input{sections/02_estado_arte}
+\input{sections/03_arquitectura}
+\input{sections/04_implementacion}
+\input{sections/05_evaluacion_resultados}
+\input{sections/06_conclusiones}
+
+\bmhead{Declaraciones}
+\begin{itemize}
+    \item \textbf{Financiación}: No aplicable.
+    \item \textbf{Conflicto de intereses}: Los autores declaran no tener conflictos de interés ni intereses financieros concurrentes.
+    \item \textbf{Disponibilidad de datos y materiales}: Los conjuntos de datos generados y los artefactos de registro durante las pruebas empíricas están disponibles a solicitud.
+    \item \textbf{Disponibilidad de código}: Los scripts de orquestación, contratos inteligentes y módulos de auditoría se encuentran accesibles para reproducción experimental.
+\end{itemize}
+
+\bibliography{sn-bibliography}
+
+\end{document}
