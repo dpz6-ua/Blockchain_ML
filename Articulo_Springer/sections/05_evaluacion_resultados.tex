@@ -238,15 +238,18 @@ El ensayo se ejecutó sobre la Ronda~2 de un entrenamiento real de aprendizaje f
 
 \begin{table}[htbp]
 \caption{Cadena de custodia y trazabilidad cruzada on-chain/IPFS durante la Ronda 2 y su fiscalización ex-post.}\label{tab:trazabilidad_ronda2}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.2}
 \begin{tabular*}{\textwidth}{@{\extracolsep\fill}lcccccc}
 \toprule
-\textbf{Entidad} & \textbf{Dirección Ethereum} & \textbf{Evento / Método} & \textbf{Bloque Besu} & \textbf{Latencia} & \textbf{CID IPFS} & \textbf{Estado / Resultado} \\
+\textbf{Entidad} & \makecell{\textbf{Dirección}\\\textbf{Ethereum}} & \makecell{\textbf{Evento /}\\\textbf{Método}} & \makecell{\textbf{Bloque}\\\textbf{Besu}} & \textbf{Latencia} & \makecell{\textbf{CID}\\\textbf{IPFS}} & \makecell{\textbf{Estado /}\\\textbf{Resultado}} \\
 \midrule
-Cliente 3 & \texttt{0xf17f5215...} & \texttt{registerClientModel} & Bloque 73 & 0,886 s & \texttt{QmS5ViVf...} & Confirmado on-chain \\
-Cliente 2 & \texttt{0x62730609...} & \texttt{registerClientModel} & Bloque 74 & 4,311 s & \texttt{QmNh3TLS...} & Confirmado on-chain \\
-Servidor  & \texttt{0xfe3b557e...} & \texttt{updateModel} (FedAvg) & Bloque 75 & 4,709 s & \texttt{QmWF7tJ1...} & Modelo global sellado \\
+Cliente 3 & \texttt{0xf17f5215...} & \makecell[c]{\texttt{registerClient-}\\\texttt{Model}} & Bloque 73 & 0,886 s & \texttt{QmS5ViVf...} & \makecell[c]{Confirmado\\on-chain} \\
+Cliente 2 & \texttt{0x62730609...} & \makecell[c]{\texttt{registerClient-}\\\texttt{Model}} & Bloque 74 & 4,311 s & \texttt{QmNh3TLS...} & \makecell[c]{Confirmado\\on-chain} \\
+Servidor  & \texttt{0xfe3b557e...} & \makecell[c]{\texttt{updateModel}\\(FedAvg)} & Bloque 75 & 4,709 s & \texttt{QmWF7tJ1...} & \makecell[c]{Modelo global\\sellado} \\
 \midrule
-Auditor   & \textit{Externo (Off-chain)} & Reconstrucción FedAvg & Consulta 73--75 & 0,339 s & \texttt{QmWF7tJ1...} & \textbf{$\Delta = 0{,}000000$ (MATCH)} \\
+Auditor   & \textit{Externo (Off-chain)} & \makecell[c]{Reconstrucción\\FedAvg} & \makecell[c]{Consulta\\73--75} & 0,339 s & \texttt{QmWF7tJ1...} & \makecell[c]{\textbf{$\Delta = 0{,}000000$}\\\textbf{(MATCH)}} \\
 \bottomrule
 \end{tabular*}
 \end{table}
@@ -269,19 +272,21 @@ El protocolo de auditoría operó conforme a las siguientes etapas:
     \label{fig:log_auditoria_expost}
 \end{figure}
 
-\begin{table}[htbp]
+\begin{sidewaystable}
 \caption{Validación experimental del marco de integridad y auditoría frente a escenarios de manipulación y verificación ex-post.}\label{tab:resumen_ataques}
-\renewcommand{\arraystretch}{1.2}
-\begin{tabular*}{\textwidth}{@{\extracolsep\fill}lcccc}
+\footnotesize
+\setlength{\tabcolsep}{6pt}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular*}{\textheight}{@{\extracolsep\fill}lcccc}
 \toprule
-\textbf{Escenario de Prueba} & \textbf{Entidad Defensora / Auditora} & \textbf{Acción Preventiva / Resultado} & \textbf{Latencia} & \textbf{Integridad de Pesos} \\
+\textbf{Escenario de Prueba} & \makecell{\textbf{Entidad Defensora /}\\\textbf{Auditora}} & \makecell{\textbf{Acción Preventiva /}\\\textbf{Resultado}} & \textbf{Latencia} & \makecell{\textbf{Integridad}\\\textbf{de Pesos}} \\
 \midrule
-Manipulación en Tránsito / Servidor No Fidedigno & Cliente (Edge) & Intercepción determinista / Aborto preventivo & 0,1486 s & Sin contaminación local \\
-Inyección No Autenticada / Cliente No Registrado & Servidor Agregador & Intercepción determinista / Descarte en FedAvg & 0,0309 s & Agregación preservada \\
-Auditoría FedAvg Ex-Post & Auditor Independiente & Reconstrucción matemática / Verificación fidedigna & 0,34 s & Fidelidad exacta ($\Delta = 0$, CID MATCH) \\
+\makecell[l]{Manipulación en Tránsito /\\Servidor No Fidedigno} & \makecell{Cliente\\(Edge)} & \makecell{Intercepción determinista /\\Aborto preventivo} & 0,1486 s & \makecell{Sin contaminación\\local} \\ \midrule
+\makecell[l]{Inyección No Autenticada /\\Cliente No Registrado} & \makecell{Servidor\\Agregador} & \makecell{Intercepción determinista /\\Descarte en FedAvg} & 0,0309 s & \makecell{Agregación\\preservada} \\ \midrule
+\makecell[l]{Auditoría FedAvg\\Ex-Post} & \makecell{Auditor\\Independiente} & \makecell{Reconstrucción matemática /\\Verificación fidedigna} & 0,34 s & \makecell{Fidelidad exacta\\($\Delta = 0$, CID MATCH)} \\
 \bottomrule
 \end{tabular*}
-\end{table}
+\end{sidewaystable}
 
 Como refleja la telemetría en tiempo de ejecución capturada en la Figura~\ref{fig:log_auditoria_expost}, la auditoría integral (autodescubrimiento dinámico de participantes vía eventos Besu, consulta RPC de compromisos, descarga de 6,24~MB de IPFS, reconstrucción tensorial y verificación exhaustiva de las 8 capas de la red convolucional) requirió únicamente \textbf{0,3391~segundos}. La discrepancia paramétrica en todas las capas convolucionales y completamente conexas fue estrictamente nula ($\Delta = 0{,}000000\text{e}+00$), derivando en un identificador CID idéntico carácter a carácter al registrado en el Bloque~75 (\texttt{CID Equality: MATCH}), ratificando de forma incontrovertible la concordancia de la agregación.
 
@@ -320,6 +325,9 @@ Para verificar empíricamente la correspondencia unívoca entre los eventos del 
 
 \begin{table}[htbp]
 \caption{Muestra de trazabilidad y auditoría forense on-chain.}\label{tab:auditoria_transacciones}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.15}
 \begin{tabular*}{\textwidth}{@{\extracolsep\fill}cccccc}
 \toprule
 \textbf{Bloque} & \textbf{Entidad} & \textbf{Evento / Método} & \textbf{Dirección Emisora} & \textbf{Prefijo Tx Hash} & \textbf{Gas EVM} \\
