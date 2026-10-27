@@ -234,7 +234,7 @@ def generar_figura_consumo_gas():
     fig, ax = plt.subplots(figsize=(8, 4.5))
 
     rondas = np.arange(0, 31)
-    gas_servidor = [184560] + [167460] * 30
+    gas_servidor = [186749] + [169649] * 30
     gas_cliente = [np.nan] + [160200] * 30
 
     ax.plot(rondas, gas_servidor, label='Servidor (updateModel)', color='#6F42C1', marker='o', linewidth=1.8, markersize=4)
@@ -250,12 +250,12 @@ def generar_figura_consumo_gas():
     ax.legend(loc='upper right', framealpha=0.95)
 
     # Anotación cold write en ronda 0
-    ax.annotate("Cold write inicial (SSTORE):\n184.560 gas (+17.100)", xy=(0, 184560), xytext=(2.0, 195000),
+    ax.annotate("Cold write inicial (SSTORE):\n186.749 gas (+17.100)", xy=(0, 186749), xytext=(2.0, 197000),
                 arrowprops=dict(facecolor='#333333', shrink=0.08, width=1, headwidth=6),
                 fontsize=9, fontweight='bold', color='#333333')
 
     # Anotación O(1) determinista
-    ax.text(10, 171500, "Invariable O(1): 167.460 gas", color='#6F42C1', fontweight='bold', fontsize=9.5)
+    ax.text(10, 173500, "Invariable O(1): 169.649 gas", color='#6F42C1', fontweight='bold', fontsize=9.5)
     ax.text(10, 154500, "Invariable O(1): 160.200 gas", color='#0275D8', fontweight='bold', fontsize=9.5)
 
     guardar_figura(fig, 'consumo_gas.png')

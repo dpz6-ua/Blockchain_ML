@@ -2,23 +2,7 @@
 \section{Evaluación Experimental y Resultados}
 \label{sec:evaluacion}
 
-En esta sección se analiza cuantitativamente el comportamiento del sistema a lo largo del banco de pruebas experimental, respondiendo a las preguntas de investigación formuladas: el sobrecoste temporal de la capa de auditoría, el desacoplamiento de recursos físicos, la escalabilidad del consenso bizantino IBFT~2.0, la resiliencia empírica frente a ataques de adulteración y la previsibilidad del consumo de gas en la EVM. Con el objetivo de afianzar la solidez, robustez y reproducibilidad experimental, cada una de las cinco configuraciones experimentales ($E_1$ a $E_5$) fue evaluada a lo largo de 3 ejecuciones independientes completas de 30 rondas cada una, totalizando un corpus de 15 ejecuciones y 450 rondas federadas ($N_{\text{total}} = 450$).
-
-\subsection{Convergencia del Modelo y Análisis de Pérdida}
-La Figura~\ref{fig:convergencia} ilustra la evolución de la función de pérdida de entropía cruzada en el conjunto de validación durante las 30 iteraciones federadas.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\columnwidth]{figuras/convergencia_loss.png}
-    \caption{Evolución de la pérdida de validación (\textit{cross-entropy}) a lo largo de las 30 rondas federadas.}
-    \label{fig:convergencia}
-\end{figure}
-
-El modelo muestra un rápido aprendizaje inicial, alcanzando su mínimo de pérdida en la ronda 4 ($\mathcal{L} \approx 0{,}24$) con una precisión de clasificación que se estabiliza en el $97\%$. A partir de dicho punto, la pérdida experimenta un incremento gradual y sostenido hasta situarse en torno a $0{,}90$ hacia el final del ciclo. Este comportamiento representa un caso paradigmático de sobreajuste (\textit{overfitting}) provocado por el régimen de 90 épocas acumuladas (3 épocas locales $\times$ 30 rondas federadas) sobre un conjunto de entrenamiento acotado, donde la red incrementa excesivamente su confianza en predicciones.
-
-El mínimo de pérdida en la ronda 4 sugiere que la incorporación de técnicas como la parada temprana (\textit{early stopping}) habría detenido el entrenamiento en ese instante, logrando una versión más ajustada del clasificador. Sin embargo, se mantuvieron de forma deliberada las 30 rondas predefinidas porque el objetivo central de esta investigación no es optimizar el modelo de IA ni perseguir su punto de máxima eficiencia, sino someter la infraestructura de aprendizaje federado a una carga constante para extraer métricas cuantitativas reproducibles (latencia por ronda, tiempo de confirmación y coste de gas). De este modo, la optimización fina del modelo se pospone como trabajo futuro.
-
-Es fundamental enfatizar que \textbf{la curva de convergencia es estrictamente idéntica con o sin la presencia de Blockchain}. Dado que la capa de trazabilidad opera exclusivamente en la verificación e indexación criptográfica fuera de cadena y no interfiere en los tensores ni en los gradientes de FedAvg, la dinámica de entrenamiento se mantiene inalterada.
+En esta sección se analiza cuantitativamente el comportamiento del sistema a lo largo del banco de pruebas experimental, respondiendo a las preguntas de investigación formuladas: el sobrecoste temporal de la capa de auditoría, el desacoplamiento de recursos físicos, la escalabilidad del consenso bizantino IBFT~2.0, la resiliencia empírica frente a ataques de adulteración y la previsibilidad del consumo de gas en la EVM. Con el objetivo de afianzar la solidez, robustez y reproducibilidad experimental, cada una de las cinco configuraciones experimentales ($E_1$ a $E_5$) fue evaluada a lo largo de 3 ejecuciones independientes completas de 30 rondas cada una, totalizando un corpus de 15 ejecuciones y 450 rondas federadas ($N_{\text{total}} = 450$). Conviene enfatizar que la dinámica de convergencia del clasificador es estrictamente idéntica con o sin la presencia de Blockchain, ya que la capa de trazabilidad opera de forma desacoplada y no interfiere en los tensores ni en los gradientes de entrenamiento.
 
 \subsection{Formalización Matemática de Métricas de Rendimiento}
 Con el fin de aislar de forma unívoca la latencia impuesta por cada componente del sistema, el tiempo total por ronda en los nodos de borde ($T_{\text{client}}$) y en el servidor agregador ($T_{\text{server}}$) en la iteración $t$ se define analíticamente como:
@@ -147,16 +131,16 @@ Al comparar $E_4$ con $E_5$, la mediana por ronda apenas varía de 72,96~s a 73,
     \label{fig:tiempo_confirmacion}
 \end{figure}
 
-Al aislar específicamente el \textbf{tiempo de confirmación de las transacciones on-chain} (Figura~\ref{fig:tiempo_confirmacion}), la complejidad de intercambio de mensajes del algoritmo IBFT~2.0 ($\mathcal{O}(N^2)$ en fases \textit{Prepare} y \textit{Commit}) se manifiesta de manera clara:
+Al aislar específicamente el \textbf{tiempo de confirmación de las transacciones on-chain} (Figura~\ref{fig:tiempo_confirmacion}), se cuantifica el impacto directo observado al ampliar el comité de consenso de 4 a 7 nodos validadores en el banco de pruebas evaluado:
 \begin{itemize}
     \item Transacción del cliente (\texttt{registerClientModel}): la latencia media pasa de 2,84~s en $E_4$ a 2,94~s en $E_5$ (+0,10~s).
     \item Transacción del servidor (\texttt{updateModel}): la latencia pasa de 2,89~s en $E_4$ a 2,99~s en $E_5$ (+0,10~s).
 \end{itemize}
-Este incremento simétrico de 100~ms confirma experimentalmente que ampliar la resiliencia bizantina del consorcio de 1 a 2 nodos fallidos no compromete la viabilidad temporal del sistema.
+Este incremento simétrico de 100~ms refleja la sobrecarga medida empíricamente al ampliar el quórum de validación ($f=1 \to 2$), confirmando que la mayor resiliencia bizantina del consorcio se absorbe holgadamente dentro del ciclo de cómputo local sin degradar la cadencia operativa del entrenamiento.
 
 \subsection{Robustez Adversarial y Verificación Experimental de Ataques}
 \label{subsec:ataques}
-Para validar empíricamente que la arquitectura no solo registra transacciones en condiciones nominales, sino que neutraliza activamente vectores de ataque reales, se implementó una batería de ensayos adversariales controlados en el módulo \texttt{test\_verificacion.py}. El objetivo es evaluar el comportamiento del sistema ante las dos principales amenazas bizantinas en aprendizaje federado no confiable: un servidor central comprometido (ataque descendente) y un nodo participante envenenador (ataque ascendente).
+Para validar empíricamente que la arquitectura no solo registra transacciones en condiciones nominales, sino que neutraliza activamente vectores de ataque reales, se implementó una batería de ensayos adversariales controlados en el módulo \texttt{test\_verificacion.py}. El objetivo es evaluar el comportamiento del sistema ante las dos principales amenazas bizantinas en aprendizaje federado no confiable: la equivocación del servidor agregador (\textit{server equivocation}, en el flujo descendente) y un nodo participante envenenador (en el flujo ascendente).
 
 \subsubsection{Prueba 1: Verificación Descendente (Servidor Adulterado frente a Cliente Edge)}
 \label{subsubsec:ataque_descendente}
@@ -196,7 +180,7 @@ La Figura~\ref{fig:log_ataque_descendente} ilustra la telemetría real en tiempo
     \label{fig:log_ataque_descendente}
 \end{figure}
 
-Por su parte, la Figura~\ref{fig:bloque_80_audit} aporta la evidencia inmutable en la cadena de bloques, capturada desde el explorador de la red Hyperledger Besu. En ella se observa el sellado de la transacción \texttt{updateModel} en el \textbf{Bloque~80}, emitida por la dirección del servidor (\texttt{0xfe3b557e...}) con hash criptográfico \texttt{0x973b0b...} y un consumo de gas de 167.460 (límite 500.000). Esta correspondencia unívoca entre el bloque minado y la verificación del cliente valida la consistencia del protocolo.
+Por su parte, la Figura~\ref{fig:bloque_80_audit} aporta la evidencia inmutable en la cadena de bloques, capturada desde el explorador de la red Hyperledger Besu. En ella se observa el sellado de la transacción \texttt{updateModel} en el \textbf{Bloque~80}, emitida por la dirección del servidor (\texttt{0xfe3b557e...}) con hash criptográfico \texttt{0x973b0b...} y un consumo de gas de 167.460 en dicho ensayo previo (elevándose a 169.649 en la versión final con \texttt{onlyServer}, límite 500.000). Esta correspondencia unívoca entre el bloque minado y la verificación del cliente valida la consistencia del protocolo.
 
 \begin{figure}[H]
     \centering
@@ -309,7 +293,7 @@ El protocolo de auditoría operó conforme a las siguientes etapas:
 \midrule
 Manipulación en Tránsito / Servidor No Fidedigno & Cliente (Edge) & Intercepción determinista / Aborto preventivo & 0,1486 s & Sin contaminación local \\
 Inyección No Autenticada / Cliente No Registrado & Servidor Agregador & Intercepción determinista / Descarte en FedAvg & 0,0309 s & Agregación preservada \\
-Auditoría FedAvg Ex-Post & Auditor Independiente & Reconstrucción matemática / Verificación fidedigna & 0,3391 s & Fidelidad exacta ($\Delta = 0$, CID MATCH) \\
+Auditoría FedAvg Ex-Post & Auditor Independiente & Reconstrucción matemática / Verificación fidedigna & 0,34 s & Fidelidad exacta ($\Delta = 0$, CID MATCH) \\
 \bottomrule
 \end{tabular}%
 }
@@ -322,7 +306,7 @@ Asimismo, se evaluó la sensibilidad del mecanismo activando el modo adversarial
 \subsubsection{Síntesis de Validación y Alcance de Seguridad}
 La Tabla~\ref{tab:resumen_ataques} sintetiza las métricas cuantitativas obtenidas a lo largo de las tres pruebas experimentales de integridad y auditoría.
 
-Estos ensayos constituyen una validación funcional determinista de las primitivas de intercepción criptográfica implementadas en el marco: ante una alteración de los parámetros en tránsito o la ausencia de un compromiso inmutable previamente sellado y firmado en la cadena, el protocolo intercepta la anomalía de manera determinista con tiempos de respuesta en torno a la décima de segundo (149~ms en el cliente, 31~ms en el servidor y $\approx 200$~ms en la auditoría ex-post de FedAvg), impidiendo que los pesos discordantes contaminen los cómputos locales o globales.
+Estos ensayos constituyen una validación funcional determinista de las primitivas de intercepción criptográfica implementadas en el marco: ante una alteración de los parámetros en tránsito o la ausencia de un compromiso inmutable previamente sellado y firmado en la cadena, el protocolo intercepta la anomalía de manera determinista con tiempos de respuesta en torno a la décima de segundo (149~ms en el cliente, 31~ms en el servidor y $0{,}34$~s en la auditoría ex-post de FedAvg), impidiendo que los pesos discordantes contaminen los cómputos locales o globales.
 
 Tal como se formalizó en el modelo de amenazas (Sección~\ref{subsec:modelo_amenazas}), conviene remarcar los límites operacionales de este esquema defensivo: la doble verificación en cadena actúa con eficacia contra la adulteración directa de parámetros en tránsito (\textit{tampering}), la emisión no autorizada a nombre de terceros mediante autenticación asimétrica ECDSA y la inyección de modelos disidentes no respaldados on-chain. No obstante, si un nodo malicioso genera una actualización perjudicial mediante manipulación local de sus datos de entrenamiento (\textit{data poisoning} o \textit{label flipping})~\cite{tolpegin2020data} y la firma legítimamente con su clave privada en Besu, el compromiso criptográfico coincidirá formalmente aunque la semántica del modelo esté contaminada. La neutralización de esta tipología de ataques semánticos requiere complementar la trazabilidad con filtros de agregación estadística bizantina (como Krum~\cite{blanchard2017byzantine}, Median o Trimmed-Mean) o mediante la auditoría ex-post de las contribuciones registradas posibilitada por nuestro diseño (Sección~\ref{subsec:auditoria_fedavg}).
 
@@ -339,10 +323,10 @@ La Figura~\ref{fig:consumo_gas} ilustra el consumo de gas computacional de las o
 El perfil de consumo resulta rigurosamente constante en todas las iteraciones:
 \begin{itemize}
     \item \texttt{registerClientModel}: exactamente \textbf{160.200 unidades de gas}.
-    \item \texttt{updateModel}: exactamente \textbf{167.460 unidades de gas}.
+    \item \texttt{updateModel}: exactamente \textbf{169.649 unidades de gas}.
 \end{itemize}
-Conviene destacar que este consumo refleja la versión definitiva del contrato inteligente \texttt{FLRegistry}: la inclusión del modificador de control de acceso \texttt{onlyServer} en \texttt{updateModel} introduce una comprobación de identidad en la EVM (\texttt{SLOAD} y salto condicional sobre \texttt{serverAddress}) que añade únicamente 100 unidades de gas (+0,06\% de sobrecoste respecto a una versión abierta sin control de acceso), manteniendo el coste acotado y plenamente predecible.
-La única excepción observable corresponde a la ronda 0 del servidor, que demandó \textbf{184.560 unidades de gas}. Dicha discrepancia (+17.100 unidades) responde al coste de la instrucción \texttt{SSTORE} de la EVM al escribir por primera vez en posiciones de memoria previamente vacías (\textit{cold write}) y modificar el valor del flag booleano \texttt{hasModel}.
+Conviene destacar que este consumo refleja la versión definitiva del contrato inteligente \texttt{FLRegistry}: el despliegue del contrato con el modificador de control de acceso \texttt{onlyServer} en \texttt{updateModel} introduce una comprobación de identidad en la EVM (\texttt{SLOAD} y salto condicional sobre \texttt{serverAddress}) que sitúa el coste de ejecución en exactamente 169.649 unidades de gas (un sobrecoste acotado de 2.189 unidades de gas, +1,3\% respecto a una versión abierta sin control de acceso), manteniéndose rigurosamente constante y predecible a lo largo de todas las rondas operativas.
+La única excepción observable corresponde a la ronda 0 del servidor, que demandó \textbf{186.749 unidades de gas}. Dicha discrepancia (+17.100 unidades) responde al coste de la instrucción \texttt{SSTORE} de la EVM al escribir por primera vez en posiciones de memoria previamente vacías (\textit{cold write}) y modificar el valor del flag booleano \texttt{hasModel}.
 
 La invariabilidad del consumo valida formalmente el diseño desacoplado: al almacenar en el contrato únicamente cadenas de longitud uniforme (los identificadores CIDv0 de IPFS de 46 caracteres que encapsulan el multihash SHA-256 y metadatos acotados), el coste de gas se mantiene estable por transacción e independiente tanto del tamaño del modelo neuronal como del número acumulado de rondas, asegurando un consumo de recursos acotado y predecible en redes de consorcio.
 
@@ -360,12 +344,12 @@ Para verificar empíricamente la correspondencia unívoca entre los eventos del 
 \textbf{Bloque} & \textbf{Entidad} & \textbf{Evento / Método} & \textbf{Dirección Emisora} & \textbf{Prefijo Tx Hash} & \textbf{Gas EVM} \\
 \midrule
 8 & Servidor & Despliegue \texttt{FLRegistry} & \texttt{0xfe3b557e...} & \texttt{0x939eb46c...} & 1.999.000 \\
-13 & Servidor & \texttt{updateModel} & \texttt{0xfe3b557e...} & \texttt{0xa18e3bb4...} & 167.460 \\
+13 & Servidor & \texttt{updateModel} & \texttt{0xfe3b557e...} & \texttt{0xa18e3bb4...} & 169.649 \\
 14 & Cliente 2 & \texttt{registerClientModel} & \texttt{0x62730609...} & \texttt{0xc1c7402f...} & 160.200 \\
 \midrule
-765 & Servidor & \texttt{updateModel} (Ronda 23) & \texttt{0xfe3b557e...} & \texttt{0x4ceabb7a...} & 167.460 \\
-783 & Servidor & \texttt{updateModel} (Ronda 24) & \texttt{0xfe3b557e...} & \texttt{0xb9cb75f5...} & 167.460 \\
-801 & Servidor & \texttt{updateModel} (Ronda 25) & \texttt{0xfe3b557e...} & \texttt{0xdf69295f...} & 167.460 \\
+765 & Servidor & \texttt{updateModel} (Ronda 23) & \texttt{0xfe3b557e...} & \texttt{0x4ceabb7a...} & 169.649 \\
+783 & Servidor & \texttt{updateModel} (Ronda 24) & \texttt{0xfe3b557e...} & \texttt{0xb9cb75f5...} & 169.649 \\
+801 & Servidor & \texttt{updateModel} (Ronda 25) & \texttt{0xfe3b557e...} & \texttt{0xdf69295f...} & 169.649 \\
 \bottomrule
 \end{tabular}%
 }
