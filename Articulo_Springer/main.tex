@@ -29,17 +29,17 @@
 
 \begin{document}
 
-\title[Integración de Blockchain e IPFS para Auditoría Ex-Post en FL]{Integración de Blockchain e IPFS para la Trazabilidad, Integridad y Auditoría Ex-Post en Aprendizaje Federado}
+\title[Integrating Blockchain and IPFS for Ex-Post Auditing in FL]{Integrating Blockchain and IPFS for Traceability, Integrity, and Ex-Post Auditing in Federated Learning}
 
 \author*[1]{\fnm{David Piotr} \sur{Znojek}}\email{dawidznojek@gmail.com}
 
 \author[1]{\fnm{Francisco A.} \sur{Pujol}}\email{fpujol@ua.es}
 
-\affil*[1]{\orgdiv{Departamento de Tecnología Informática y Computación}, \orgname{Universidad de Alicante}, \orgaddress{\street{Carretera de San Vicente del Raspeig s/n}, \city{San Vicente del Raspeig}, \postcode{03690}, \state{Alicante}, \country{España}}}
+\affil*[1]{\orgdiv{Department of Computer Technology and Computation}, \orgname{University of Alicante}, \orgaddress{\street{Carretera de San Vicente del Raspeig s/n}, \city{San Vicente del Raspeig}, \postcode{03690}, \state{Alicante}, \country{Spain}}}
 
-\abstract{El entrenamiento distribuido mediante Aprendizaje Federado (\textit{Federated Learning}) permite preservar la privacidad de datos sensibles pero carece intrínsecamente de mecanismos para auditar la legitimidad de las contribuciones de los participantes, exponiendo al sistema a ataques de envenenamiento (\textit{model poisoning}) con consecuencias críticas en sectores como el de los vehículos autónomos. En este artículo se presenta y evalúa una arquitectura híbrida que integra una red Blockchain permisionada basada en Hyperledger Besu y consenso IBFT 2.0 con el framework Flower y almacenamiento distribuido fuera de cadena mediante IPFS. Se diseña un contrato inteligente en Solidity que implementa un protocolo de doble verificación cruzada entre clientes y servidor agregador utilizando compromisos criptográficos (CIDs de IPFS) de los pesos neuronales. La viabilidad del marco se valida empíricamente sobre un banco de pruebas distribuido entrenando un clasificador convolucional de señales y eventos viales bajo un riguroso protocolo experimental multiejecución (15 ejecuciones y 450 rondas federadas en total) bajo cinco configuraciones. Los resultados cuantitativos demuestran que, en el despliegue distribuido realista, la capa de trazabilidad añade una sobrecarga temporal reducida de tan solo el 9,5\% (6,34~s por ronda), manteniendo un coste de gas estable y predecible por transacción y escalando con un impacto marginal (+0,39~s en mediana de ronda y +0,10~s en confirmación de bloque) al ampliar el quórum de 4 a 7 nodos validadores ($f=1 \to f=2$). Asimismo, la evaluación adversarial valida funcionalmente la intercepción determinista de manipulaciones en tránsito y contribuciones desalineadas tanto en servidor como en clientes con latencias de mitigación reducidas (149~ms para aborto local preventivo y 31~ms para descarte en agregación), complementado con un protocolo de auditoría ex-post capaz de reconstruir y verificar la agregación FedAvg en $\approx 300$~ms sin discrepancia ($\Delta = 0$). Esta investigación confirma que el coste de incorporar inmutabilidad y no repudio resulta plenamente asumible frente a las garantías de auditoría obtenidas.}
+\abstract{Distributed training via Federated Learning (FL) preserves the privacy of sensitive edge data, but inherently lacks verifiable mechanisms to audit the authenticity and integrity of participant contributions, leaving systems vulnerable to model and data poisoning attacks with critical implications in domains such as Connected and Autonomous Vehicles (CAVs). This paper presents and evaluates a hybrid architecture that integrates a permissioned blockchain network based on Hyperledger Besu and IBFT 2.0 consensus with the Flower framework and off-chain content-addressable storage via IPFS. A Solidity smart contract implements a bidirectional cross-verification protocol between edge clients and the aggregation server using cryptographic commitments (IPFS content identifiers, CIDs) derived from neural network parameters. The viability of the framework is empirically validated on a physical distributed testbed training a convolutional classifier for vehicular hazard and road event detection under a rigorous multi-run protocol (15 complete independent executions totaling 450 federated rounds across five configurations). Quantitative results demonstrate that in a realistic distributed deployment, the blockchain auditability layer incurs a modest temporal overhead of only 9.5\% (6.34~s per round), while maintaining a deterministic, invariant EVM gas profile per transaction (186,749 gas initial cold write, 169,649 gas steady state) and scaling with marginal impact (+0.39~s in median round time and +0.10~s in block confirmation delay) when expanding the IBFT 2.0 quorum from 4 to 7 validator nodes ($f=1 \to f=2$). Furthermore, adversarial evaluation confirms deterministic interception of in-transit parameter tampering and unauthenticated injections at both client (149~ms) and server (31~ms) levels. An ex-post audit protocol allows independent entities to mathematically reconstruct the canonical FedAvg aggregation directly from immutable Besu and IPFS commitments in 0.34~s with exact numerical correspondence ($\Delta = 0$, CID match) and instantaneously detect deviations in 0.18~s. These findings confirm that the operational cost of decentralization, immutability, and non-repudiation is thoroughly viable for safety-critical distributed intelligent systems.}
 
-\keywords{Aprendizaje Federado, Auditoría Criptográfica, Blockchain, Consenso IBFT 2.0, Hyperledger Besu, IPFS, Trazabilidad, Vehículos Autónomos}
+\keywords{Federated Learning, Blockchain, Hyperledger Besu, IBFT 2.0 Consensus, IPFS, Ex-Post Auditing, Cryptographic Integrity, Traceability, Autonomous Vehicles}
 
 \maketitle
 
@@ -50,12 +50,12 @@
 \input{sections/05_evaluacion_resultados}
 \input{sections/06_conclusiones}
 
-\bmhead{Declaraciones}
+\bmhead{Declarations}
 \begin{itemize}
-    \item \textbf{Financiación}: No aplicable.
-    \item \textbf{Conflicto de intereses}: Los autores declaran no tener conflictos de interés ni intereses financieros concurrentes.
-    \item \textbf{Disponibilidad de datos y materiales}: Los conjuntos de datos generados y los artefactos de registro durante las pruebas empíricas están disponibles a solicitud.
-    \item \textbf{Disponibilidad de código}: Los scripts de orquestación, contratos inteligentes y módulos de auditoría se encuentran accesibles para reproducción experimental.
+    \item \textbf{Funding}: Not applicable.
+    \item \textbf{Conflict of interest}: The authors declare that they have no competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
+    \item \textbf{Data and materials availability}: The datasets and runtime telemetry logs generated during the empirical evaluation are available upon reasonable request.
+    \item \textbf{Code availability}: Orchestration scripts, Solidity smart contracts, Docker Compose deployment templates, and independent audit modules are openly accessible at \url{https://github.com/dpz6-ua/Blockchain_ML}.
 \end{itemize}
 
 \bibliography{sn-bibliography}
