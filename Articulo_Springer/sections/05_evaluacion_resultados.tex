@@ -2,7 +2,7 @@
 \section{Experimental Evaluation and Results}
 \label{sec:evaluacion}
 
-This section quantitatively analyzes the performance of the proposed architecture across the experimental testbed, directly addressing the core research questions: the temporal overhead of the auditability layer, the impact of physical resource decoupling, the scalability of the IBFT 2.0 Byzantine consensus, the empirical resilience against adversarial tampering attacks, and the predictability of EVM gas consumption. To ensure statistical soundness and experimental reproducibility, each of the five experimental configurations ($E_1$ to $E_5$) was evaluated across 3 complete, independent executions of 30 federated rounds each, yielding a corpus of 15 executions and 450 total federated rounds ($N_{\text{total}} = 450$). We note that the model convergence trajectory is identical with or without the blockchain layer, as the traceability framework operates fully decoupled and does not modify training tensors or gradients.
+This section quantitatively analyzes the performance of the proposed architecture across the experimental testbed, directly addressing the core research questions: the temporal overhead of the auditability layer, the impact of physical resource decoupling, the latency impact of expanding the IBFT 2.0 validator committee, the empirical resilience against adversarial tampering attacks, and the predictability of EVM gas consumption. To ensure statistical soundness and experimental reproducibility, each of the five experimental configurations ($E_1$ to $E_5$) was evaluated across 3 complete, independent executions of 30 federated rounds each, yielding a corpus of 15 executions and 450 total federated rounds ($N_{\text{total}} = 450$). We note that the model convergence trajectory is identical with or without the blockchain layer, as the traceability framework operates fully decoupled and does not modify training tensors or gradients.
 
 \subsection{Mathematical Formalization of Performance Metrics}
 To isolate the latency imposed by each system component, the total round time at the edge nodes ($T_{\text{client}}$) and at the central coordinator ($T_{\text{server}}$) during iteration $t$ is analytically defined as:
@@ -109,12 +109,13 @@ The empirical breakdown in Table~\ref{tab:desglose_fases} substantiates three fu
     \item \textbf{Consistency between $T_{\text{client}}$ and $T_{\text{server}}$:} The sum of the four client-side local phases (\textit{Train} + \textit{Verif.} + \textit{IPFS} + \textit{Tx Besu}) strictly accounts for the client cycle time in Table~\ref{tab:tiempos_resumen} (e.g., in $E_4$: $66.22 + 1.68 + 2.43 + 2.84 = 73.17$~s, matching the empirical mean of $73.29$~s). Concurrently, server perspective reflects overall round duration ($T_{\text{server}}$), where the coordinator awaits concurrent client completion (\textit{Wait}, $79.54$~s) and commits the aggregated global model on-chain (\textit{Block}, $2.89$~s), totaling an end-to-end latency of $\approx 82.49$~s.
 \end{enumerate}
 
-\subsection{IBFT 2.0 Byzantine Consensus Scalability (4 vs. 7 Validators)}
-In permissioned consortium networks, Byzantine fault tolerance requires $N \ge 3f + 1$, where $N$ is the total validator count and $f$ is the maximum number of tolerated faulty or adversarial nodes:
+\subsection{Impact of Validator Committee Size in IBFT 2.0 (4 vs. 7 Validators)}
+In permissioned consortium deployments, elevating Byzantine fault tolerance requires expanding the validator committee such that $N \ge 3f + 1$, where $N$ is the total validator count and $f$ is the maximum number of tolerated faulty or adversarial nodes:
 \begin{itemize}
     \item 4-validator network ($E_4$): tolerates $f=1$ faulty node; signature quorum $2f+1 = 3$.
     \item 7-validator network ($E_5$): tolerates $f=2$ faulty nodes; signature quorum $2f+1 = 5$.
 \end{itemize}
+Because all validator instances in our testbed execute containerized on the same physical host, this experiment does not aim to measure wide-area network scalability, but rather to isolate and quantify the direct impact of increasing the validator count and signature quorum on local consensus processing and round duration.
 
 Comparing $E_4$ against $E_5$, median cycle time per round exhibits only a slight change, rising from 72.96~s to 73.35~s (+0.39~s), demonstrating that round cadence remains dominated by local model training rather than consensus messaging.
 
@@ -134,7 +135,7 @@ This symmetric 100~ms increase reflects the empirical consensus communication ov
 
 \subsection{Adversarial Robustness and Experimental Attack Verification}
 \label{subsec:ataques}
-To empirically verify that the architecture actively intercepts real-world adversarial vectors rather than merely logging nominal transactions, controlled attack scenarios were executed via the \texttt{test\_verificacion.py} test suite. The evaluation assesses system behavior against the two primary Byzantine threats in untrusted federated environments: coordinator equivocation or split-view attacks (downward flow) and poisoning client updates (upward flow).
+To empirically verify that the architecture actively intercepts real-world adversarial vectors rather than merely logging nominal transactions, controlled attack scenarios were executed via the \texttt{test\_verificacion.py} test suite. The evaluation assesses system behavior against the two primary Byzantine threats in untrusted federated environments: coordinator equivocation or split-view attacks (downward flow) and unauthenticated or tampered client updates (upward flow).
 
 \subsubsection{Test 1: Downward Verification (Tampered Server vs. Edge Client)}
 \label{subsubsec:ataque_descendente}
@@ -183,12 +184,12 @@ Figure~\ref{fig:bloque_80_audit} shows the immutable blockchain evidence capture
     \label{fig:bloque_80_audit}
 \end{figure}
 
-\subsubsection{Test 2: Upward Verification (Poisoning Client vs. Aggregation Coordinator)}
+\subsubsection{Test 2: Upward Verification (Tampered Client Update vs. Aggregation Coordinator)}
 \label{subsubsec:ataque_ascendente}
-The second critical vulnerability is the injection of corrupt weights or gradients by a compromised client (\textit{model poisoning}). To intercept this at the gateway, the coordinator cross-verifies the bijective correspondence between received memory payloads and signed on-chain commitments:
+The second critical vulnerability is the injection of manipulated, tampered, or unregistered parameter weights by a client that do not match its registered on-chain commitment. To intercept this at the gateway prior to FedAvg aggregation, the coordinator cross-verifies the bijective correspondence between received memory payloads and signed on-chain commitments:
 \begin{enumerate}
     \item \textbf{Legitimate On-Chain Registration:} The honest client node (account 3, address \texttt{0xf17f52...}) uploads its local weights to IPFS and submits a signed transaction calling \texttt{registerClientModel(round, legitimate\_cid)}, confirmed in \textbf{Block~81}.
-    \item \textbf{Adversarial Injection:} An injection attempt is simulated where an update with altered parameters or mismatched metadata is delivered to the coordinator (modeling the transmission of fraudulent CID \texttt{QmClientFraud...} or poisoned parameters that deviate from the registered CID).
+    \item \textbf{Adversarial Injection:} An injection attempt is simulated where an update with altered parameters or mismatched metadata is delivered to the coordinator (modeling the transmission of a fraudulent CID \texttt{QmClientFraud...} or tampered weight tensors that deviate from the registered on-chain digest).
     \item \textbf{Cryptographic Audit and Exclusion from FedAvg:} Prior to executing FedAvg, the coordinator computes the cryptographic hash of received memory tensors ($\text{CID}_{\text{calc}}^{(k)}$) and executes a read-only JSON-RPC call \texttt{getClientModel(round, address)} against \texttt{FLRegistry} to retrieve $\text{CID}_{\text{onchain}}^{(k)}$. Upon detecting discrepancy, the update is excluded before aggregation.
 \end{enumerate}
 

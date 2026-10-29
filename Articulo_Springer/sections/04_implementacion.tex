@@ -45,7 +45,7 @@ The dataset comprises 3,415 images distributed across: adverse weather (1,027), 
 
 The implemented model (\texttt{NetCliente}) is a Convolutional Neural Network (CNN) structured into two consecutive convolutional blocks (with $3 \times 3$ kernels, ReLU activation, and Max Pooling subsampling), followed by two dense fully connected layers that project the feature vector to 4 output logits. Model training optimizes Cross-Entropy Loss using the Adam optimizer with a learning rate $\eta = 10^{-3}$, a batch size of 16 for training and 32 for validation, 3 local training epochs per federated round, and a total horizon of 30 federated rounds.
 
-We emphasize that the primary objective of this study is not to design an optimal convolutional architecture or maximize classification accuracy, but rather to establish a realistic federated learning testbed to quantify and analyze system-level performance metrics (temporal overhead, scalability, and gas consumption). Model-level hyperparameter tuning, overfitting mitigation, and deeper architectures are deliberately left as future work, with the neural network serving here as a representative, realistic workload. Consequently, the decoupled architecture is directly transferable to other distributed learning domains (e.g., smart healthcare, smart grids, or collaborative finance), where blockchain audit logic remains identical and only IPFS off-chain transfer and hash computation scale with serialized model volume.
+We emphasize that the primary objective of this study is not to design an optimal convolutional architecture or maximize classification accuracy, but rather to establish a realistic federated learning testbed to quantify and analyze system-level performance metrics (temporal overhead, validator quorum impact, and gas consumption). Model-level hyperparameter tuning, overfitting mitigation, and deeper architectures are deliberately left as future work, with the neural network serving here as a representative, realistic workload. Consequently, the decoupled architecture is directly transferable to other distributed learning domains (e.g., smart healthcare, smart grids, or collaborative finance), where blockchain audit logic remains identical and only IPFS off-chain transfer and hash computation scale with serialized model volume.
 
 \subsection{Experimental Configuration Matrix}
 To decouple and analytically quantify the individual impact of each architectural component, five experimental configurations (E1 to E5) were evaluated, as summarized in Table~\ref{tab:configuraciones}.
@@ -60,7 +60,7 @@ E1 & 1 & Yes & 4 & Local BC overhead \\
 E2 & 1 & No & --- & Local baseline \\
 E3 & 2 & No & --- & Distributed baseline \\
 E4 & 2 & Yes & 4 & Distributed BC overhead \\
-E5 & 2 & Yes & 7 & IBFT 2.0 scalability \\
+E5 & 2 & Yes & 7 & Validator count impact \\
 \bottomrule
 \end{tabular*}
 \end{table}
@@ -69,5 +69,5 @@ This experimental design enables controlled single-variable comparisons:
 \begin{itemize}
     \item \textbf{Direct Blockchain overhead}: Comparing E1 vs. E2 in a single-machine setup, and E4 vs. E3 in a distributed network setup.
     \item \textbf{Effect of physical distribution}: Comparing E2 vs. E3 (without Blockchain) and E1 vs. E4 (with a 4-validator Blockchain).
-    \item \textbf{BFT consensus scalability}: Comparing E4 (4 validators) vs. E5 (7 validators), evaluating latency overhead when elevating Byzantine fault tolerance from $f=1$ to $f=2$.
+    \item \textbf{Impact of validator committee size}: Comparing E4 (4 validators) vs. E5 (7 validators), evaluating latency impact when expanding the Byzantine consensus committee from $f=1$ to $f=2$.
 \end{itemize}
