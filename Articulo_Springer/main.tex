@@ -58,6 +58,16 @@
     \item \textbf{Code availability}: Orchestration scripts, Solidity smart contracts, Docker Compose deployment templates, and independent audit modules are openly accessible at \url{https://github.com/dpz6-ua/Blockchain_ML}.
 \end{itemize}
 
+\makeatletter
+\def\blocation#1{%
+  \def\qmark{???}%
+  \def\currloc{#1}%
+  \ifx\qmark\currloc
+  \else
+    #1%
+  \fi
+}
+\makeatother
 \bibliography{sn-bibliography}
 
 \end{document}
