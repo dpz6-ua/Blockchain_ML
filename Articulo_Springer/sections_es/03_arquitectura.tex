@@ -6,7 +6,7 @@ Para dotar al aprendizaje federado de trazabilidad y resistencia frente a compor
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.88\textwidth]{figuras/ArqSistema.png}
+    \includegraphics[width=0.88\textwidth]{figures/ArqSistema.png}
     \caption{Arquitectura general del sistema híbrido: desacoplamiento entre el cómputo federado (Flower), el almacenamiento de pesos fuera de cadena (IPFS) y el registro inmutable de trazabilidad (Hyperledger Besu con IBFT 2.0).}
     \label{fig:arq_sistema}
 \end{figure}
@@ -85,7 +85,7 @@ Al recibir la señal de inicio de ronda junto con los pesos candidatos $w_{cand}
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/flujo_fase1_verificacion_descendente.pdf}
+    \includegraphics[width=\columnwidth]{figures/flujo_fase1_verificacion_descendente.pdf}
     \caption{Fase 1: Verificación descendente en el cliente: cotejo del modelo recibido frente al CID registrado on-chain y descargado de IPFS.}
     \label{fig:flujo_cliente_verif}
 \end{figure}
@@ -101,7 +101,7 @@ Si la comprobación previa es satisfactoria (Figura~\ref{fig:flujo_cliente_entre
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/flujo_fase2_entrenamiento_registro.pdf}
+    \includegraphics[width=\columnwidth]{figures/flujo_fase2_entrenamiento_registro.pdf}
     \caption{Fase 2: Entrenamiento local en el cliente, subida de pesos a IPFS y transacción firmada a Hyperledger Besu.}
     \label{fig:flujo_cliente_entreno}
 \end{figure}
@@ -126,7 +126,7 @@ Al recibir las actualizaciones de los clientes en el servidor agregador (Figura~
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/flujo_fase3_verificacion_agregacion.pdf}
+    \includegraphics[width=\columnwidth]{figures/flujo_fase3_verificacion_agregacion.pdf}
     \caption{Fase 3: Verificación ascendente en el servidor: validación de integridad tensorial, verificación on-chain, agregación FedAvg y sellado global de ronda.}
     \label{fig:flujo_servidor_agregacion}
 \end{figure}

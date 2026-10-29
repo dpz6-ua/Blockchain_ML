@@ -49,7 +49,7 @@ $E_5$ & 2 & 7 val · with BC & 3 & \textbf{73.35} & 74.40 & 0.54 & 0.31 \\
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/tiempo_ronda_todas.png}
+    \includegraphics[width=\columnwidth]{figures/tiempo_ronda_todas.png}
     \caption{Comparison of client cycle time ($T_{\text{client}}$) across federated rounds for the five evaluated configurations.}
     \label{fig:tiempo_todas}
 \end{figure}
@@ -65,7 +65,7 @@ To evaluate the precise temporal cost incurred by tensor serialization, IPFS upl
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/coste_blockchain.png}
+    \includegraphics[width=\columnwidth]{figures/coste_blockchain.png}
     \caption{Temporal overhead induced by blockchain integration in single-workstation and distributed deployments.}
     \label{fig:coste_bc}
 \end{figure}
@@ -77,7 +77,7 @@ Comparing single-workstation and distributed configurations confirms that physic
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/coste_distribucion.png}
+    \includegraphics[width=\columnwidth]{figures/coste_distribucion.png}
     \caption{Effect of physical node distribution on cycle time: mitigating CPU/memory contention.}
     \label{fig:coste_dist}
 \end{figure}
@@ -121,7 +121,7 @@ Comparing $E_4$ against $E_5$, median cycle time per round exhibits only a sligh
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/tiempo_confirmacion.png}
+    \includegraphics[width=\columnwidth]{figures/tiempo_confirmacion.png}
     \caption{Average on-chain transaction confirmation latency by topology and validator count in Hyperledger Besu.}
     \label{fig:tiempo_confirmacion}
 \end{figure}
@@ -170,7 +170,7 @@ Figure~\ref{fig:log_ataque_descendente} shows runtime console telemetry at the e
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/logs_deteccion_ataque_descendent.png}
+    \includegraphics[width=\columnwidth]{figures/logs_deteccion_ataque_descendent.png}
     \caption{Test 1: Console log of edge client detecting parameter tampering against the official on-chain CID sealed in block 80.}
     \label{fig:log_ataque_descendente}
 \end{figure}
@@ -179,7 +179,7 @@ Figure~\ref{fig:bloque_80_audit} shows the immutable blockchain evidence capture
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/auditoria_grafana_bloque_80.png}
+    \includegraphics[width=\columnwidth]{figures/auditoria_grafana_bloque_80.png}
     \caption{Test 1: Confirmation of Block 80 in Hyperledger Besu, recording the authoritative \texttt{updateModel} transaction submitted by the coordinator.}
     \label{fig:bloque_80_audit}
 \end{figure}
@@ -219,7 +219,7 @@ Figure~\ref{fig:log_ataque_ascendente} illustrates server terminal output. The J
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/logs_deteccion_ataque_ascendente.png}
+    \includegraphics[width=\columnwidth]{figures/logs_deteccion_ataque_ascendente.png}
     \caption{Test 2: Coordinator console log auditing client CID via RPC and discarding fraudulent contribution prior to aggregation.}
     \label{fig:log_ataque_ascendente}
 \end{figure}
@@ -228,7 +228,7 @@ Figure~\ref{fig:bloque_81_audit} displays the transaction receipt in \textbf{Blo
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/auditoria_grafana_bloque_81.png}
+    \includegraphics[width=\columnwidth]{figures/auditoria_grafana_bloque_81.png}
     \caption{Test 2: Forensic confirmation in Hyperledger Besu of Block 81, recording legitimate client transaction \texttt{registerClientModel}.}
     \label{fig:bloque_81_audit}
 \end{figure}
@@ -270,7 +270,7 @@ The audit protocol proceeded through the following steps:
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/logs_auditoria_expost_fedavg.png}
+    \includegraphics[width=\columnwidth]{figures/logs_auditoria_expost_fedavg.png}
     \caption{Test 3: Independent auditor console log reconstructing Round 2 FedAvg aggregation from Besu and IPFS, verifying exact fidelity ($\Delta = 0.000000$) and CID match.}
     \label{fig:log_auditoria_expost}
 \end{figure}
@@ -307,7 +307,7 @@ Figure~\ref{fig:consumo_gas} illustrates EVM gas consumption for operations reco
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.70\columnwidth]{figuras/consumo_gas.png}
+    \includegraphics[width=0.70\columnwidth]{figures/consumo_gas.png}
     \caption{Ethereum Virtual Machine gas consumption by transaction type across 30 federated rounds.}
     \label{fig:consumo_gas}
 \end{figure}
@@ -347,7 +347,7 @@ To empirically verify bijective correspondence between Flower lifecycle events a
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.96\columnwidth]{figuras/bloque_contrato.png}
+    \includegraphics[width=0.96\columnwidth]{figures/bloque_contrato.png}
     \caption{On-chain immutability audit: Besu explorer visualization of \texttt{FLRegistry} contract deployment (Block 8) by coordinator (\texttt{0xfe3b55...}) alongside operational transactions 13 and 14.}
     \label{fig:auditoria_bloque}
 \end{figure}

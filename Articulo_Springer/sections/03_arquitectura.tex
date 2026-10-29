@@ -6,7 +6,7 @@ To provide federated learning with robust traceability and Byzantine fault resil
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.88\textwidth]{figuras/ArqSistema.png}
+    \includegraphics[width=0.88\textwidth]{figures/ArqSistema.png}
     \caption{Overall hybrid system architecture: decoupling between federated computation (Flower), off-chain parameter storage (IPFS), and immutable traceability logging (Hyperledger Besu with IBFT 2.0).}
     \label{fig:arq_sistema}
 \end{figure}
@@ -81,7 +81,7 @@ Upon receiving the round start signal and candidate weights $w_{cand}^{(t)}$ via
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/flujo_fase1_verificacion_descendente.pdf}
+    \includegraphics[width=\columnwidth]{figures/flujo_fase1_verificacion_descendente.pdf}
     \caption{Phase 1: Downward verification at the edge client: validating received candidate weights against the on-chain registered CID retrieved from IPFS.}
     \label{fig:flujo_cliente_verif}
 \end{figure}
@@ -97,7 +97,7 @@ If the downward verification check passes successfully (Figure~\ref{fig:flujo_cl
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/flujo_fase2_entrenamiento_registro.pdf}
+    \includegraphics[width=\columnwidth]{figures/flujo_fase2_entrenamiento_registro.pdf}
     \caption{Phase 2: Local training at the client, parameter upload to IPFS, and signed transaction commitment to Hyperledger Besu.}
     \label{fig:flujo_cliente_entreno}
 \end{figure}
@@ -122,7 +122,7 @@ Upon receiving client updates at the aggregation coordinator (Figure~\ref{fig:fl
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/flujo_fase3_verificacion_agregacion.pdf}
+    \includegraphics[width=\columnwidth]{figures/flujo_fase3_verificacion_agregacion.pdf}
     \caption{Phase 3: Upward verification at the aggregation coordinator: tensor integrity validation, on-chain cross-check, FedAvg aggregation, and global round commitment.}
     \label{fig:flujo_servidor_agregacion}
 \end{figure}

@@ -47,7 +47,7 @@ $E_5$ & 2 & 7 val · con BC & 3 & \textbf{73,35} & 74,40 & 0,54 & 0,31 \\
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/tiempo_ronda_todas.png}
+    \includegraphics[width=\columnwidth]{figures/tiempo_ronda_todas.png}
     \caption{Comparativa del tiempo de ciclo en clientes ($T_{\text{client}}$) a lo largo de las rondas en las cinco configuraciones experimentales.}
     \label{fig:tiempo_todas}
 \end{figure}
@@ -63,7 +63,7 @@ Para cuantificar con exactitud el coste temporal impuesto por la serialización 
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/coste_blockchain.png}
+    \includegraphics[width=\columnwidth]{figures/coste_blockchain.png}
     \caption{Sobrecoste temporal inducido por la integración de la Blockchain en entornos local y distribuido.}
     \label{fig:coste_bc}
 \end{figure}
@@ -75,7 +75,7 @@ La comparación entre la arquitectura monomáquina y distribuida demuestra que l
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/coste_distribucion.png}
+    \includegraphics[width=\columnwidth]{figures/coste_distribucion.png}
     \caption{Efecto de la distribución física de nodos sobre el tiempo de ciclo: mitigación de cuellos de botella de CPU/memoria.}
     \label{fig:coste_dist}
 \end{figure}
@@ -118,7 +118,7 @@ Al comparar $E_4$ con $E_5$, la mediana por ronda apenas varía de 72,96~s a 73,
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/tiempo_confirmacion.png}
+    \includegraphics[width=\columnwidth]{figures/tiempo_confirmacion.png}
     \caption{Tiempo medio de confirmación de transacción según topología y número de validadores en Hyperledger Besu.}
     \label{fig:tiempo_confirmacion}
 \end{figure}
@@ -167,7 +167,7 @@ La Figura~\ref{fig:log_ataque_descendente} ilustra la telemetría real en tiempo
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/logs_deteccion_ataque_descendent.png}
+    \includegraphics[width=\columnwidth]{figures/logs_deteccion_ataque_descendent.png}
     \caption{Prueba 1: Registro de consola del nodo cliente detectando la adulteración del modelo frente al CID oficial sellado en el bloque}
     \label{fig:log_ataque_descendente}
 \end{figure}
@@ -176,7 +176,7 @@ Por su parte, la Figura~\ref{fig:bloque_80_audit} aporta la evidencia inmutable 
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/auditoria_grafana_bloque_80.png}
+    \includegraphics[width=\columnwidth]{figures/auditoria_grafana_bloque_80.png}
     \caption{Prueba 1: Confirmación en Hyperledger Besu del bloque 80, registrando la transacción oficial \texttt{updateModel} emitida por el servidor agregador.}
     \label{fig:bloque_80_audit}
 \end{figure}
@@ -216,7 +216,7 @@ La Figura~\ref{fig:log_ataque_ascendente} documenta la salida en terminal del se
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/logs_deteccion_ataque_ascendente.png}
+    \includegraphics[width=\columnwidth]{figures/logs_deteccion_ataque_ascendente.png}
     \caption{Prueba 2: Registro de consola del servidor agregador auditando vía RPC el CID del cliente y descartando la contribución fraudulenta}
     \label{fig:log_ataque_ascendente}
 \end{figure}
@@ -225,7 +225,7 @@ La Figura~\ref{fig:bloque_81_audit} muestra el recibo del \textbf{Bloque~81} en 
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/auditoria_grafana_bloque_81.png}
+    \includegraphics[width=\columnwidth]{figures/auditoria_grafana_bloque_81.png}
     \caption{Prueba 2: Confirmación forense en Hyperledger Besu del bloque 81, registrando la transacción legítima \texttt{registerClientModel} del nodo cliente.}
     \label{fig:bloque_81_audit}
 \end{figure}
@@ -264,7 +264,7 @@ El protocolo de auditoría operó conforme a las siguientes etapas:
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\columnwidth]{figuras/logs_auditoria_expost_fedavg.png}
+    \includegraphics[width=\columnwidth]{figures/logs_auditoria_expost_fedavg.png}
     \caption{Prueba 3: Registro de consola del auditor independiente reconstruyendo la agregación FedAvg de la Ronda 2 a partir de Besu e IPFS, verificando fidelidad estricta ($\Delta = 0{,}000000$) y coincidencia de CID.}
     \label{fig:log_auditoria_expost}
 \end{figure}
@@ -299,7 +299,7 @@ La Figura~\ref{fig:consumo_gas} ilustra el consumo de gas computacional de las o
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.70\columnwidth]{figuras/consumo_gas.png}
+    \includegraphics[width=0.70\columnwidth]{figures/consumo_gas.png}
     \caption{Consumo de gas en la Máquina Virtual de Ethereum por tipo de transacción a lo largo de las 30 rondas.}
     \label{fig:consumo_gas}
 \end{figure}
@@ -337,7 +337,7 @@ Para verificar empíricamente la correspondencia unívoca entre los eventos del 
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.96\columnwidth]{figuras/bloque_contrato.png}
+    \includegraphics[width=0.96\columnwidth]{figures/bloque_contrato.png}
     \caption{Auditoría de inmutabilidad on-chain: visualización en el explorador Besu del despliegue del contrato \texttt{FLRegistry} (Bloque~8) por el servidor (\texttt{0xfe3b55...}) junto a transacciones operativas 13 y 14.}
     \label{fig:auditoria_bloque}
 \end{figure}
