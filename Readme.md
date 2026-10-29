@@ -1,4 +1,4 @@
-# Blockchain and IPFS Integration for Traceability and Auditing in Vehicular Federated Learning
+# Integrating Blockchain and IPFS for Traceability, Integrity, and Ex-Post Auditing in Federated Learning
 
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/release/python-3120/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
@@ -215,7 +215,7 @@ The convolutional classifier (**CNN**) is trained on the CloudLab-AIA vehicular 
 * **Francisco A. Pujol López** (`fpujol@ua.es`) — Supervisor and coauthor.
 
 **Affiliation:** Department of Computer Technology and Computation, Polytechnic University College, University of Alicante (Spain).  
-**Scientific Manuscript:** *Decoupled Blockchain and IPFS Architecture for Scalable Traceability and Ex-Post Verifiability in Federated Learning* (Submitted to **The Journal of Supercomputing**, Springer Nature).  
+**Scientific Manuscript:** *Integrating Blockchain and IPFS for Traceability, Integrity, and Ex-Post Auditing in Federated Learning* (Submitted to **The Journal of Supercomputing**, Springer Nature).  
 * **LaTeX Source:** [`Articulo_Springer/main.tex`](Articulo_Springer/main.tex)
 * **Compiled PDF:** [`Articulo_Springer/main.pdf`](Articulo_Springer/main.pdf)
 
