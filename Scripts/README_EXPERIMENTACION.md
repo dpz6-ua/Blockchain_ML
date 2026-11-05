@@ -118,6 +118,19 @@ python test_verificacion.py
   ```
   *Expected Behavior*: In round 2, the aggregation coordinator queries `getClientModel()` on Besu, verifies triple equality ($\text{CID}_{\text{calc}} == \text{CID}_{\text{gRPC}} == \text{CID}_{\text{onchain}}$), identifies the discrepancy within **0.031 s**, **discards the untrusted contribution from the round**, and computes `FedAvg` exclusively over legitimate client updates.
 
+#### Test 3 — Rogue Coordinator Aggregation (Ex-Post Auditing):
+- The coordinator executes canonical FedAvg, but deliberately alters the consolidated global parameters (+0.10) in round 2 before uploading to IPFS and committing the CID on Besu:
+  ```bash
+  python server.py --exp TEST_AUDIT --run 1 --rounds 2 --simulate-attack tampered_aggregation --attack-round 2
+  python client.py --member 2 --exp TEST_AUDIT --run 1
+  python client.py --member 3 --exp TEST_AUDIT --run 1
+  ```
+- The independent auditor executes in clean mode (without local simulation flags):
+  ```bash
+  python auditor_fedavg.py --round 2
+  ```
+  *Expected Behavior*: The auditor autodiscovers participants from Besu event logs, reconstructs canonical FedAvg from client IPFS artifacts, and compares against the coordinator's committed model. The fraud is unmasked within **0.28 s** with an explicit discrepancy alert (`AUDIT FAILED`), $\Delta = 0.100000$, and cryptographic proof (`CID Equality: MISMATCH`).
+
 ---
 
 ## 4. Retrospective Ex-Post Auditing

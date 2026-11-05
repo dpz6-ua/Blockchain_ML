@@ -215,7 +215,17 @@ class MiBesuServer(fl.server.strategy.FedAvg):
 
         if agg_params is not None:
             t_start_ipfs = time.time()
-            pesos = pickle.dumps(fl.common.parameters_to_ndarrays(agg_params))
+            ndarrays = fl.common.parameters_to_ndarrays(agg_params)
+
+            if self.simulate_attack == "tampered_aggregation" and server_round == self.attack_round:
+                print(f"\n{'='*70}")
+                print(f"[ATAQUE SIMULADO - AGREGACIÓN FRAUDULENTA] Servidor adultera los pesos globales (+0.10) tras FedAvg en ronda {server_round}")
+                print(f"El servidor subirá este modelo manipulado a IPFS y sellará su CID en Besu como si fuera legítimo.")
+                print(f"{'='*70}\n")
+                ndarrays = [arr + 0.1 for arr in ndarrays]
+                agg_params = fl.common.ndarrays_to_parameters(ndarrays)
+
+            pesos = pickle.dumps(ndarrays)
             model_cid = self.upload_to_ipfs(pesos)
             t_ipfs = time.time() - t_start_ipfs
 
@@ -285,8 +295,8 @@ if __name__ == "__main__":
     parser.add_argument("--rounds", type=int, default=30, help="Número de rondas federadas")
     parser.add_argument("--server-address", type=str, default="0.0.0.0:8081", help="Dirección gRPC de escucha")
     parser.add_argument("--min-clients", type=int, default=2, help="Mínimo de clientes para entrenar")
-    parser.add_argument("--simulate-attack", type=str, choices=["none", "tampered_server"], default="none",
-                        help="Simular servidor malicioso enviando pesos adulterados")
+    parser.add_argument("--simulate-attack", type=str, choices=["none", "tampered_server", "tampered_aggregation"], default="none",
+                        help="Simular servidor malicioso enviando pesos adulterados (tampered_server) o agregación fraudulenta (tampered_aggregation)")
     parser.add_argument("--attack-round", type=int, default=2, help="Ronda en la que se inyecta el ataque")
     args = parser.parse_args()
 
